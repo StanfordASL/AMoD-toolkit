@@ -11,11 +11,11 @@ for t = 1:obj.Thor
                 % Loop does not run for obj.num_passenger_flows = 0
                 for k = 1:obj.num_passenger_flows
                     % Recall that TravelDistance is in meter
-                    f_cost_pax(obj.FindRoadLinkPtckij(t,c,k,i,j)) = obj.ValueOfTime*obj.TravelTimes(i,j) + obj.TravelDistance(i,j)*obj.VehicleCostPerKm/1000;
+                    f_cost_pax(obj.FindRoadLinkPtckij(t,c,k,i,j)) = obj.ValueOfTime*obj.TravelTimes(i,j) + obj.TravelDistance(i,j)*obj.VehicleCostPerM;
                 end
                 if j ~= i
                     % Recall that TravelDistance is in meter
-                    f_cost_reb(obj.FindRoadLinkRtcij(t,c,i,j)) = obj.TravelDistance(i,j)*obj.VehicleCostPerKm/1000;
+                    f_cost_reb(obj.FindRoadLinkRtcij(t,c,i,j)) = obj.TravelDistance(i,j)*obj.VehicleCostPerM;
                 end
             end
         end

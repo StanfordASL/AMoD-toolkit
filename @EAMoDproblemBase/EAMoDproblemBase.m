@@ -99,7 +99,7 @@ classdef EAMoDproblemBase < handle
             
             % Economic settings
             obj.ValueOfTime = RoadNetwork.ValueOfTime;
-            obj.VehicleCostPerKm = RoadNetwork.VehicleCostPerKm;
+            obj.VehicleCostPerM = RoadNetwork.VehicleCostPerKm/1e3;
             
             % Relaxation
             if Flags.congrelaxflag
@@ -345,7 +345,7 @@ classdef EAMoDproblemBase < handle
         
         % Economic settings
         ValueOfTime
-        VehicleCostPerKm
+        VehicleCostPerM
         
         % Initial conditions
         FullVehicleInitialPos
