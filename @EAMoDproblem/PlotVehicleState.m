@@ -30,7 +30,15 @@ if all(DischargingVehicleHist < 1e-3)
 end
     
 h = figure;
-area(date_time_range,state_matrix)
+
+h_area = area(date_time_range,state_matrix);
+
+n_area = numel(h_area);
+
+for i_area = 1:n_area
+    h_area(i_area).FaceColor = params_plot.color_map(i_area,:);
+end
+
 legend(legend_cell,'location','northeast')
 title(title_text)
 xlabel('Time [h]')
