@@ -17,7 +17,7 @@ addpath('..')
 addpath('HelperFunctions');
 
 mosek_path = '/home/ealvaro/ProgramFiles/mosek/8/toolbox/r2014a';
-mosek_path = 'C:/Program Files/Mosek/8/toolbox/r2014a';
+% mosek_path = 'C:/Program Files/Mosek/8/toolbox/r2014a';
 addpath(genpath(mosek_path));
 
 amod_power_path = '../../AMoD-power/';
