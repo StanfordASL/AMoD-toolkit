@@ -1,4 +1,4 @@
-classdef EAMoDspec
+classdef EAMoDspec_old
     methods
         function obj = EAMoDspec()
         end
