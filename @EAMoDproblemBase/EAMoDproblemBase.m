@@ -34,6 +34,12 @@ classdef EAMoDproblemBase < handle
             
             obj.N = length(obj.RoadGraph);
             
+            if isfield(RoadNetwork,'BatteryDepreciationPerUnitCharge')
+                 obj.BatteryDepreciationPerUnitCharge = RoadNetwork.BatteryDepreciationPerUnitCharge;
+            else
+                obj.BatteryDepreciationPerUnitCharge = 0;
+            end
+            
             obj.Sources = Passengers.Sources;
             obj.Sinks = Passengers.Sinks;
             obj.Flows=Passengers.Flows;
@@ -99,7 +105,7 @@ classdef EAMoDproblemBase < handle
             
             % Economic settings
             obj.ValueOfTime = RoadNetwork.ValueOfTime;
-            obj.VehicleCostPerKm = RoadNetwork.VehicleCostPerKm;
+            obj.VehicleCostPerM = RoadNetwork.VehicleCostPerKm/1e3;
             
             % Relaxation
             if Flags.congrelaxflag
@@ -311,6 +317,8 @@ classdef EAMoDproblemBase < handle
         
         NumChargers
         
+        BatteryDepreciationPerUnitCharge
+        
         RoadGraph
         ReverseRoadGraph
         NumRoadEdges
@@ -345,7 +353,7 @@ classdef EAMoDproblemBase < handle
         
         % Economic settings
         ValueOfTime
-        VehicleCostPerKm
+        VehicleCostPerM
         
         % Initial conditions
         FullVehicleInitialPos

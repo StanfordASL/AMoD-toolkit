@@ -49,7 +49,7 @@ end
 
 function ProblemMatricesMatchHelper(test_case,scenario)
 [f_cost_full_ref,Ain_ref,Bin_ref,Aeq_ref,Beq_ref,lb_StateVector_full_ref,ub_StateVector_full_ref,~,~,indexer,SourceRelaxCost] = ...
-    TVPowerBalancedFlow_withpower_sinkbundle_CreateConstraintMats(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
+    TVPowerBalancedFlow_withpower_sinkbundle_ConstraintMatrices(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
 
 eamod_spec = EAMoDspec;
 eamod_spec.Thor = scenario.Thor;
