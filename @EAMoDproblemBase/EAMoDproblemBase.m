@@ -34,6 +34,12 @@ classdef EAMoDproblemBase < handle
             
             obj.N = length(obj.RoadGraph);
             
+            if isfield(RoadNetwork,'BatteryDepreciationPerUnitCharge')
+                 obj.BatteryDepreciationPerUnitCharge = RoadNetwork.BatteryDepreciationPerUnitCharge;
+            else
+                obj.BatteryDepreciationPerUnitCharge = 0;
+            end
+            
             obj.Sources = Passengers.Sources;
             obj.Sinks = Passengers.Sinks;
             obj.Flows=Passengers.Flows;
@@ -310,6 +316,8 @@ classdef EAMoDproblemBase < handle
         ChargerCap
         
         NumChargers
+        
+        BatteryDepreciationPerUnitCharge
         
         RoadGraph
         ReverseRoadGraph
