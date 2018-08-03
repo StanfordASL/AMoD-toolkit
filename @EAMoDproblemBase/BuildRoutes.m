@@ -1,22 +1,22 @@
 function [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj)
-RouteTime = zeros(obj.N);
-RouteCharge = zeros(obj.N);
-RouteDistance = zeros(obj.N);
-Routes = cell(obj.N,obj.N);
+RouteTime = zeros(obj.spec.N);
+RouteCharge = zeros(obj.spec.N);
+RouteDistance = zeros(obj.spec.N);
+Routes = cell(obj.spec.N,obj.spec.N);
 
-for i = 1:obj.N
-    for j = 1:obj.N
-        Routes{i,j} = FreeRouteAstar(i,j,obj.RoadGraph,obj.TravelTimes);
+for i = 1:obj.spec.N
+    for j = 1:obj.spec.N
+        Routes{i,j} = FreeRouteAstar(i,j,obj.spec.RoadGraph,obj.spec.TravelTimes);
         
         % Account for self-loops
         if i == j
-            RouteTime(i,j) = obj.TravelTimes(i,j);
-            RouteCharge(i,j) = obj.ChargeToTraverse(i,j);
+            RouteTime(i,j) = obj.spec.TravelTimes(i,j);
+            RouteCharge(i,j) = obj.spec.ChargeToTraverse(i,j);
         else
             for k = 1:(numel(Routes{i,j}) - 1)
-                RouteTime(i,j) = RouteTime(i,j) + obj.TravelTimes(Routes{i,j}(k),Routes{i,j}(k+1));
-                RouteCharge(i,j) = RouteCharge(i,j) + obj.ChargeToTraverse(Routes{i,j}(k),Routes{i,j}(k+1));
-                RouteDistance(i,j) = RouteDistance(i,j) + obj.TravelDistance(Routes{i,j}(k),Routes{i,j}(k+1));
+                RouteTime(i,j) = RouteTime(i,j) + obj.spec.TravelTimes(Routes{i,j}(k),Routes{i,j}(k+1));
+                RouteCharge(i,j) = RouteCharge(i,j) + obj.spec.ChargeToTraverse(Routes{i,j}(k),Routes{i,j}(k+1));
+                RouteDistance(i,j) = RouteDistance(i,j) + obj.spec.TravelDistance(Routes{i,j}(k),Routes{i,j}(k+1));
             end
         end
     end    

@@ -2,7 +2,7 @@ function h = PlotTravelTimes(obj,params_plot,title_text,varargin)
 
 switch numel(varargin)
     case 0
-        decision_vector_val = obj.EvaluateDecisionVector();
+        decision_vector_val = obj.spec.EvaluateDecisionVector();
     case 1
         decision_vector_val = varargin{1};
     otherwise
@@ -11,7 +11,7 @@ end
 
 [DepTimeHist, ArrivalTimeHist] = obj.GetTravelTimesHistograms(decision_vector_val);
         
-date_time_range = GetDateTimeRange(obj.eamod_spec);
+date_time_range = GetDateTimeRange(obj.spec);
 
 PassengerCarsDeltaHist = DepTimeHist - ArrivalTimeHist;
 

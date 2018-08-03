@@ -1,14 +1,14 @@
 classdef EAMoDproblemBase < handle
     methods
-        function obj = EAMoDproblemBase(eamod_spec)
+        function obj = EAMoDproblemBase(spec)
              
-            eamod_spec.ValidateSpec();
-            obj.eamod_spec = eamod_spec;                        
+            spec.ValidateSpec();
+            obj.spec = spec;                        
                                     
             % Stuff for real time algorithm
-            obj.TVRoadCap = zeros(obj.Thor,obj.N,obj.N);
-            for tt = 1:obj.Thor
-                obj.TVRoadCap(tt,:,:) = obj.RoadCap;
+            obj.spec.TVRoadCap = zeros(obj.spec.Thor,obj.spec.N,obj.spec.N);
+            for tt = 1:obj.spec.Thor
+                obj.spec.TVRoadCap(tt,:,:) = obj.spec.RoadCap;
             end
             
             [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();            
@@ -27,7 +27,7 @@ classdef EAMoDproblemBase < handle
         % State vector indexing functions
         
         function res = FindRoadLinkHelpertckij(obj,t,c,k,i,j)
-            res = (t-1)*(obj.E*(obj.num_passenger_flows + 1)*(obj.C) + 2*(obj.num_passenger_flows+1)*obj.NumChargers*(obj.C)) + (c-1)*obj.E*(obj.num_passenger_flows+1) + (k-1)*obj.E + (obj.cumRoadNeighbors(i) + obj.RoadNeighborCounter(i,j));
+            res = (t-1)*(obj.spec.E*(obj.num_passenger_flows + 1)*(obj.spec.C) + 2*(obj.num_passenger_flows+1)*obj.spec.NumChargers*(obj.spec.C)) + (c-1)*obj.spec.E*(obj.num_passenger_flows+1) + (k-1)*obj.spec.E + (obj.spec.cumRoadNeighbors(i) + obj.spec.RoadNeighborCounter(i,j));
         end
         
         function res = FindRoadLinkPtckij(obj,t,c,k,i,j)
@@ -42,12 +42,12 @@ classdef EAMoDproblemBase < handle
             if obj.use_real_time_formulation
                 res = obj.FindRoadLinkHelpertckij(t,c,1,i,j);
             else
-                res = obj.FindRoadLinkPtckij(t,c,obj.M + 1,i,j);
+                res = obj.FindRoadLinkPtckij(t,c,obj.spec.M + 1,i,j);
             end
         end
         
         function res = FindChargeLinkHelpertckij(obj,t,c,k,i)
-            res = obj.FindRoadLinkRtcij(t,obj.C,obj.N,obj.RoadGraph{end}(end)) + obj.NumChargers*(obj.num_passenger_flows + 1)*(c-1) + obj.NumChargers*(k-1) + i;  %Here we index the charger directly (as opposed to the node hosting the charger)
+            res = obj.FindRoadLinkRtcij(t,obj.spec.C,obj.spec.N,obj.spec.RoadGraph{end}(end)) + obj.spec.NumChargers*(obj.num_passenger_flows + 1)*(c-1) + obj.spec.NumChargers*(k-1) + i;  %Here we index the charger directly (as opposed to the node hosting the charger)
         end
         
         function res = FindChargeLinkPtckl(obj,t,c,k,i)
@@ -62,12 +62,12 @@ classdef EAMoDproblemBase < handle
             if obj.use_real_time_formulation
                 res = obj.FindChargeLinkHelpertckij(t,c,1,i);                
             else
-                res = obj.FindChargeLinkPtckl(t,c,obj.M+1,i);
+                res = obj.FindChargeLinkPtckl(t,c,obj.spec.M+1,i);
             end
         end
         
         function res = FindDischargeLinkHelpertckl(obj,t,c,k,i)
-            res = obj.FindChargeLinkRtcl(t,obj.C,obj.NumChargers) + obj.NumChargers*(obj.num_passenger_flows + 1)*(c-1) + obj.NumChargers*(k-1) + i;
+            res = obj.FindChargeLinkRtcl(t,obj.spec.C,obj.spec.NumChargers) + obj.spec.NumChargers*(obj.num_passenger_flows + 1)*(c-1) + obj.spec.NumChargers*(k-1) + i;
         end
         
         function res = FindDischargeLinkPtckl(obj,t,c,k,i)
@@ -82,30 +82,30 @@ classdef EAMoDproblemBase < handle
             if obj.use_real_time_formulation
                 res = obj.FindDischargeLinkHelpertckl(t,c,1,i);    
             else
-                res = obj.FindDischargeLinkPtckl(t,c,obj.M + 1,i);
+                res = obj.FindDischargeLinkPtckl(t,c,obj.spec.M + 1,i);
             end
         end
         
         function res = FindPaxSourceChargecks(obj,c,k,s)
-            res = obj.FindDischargeLinkRtcl(obj.Thor,obj.C,obj.NumChargers) + obj.TotNumSources*(c-1) + obj.CumNumSourcesPerSink(k) + s;
+            res = obj.FindDischargeLinkRtcl(obj.spec.Thor,obj.spec.C,obj.spec.NumChargers) + obj.spec.TotNumSources*(c-1) + obj.spec.CumNumSourcesPerSink(k) + s;
         end
         
         function res = FindPaxSinkChargetck(obj,t,c,k)
-            res = obj.FindPaxSourceChargecks(obj.C,obj.M,obj.NumSourcesPerSink(end)) + obj.C*obj.M*(t-1) + obj.M*(c-1) + k;
+            res = obj.FindPaxSourceChargecks(obj.spec.C,obj.spec.M,obj.spec.NumSourcesPerSink(end)) + obj.spec.C*obj.spec.M*(t-1) + obj.spec.M*(c-1) + k;
         end
                 
         function res = FindEndRebLocationci(obj,c,i)
-            res = obj.FindPaxSinkChargetck(obj.Thor,obj.C,obj.M) + obj.N*(c-1) + i;
+            res = obj.FindPaxSinkChargetck(obj.spec.Thor,obj.spec.C,obj.spec.M) + obj.spec.N*(c-1) + i;
         end
         
         % Constraint Indexers
         function res = FindEqPaxConservationtcki(obj,t,c,k,i)
-            res = obj.N*obj.M*obj.C*(t - 1) + obj.N*obj.M*(c - 1) + obj.N*(k - 1) + i;
+            res = obj.spec.N*obj.spec.M*obj.spec.C*(t - 1) + obj.spec.N*obj.spec.M*(c - 1) + obj.spec.N*(k - 1) + i;
         end
         
         % This is untested
         function [t,c,k,i] = ReverseFindEqPaxConservationtcki(obj,in)
-            [t,c,k,i] = obj.DecomposeNumber(in,obj.C, obj.M, obj.N);
+            [t,c,k,i] = obj.DecomposeNumber(in,obj.spec.C, obj.spec.M, obj.spec.N);
         end
         
         function varargout = DecomposeNumber(obj,in,varargin)
@@ -131,11 +131,11 @@ classdef EAMoDproblemBase < handle
         
         
         function res = FindEqRebConservationtci(obj,t,c,i)
-            res = obj.N*obj.C*(t - 1) + obj.N*(c - 1) + i;
+            res = obj.spec.N*obj.spec.C*(t - 1) + obj.spec.N*(c - 1) + i;
         end
         
         function res = FindEqSourceConservationks(obj,k,s)
-            res = obj.CumNumSourcesPerSink(k) + s;
+            res = obj.spec.CumNumSourcesPerSink(k) + s;
         end
         
         function res = FindEqSinkConservationk(obj,k)
@@ -143,19 +143,19 @@ classdef EAMoDproblemBase < handle
         end
         
         function res = FindInRoadCongestiontij(obj,t,i,j)
-            res = obj.E*(t - 1) + obj.cumRoadNeighbors(i) + obj.RoadNeighborCounter(i,j);
+            res = obj.spec.E*(t - 1) + obj.spec.cumRoadNeighbors(i) + obj.spec.RoadNeighborCounter(i,j);
         end
         
         function res = FindInChargerCongestiontl(obj,t,l)
-            res = obj.NumChargers*(t-1) + l;
+            res = obj.spec.NumChargers*(t-1) + l;
         end
         
         % The indexing for FindSourceRelaxks is different from
         % TVPowerBalancedFlowFinder_sinkbundle because we do not include
         % the power network and we do not include the congestion relaxation
         function res = FindSourceRelaxks(obj,k,s)
-            if obj.sourcerelaxflag
-                res = obj.FindEndRebLocationci(obj.C,obj.N) +  obj.CumNumSourcesPerSink(k) + s;
+            if obj.spec.sourcerelaxflag
+                res = obj.FindEndRebLocationci(obj.spec.C,obj.spec.N) +  obj.spec.CumNumSourcesPerSink(k) + s;
             else
                 res = nan;
             end
@@ -163,10 +163,10 @@ classdef EAMoDproblemBase < handle
         
         
         function res = get.StateSize(obj)
-            if obj.sourcerelaxflag
-                res = obj.FindSourceRelaxks(obj.NumSinks,obj.NumSourcesPerSink(obj.NumSinks));
+            if obj.spec.sourcerelaxflag
+                res = obj.FindSourceRelaxks(obj.spec.NumSinks,obj.spec.NumSourcesPerSink(obj.spec.NumSinks));
             else
-                res = obj.FindEndRebLocationci(obj.C,obj.N);
+                res = obj.FindEndRebLocationci(obj.spec.C,obj.spec.N);
             end            
         end
         
@@ -174,7 +174,7 @@ classdef EAMoDproblemBase < handle
             if obj.use_real_time_formulation
                 res = 0;
             else
-                res = obj.M; 
+                res = obj.spec.M; 
             end
         end
     end
@@ -266,7 +266,7 @@ classdef EAMoDproblemBase < handle
         charge_unit_j
         time_step_s
         
-        eamod_spec
+        spec
     end
     
     
