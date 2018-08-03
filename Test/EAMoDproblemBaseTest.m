@@ -48,17 +48,9 @@ end
 end
 
 function ProblemMatricesMatchHelper(test_case,scenario)
-[f_cost_full_ref,Ain_ref,Bin_ref,Aeq_ref,Beq_ref,lb_StateVector_full_ref,ub_StateVector_full_ref,~,~,indexer,SourceRelaxCost] = ...
-    TVPowerBalancedFlow_withpower_sinkbundle_ConstraintMatrices(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
+spec = EAMoDspec.CreateFromScenario(scenario);
 
-eamod_spec = EAMoDspec();
-eamod_spec.Thor = scenario.Thor;
-eamod_spec.RoadNetwork = scenario.RoadNetwork;
-eamod_spec.InitialConditions = scenario.InitialConditions;
-eamod_spec.Passengers = scenario.Passengers;
-eamod_spec.Flags = scenario.Flags;
-
-eamod_problem = EAMoDproblemBase(eamod_spec);
+eamod_problem = EAMoDproblemBase(spec);
 
 col_range = indexer.FindRoadLinkPtckij(1,1,1,1,1):indexer.FindEndRebLocationci(eamod_problem.C,eamod_problem.N);
 
@@ -69,6 +61,10 @@ if scenario.Flags.sourcerelaxflag
     % This is hardcoded in TVPowerBalancedFlowFinder_sinkbundle
     eamod_problem.SourceRelaxCost = SourceRelaxCost;
 end
+
+[f_cost_full_ref,Ain_ref,Bin_ref,Aeq_ref,Beq_ref,lb_StateVector_full_ref,ub_StateVector_full_ref,~,~,indexer,SourceRelaxCost] = ...
+    TVPowerBalancedFlow_withpower_sinkbundle_ConstraintMatrices(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
+
 
 % Cost vector
 f_cost = eamod_problem.CreateCostVector;

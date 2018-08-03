@@ -34,14 +34,14 @@ classdef EAMoDspec
             NumChargers = numel(obj.ChargersList);
         end
         
-        function obj = set.RoadGraph(obj,RoadGraph)
-            EAMoDspec.ValidateRoadGraph(RoadGraph);
-            
+        function obj = set.RoadGraph(obj,RoadGraph)         
             % Clean up road graph.
             for i = 1:numel(RoadGraph)
                 RoadGraph{i} = sort(unique(RoadGraph{i}));
             end
             obj.RoadGraph = RoadGraph(:);
+            
+            obj.ValidateRoadGraph();
             
             obj = obj.UpdatePropertiesDependentOnRoadGraph();
         end
@@ -55,7 +55,7 @@ classdef EAMoDspec
     end
     
     methods (Static)
-        ValidateRoadGraph(RoadGraph)
+        obj = CreateFromScenario(scenario);
     end
     
     properties (GetAccess = public, SetAccess = private)
@@ -98,7 +98,9 @@ classdef EAMoDspec
         % Road network
         RoadGraph(:,1) cell% RoadGraph{i} contains the neighbors of i in the road graph
         
+        % TODO: use only TVRoadCap
         RoadCap(:,:) double {mustBeNonnegative,mustBeReal} % RoadCap(i,j) is the capacity of the i-j link (in vehicles per unit time)
+        TVRoadCap(:,:,:) double {mustBeNonnegative,mustBeReal} % TVRoadCap(i,j,t) is the capacity of the i-j link (in vehicles per unit time) at time t
         TravelTimes(:,:) double {mustBeNonnegative,mustBeReal,mustBeInteger} % TravelTimes(i,j) is the travel time along the i-j link
         TravelDistance(:,:) double {mustBeNonnegative,mustBeReal} % TravelDistance(i,j) is the travel distance along the i-j link.
         ChargeToTraverse(:,:) double {mustBeNonnegative,mustBeReal,mustBeInteger} % ChargeReqs(i,j) is the amount of units of charge required to travel from i to j
@@ -107,7 +109,7 @@ classdef EAMoDspec
         ChargersList(:,1) double {mustBeNonnegative,mustBeReal,mustBeInteger} % ChargersList(i) is the location of the node in RoadGraph corresponding to the i-th charging station
         ChargerSpeed(:,1) double {mustBeNonnegative,mustBeReal} % ChargerSpeed(i) is the amount of charge gained by a vehicle crossing charging station i
         ChargerTime(:,1) double {mustBeNonnegative,mustBeReal} % ChargerTime(i) is the time required to charge ChargerSpeed(i) units of charge at charging station i
-        ChargerCaps(:,1) double {mustBeNonnegative,mustBeReal} % ChargerCaps(i) is the number of vehicles that can charge concurrently in charging station i
+        ChargerCap(:,1) double {mustBeNonnegative,mustBeReal} % ChargerCap(i) is the number of vehicles that can charge concurrently in charging station i
         
         % Trip demand
         Sinks(:,1) double {mustBeNonnegative,mustBeReal,mustBeInteger} % Sinks(i) is the sink node of the i-th flow
@@ -133,22 +135,26 @@ classdef EAMoDspec
         
         time_step_s(1,1) double {mustBeNonnegative,mustBeReal} %
         charge_unit_j(1,1) double {mustBeNonnegative,mustBeReal}
-        v2g_efficiency(1,1) double {mustBeNonnegative,mustBeReal,mustBeLessThanOrEqual(1)} = 1
+        v2g_efficiency(1,1) double {mustBeNonnegative,mustBeReal,mustBeLessThanOrEqual(v2g_efficiency,1)} = 1
         
-        yalmip_options(1,1) = sdpsettings();
+        yalmip_options(1,1) = sdpsettings()
         
-        start_date_time(1,1) datetime = datetime('01-Jan-2010 00:00:00');
+        start_date_time(1,1) datetime = datetime('01-Jan-2010 00:00:00')
     end
     
     
     methods (Access = private)
-        obj = UpdatePropertiesDependentOnRoadGraph(obj);
-        obj = UpdatePropertiesDependentOnSources(obj);
-        ValidateConsistencyWithAdjancencyMatrix(obj,M,varargin);
+        obj = UpdatePropertiesDependentOnRoadGraph(obj)
+        
+        obj = UpdatePropertiesDependentOnSources(obj)
+        
+        ValidateConsistencyWithAdjancencyMatrix(obj,M,varargin)
+        
+        ValidateRoadGraph(obj)
         
         function res = IsValidRoadNode(obj,i)
-            res = IsInteger(i) && 1 <= i && i <= obj.N;
-        end        
+            res = IsInteger(i) & 1 <= i & i <= obj.N;
+        end
     end
     
     

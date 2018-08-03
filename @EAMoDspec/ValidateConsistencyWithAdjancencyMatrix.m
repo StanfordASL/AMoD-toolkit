@@ -19,5 +19,5 @@ switch n_varargin
 end
 
 assert(all(size(M) == size(obj.adjacency_matrix)),'Size of %s must match that of adjacency_matrix.',M_name)
-assert(all(M(obj.adjacency_matrix) == 0),'%s must be zero when adjacency_matrix is zero.',M_name)
+assert(all(M(~obj.adjacency_matrix) == 0),'%s must be zero when adjacency_matrix is zero.',M_name)
 end
