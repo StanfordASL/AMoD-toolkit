@@ -2,131 +2,16 @@ classdef EAMoDproblemBase < handle
     methods
         function obj = EAMoDproblemBase(eamod_spec)
              
-            obj.eamod_spec = eamod_spec;
-            
-            obj.Thor = eamod_spec.Thor;
-            
-            RoadNetwork = eamod_spec.RoadNetwork;
-            InitialConditions = eamod_spec.InitialConditions;
-            Passengers = eamod_spec.Passengers;
-            Flags = eamod_spec.Flags;
-            
-            obj.C = RoadNetwork.C;
-            
-            obj.RoadGraph = RoadNetwork.RoadGraph;
-            
-            %Clean up road graph.
-            for i=1:length(obj.RoadGraph)
-                obj.RoadGraph{i}=sort(unique(obj.RoadGraph{i}));
-            end
-            
-            %Nodes in ReverseRoadGraph{i} are such that RoadGraph{ReverseRoadGraph{i}} contains
-            %i
-            obj.ReverseRoadGraph = cell(size(obj.RoadGraph));
-            for i=1:length(obj.RoadGraph)
-                for j=obj.RoadGraph{i}
-                    obj.ReverseRoadGraph{j} = [obj.ReverseRoadGraph{j} i];
-                end
-            end
-            for i=1:length(obj.ReverseRoadGraph)
-                obj.ReverseRoadGraph{i} = sort(unique(obj.ReverseRoadGraph{i}));
-            end
-            
-            obj.N = length(obj.RoadGraph);
-            
-            if isfield(RoadNetwork,'BatteryDepreciationPerUnitCharge')
-                 obj.BatteryDepreciationPerUnitCharge = RoadNetwork.BatteryDepreciationPerUnitCharge;
-            else
-                obj.BatteryDepreciationPerUnitCharge = 0;
-            end
-            
-            obj.Sources = Passengers.Sources;
-            obj.Sinks = Passengers.Sinks;
-            obj.Flows=Passengers.Flows;
-            obj.StartTimes=Passengers.StartTimes;
-            
-            obj.NumSinks = length(obj.Sinks);
-            
-            obj.M = obj.NumSinks;
-            
-            E_temp = 0;
-            NumRoadEdges_temp = zeros(obj.N,1);
-            for i = 1:obj.N
-                NumRoadEdges_temp(i) = length(obj.RoadGraph{i});
-                E_temp = E_temp + length(obj.RoadGraph{i});
-            end
-            obj.E = E_temp;
-            obj.NumRoadEdges = NumRoadEdges_temp;
-            
-            obj.cumRoadNeighbors = cumsum(obj.NumRoadEdges);
-            obj.cumRoadNeighbors=[0;obj.cumRoadNeighbors(1:end-1)];
-            
-            obj.RoadNeighborCounter = sparse([],[],[],obj.N,obj.N,obj.E);
-            TempNeighVec = zeros(obj.N,1);
-            for i = 1:obj.N
-                for j = obj.RoadGraph{i}
-                    TempNeighVec(j) = 1;
-                end
-                NeighCounterLine = cumsum(TempNeighVec);
-                for j = obj.RoadGraph{i}
-                    obj.RoadNeighborCounter(i,j) = NeighCounterLine(j);
-                end
-                TempNeighVec = zeros(obj.N,1);
-            end
-            
-            % Rearranging for sinks
-            obj.NumSourcesPerSink = zeros(size(obj.Sinks));
-            for i = 1:obj.NumSinks
-                obj.NumSourcesPerSink(i) = length(obj.Sources{i});
-            end
-            obj.CumNumSourcesPerSink = cumsum(obj.NumSourcesPerSink);
-            obj.TotNumSources = obj.CumNumSourcesPerSink(end);
-            obj.CumNumSourcesPerSink=[0; obj.CumNumSourcesPerSink(1:end-1)];
-            
-            obj.RoadCap = RoadNetwork.RoadCap;
-            
-            obj.TravelTimes = RoadNetwork.TravelTimes;
-            obj.TravelDistance = RoadNetwork.TravelDistance;
-            
-            obj.ChargersList = RoadNetwork.ChargersList;
-            obj.NumChargers = length(obj.ChargersList);
-            obj.ChargerTime = RoadNetwork.ChargerTime;
-            
-            obj.ChargeToTraverse = RoadNetwork.ChargeToTraverse;
-            obj.ChargerSpeed = RoadNetwork.ChargerSpeed;
-            obj.ChargerCap = RoadNetwork.ChargerCap;
-            
-            % Initial conditions
-            obj.FullVehicleInitialPos = InitialConditions.FullVehicleInitialPos;
-            obj.EmptyVehicleInitialPos = InitialConditions.EmptyVehicleInitialPos;
-            
-            % Final conditions
-            obj.MinEndCharge = RoadNetwork.MinEndCharge;
-            
-            % Economic settings
-            obj.ValueOfTime = RoadNetwork.ValueOfTime;
-            obj.VehicleCostPerM = RoadNetwork.VehicleCostPerKm/1e3;
-            
-            % Relaxation
-            if Flags.congrelaxflag
-                warning('congrelaxflag is set but functionality is not available yet. Ignoring.')
-            end
-            
-            obj.sourcerelaxflag = Flags.sourcerelaxflag;            
-            
+            eamod_spec.ValidateSpec();
+            obj.eamod_spec = eamod_spec;                        
+                                    
             % Stuff for real time algorithm
             obj.TVRoadCap = zeros(obj.Thor,obj.N,obj.N);
             for tt = 1:obj.Thor
                 obj.TVRoadCap(tt,:,:) = obj.RoadCap;
             end
             
-            [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();
-            
-            % Extras
-            obj.ChargeUnitToPowerUnit = eamod_spec.ChargeUnitToPowerUnit;
-            obj.v2g_efficiency = eamod_spec.v2g_efficiency;
-            obj.charge_unit_j = eamod_spec.charge_unit_j;
-            obj.time_step_s = eamod_spec.time_step_s;
+            [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();            
         end
         
         [f_cost,f_cost_pax,f_cost_reb,f_cost_relax] = CreateCostVector(obj);
