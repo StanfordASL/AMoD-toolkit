@@ -18,7 +18,7 @@ if obj.use_real_time_formulation
             
             time_cost = time_cost + flow*route_time*obj.spec.ValueOfTime;
             
-            distance_cost = distance_cost + flow*route_distance*obj.VehicleCostPerM;
+            distance_cost = distance_cost + flow*route_distance*obj.spec.VehicleCostPerM;
         end
     end    
 

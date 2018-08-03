@@ -187,86 +187,14 @@ classdef EAMoDproblemBase < handle
     
     
     properties
-        Thor
-        
-        % Road network properties
-        N
-        
-        TravelTimes
-        TravelDistance
-        
-        ChargersList
-        ChargerTime
-        ChargerSpeed
-        ChargerCap
-        
-        NumChargers
-        
-        BatteryDepreciationPerUnitCharge
-        
-        RoadGraph
-        ReverseRoadGraph
-        NumRoadEdges
-        ChargeToTraverse
-        
-        
-        cumRoadNeighbors
-        RoadNeighborCounter
-        
-        RoadCap
-        
-        % Extended network properties
-        C
-        E
-        
-        % Passenger properties
-        M
-        
-        Sources
-        Sinks
-        Flows
-        StartTimes
-        
-        
-        NumSourcesPerSink
-        CumNumSourcesPerSink
-        TotNumSources
-        
-        NumSinks
-        
-        
-        
-        % Economic settings
-        ValueOfTime
-        VehicleCostPerM
-        
-        % Initial conditions
-        FullVehicleInitialPos
-        EmptyVehicleInitialPos
-        
-        % Final conditions
-        MinEndCharge
-        
-        % Relaxation
-        sourcerelaxflag
-        SourceRelaxCost
-        
-        
+        spec
         
         % Stuff for real time algorithm
         use_real_time_formulation(1,1) logical = false;
-        TVRoadCap
         RouteTime
         RouteCharge
         RouteDistance
-        Routes
-        
-        ChargeUnitToPowerUnit
-        v2g_efficiency
-        charge_unit_j
-        time_step_s
-        
-        spec
+        Routes        
     end
     
     

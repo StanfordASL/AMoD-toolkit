@@ -92,7 +92,7 @@ classdef EAMoDspec
     
     properties
         % TODO: add comments to all properties
-        Thor
+        Thor(1,1) double {mustBeNonnegative,mustBeReal,mustBeInteger} % number of time steps
         C(1,1) double {mustBeNonnegative,mustBeReal,mustBeInteger} % number of charge levels
         
         % Road network
@@ -128,11 +128,14 @@ classdef EAMoDspec
         
         % Economic parameters
         ValueOfTime(1,1) double {mustBeNonnegative,mustBeReal} % Value (in USD) of one unit of time for a passenger
-        VehicleCostPerKm(1,1) double {mustBeNonnegative,mustBeReal} % Cost of running a vehicle for 1 km, excluding electricity cost
+        VehicleCostPerM(1,1) double {mustBeNonnegative,mustBeReal} % Cost of running a vehicle for 1 m, excluding electricity cost
         BatteryDepreciationPerUnitCharge(1,1) double {mustBeNonnegative,mustBeReal} = 0 % TODO: add explanation
         
         sourcerelaxflag(1,1) logical = false % This flag allows each vehicle flow to reduce its sources (and sinks) for a cost
         
+        SourceRelaxCost(1,1) double {mustBeNonnegative,mustBeReal}
+
+
         time_step_s(1,1) double {mustBeNonnegative,mustBeReal} %
         charge_unit_j(1,1) double {mustBeNonnegative,mustBeReal}
         v2g_efficiency(1,1) double {mustBeNonnegative,mustBeReal,mustBeLessThanOrEqual(v2g_efficiency,1)} = 1

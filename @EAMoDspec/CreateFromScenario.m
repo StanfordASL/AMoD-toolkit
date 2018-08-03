@@ -6,6 +6,8 @@ Flags = scenario.Flags;
 
 obj = EAMoDspec();
 
+obj.Thor = scenario.Thor;
+
 obj.C = RoadNetwork.C;
 
 obj.RoadGraph = RoadNetwork.RoadGraph;
@@ -35,7 +37,7 @@ obj.MinEndCharge = RoadNetwork.MinEndCharge;
 
 % Economic settings
 obj.ValueOfTime = RoadNetwork.ValueOfTime;
-obj.VehicleCostPerKm = RoadNetwork.VehicleCostPerKm;
+obj.VehicleCostPerM = RoadNetwork.VehicleCostPerKm/1000;
 
 % Relaxation
 if Flags.congrelaxflag
@@ -52,4 +54,10 @@ end
 
 % Extras
 obj.v2g_efficiency = scenario.PowerNetwork.v2g_efficiency;
+
+if isfield(scenario.RoadNetwork,'BatteryDepreciationPerUnitCharge')
+    obj.BatteryDepreciationPerUnitCharge = scenario.RoadNetwork.BatteryDepreciationPerUnitCharge;
+end
+    
+    
 end

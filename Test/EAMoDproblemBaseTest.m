@@ -50,24 +50,24 @@ end
 function ProblemMatricesMatchHelper(test_case,scenario)
 spec = EAMoDspec.CreateFromScenario(scenario);
 
-eamod_problem = EAMoDproblemBase(spec);
-
-col_range = indexer.FindRoadLinkPtckij(1,1,1,1,1):indexer.FindEndRebLocationci(eamod_problem.C,eamod_problem.N);
-
-if scenario.Flags.sourcerelaxflag
-    col_range_relax = indexer.FindSourceRelaxks(1,1) + [0:(eamod_problem.TotNumSources - 1)];
-    col_range = [col_range,col_range_relax];
-    
-    % This is hardcoded in TVPowerBalancedFlowFinder_sinkbundle
-    eamod_problem.SourceRelaxCost = SourceRelaxCost;
-end
-
 [f_cost_full_ref,Ain_ref,Bin_ref,Aeq_ref,Beq_ref,lb_StateVector_full_ref,ub_StateVector_full_ref,~,~,indexer,SourceRelaxCost] = ...
     TVPowerBalancedFlow_withpower_sinkbundle_ConstraintMatrices(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
 
+col_range = indexer.FindRoadLinkPtckij(1,1,1,1,1):indexer.FindEndRebLocationci(spec.C,spec.N);
+
+if scenario.Flags.sourcerelaxflag
+    col_range_relax = indexer.FindSourceRelaxks(1,1) + [0:(spec.TotNumSources - 1)];
+    col_range = [col_range,col_range_relax];
+    
+    % This is hardcoded in TVPowerBalancedFlowFinder_sinkbundle
+    spec.SourceRelaxCost = SourceRelaxCost;
+end
+
+eamod_problem = EAMoDproblemBase(spec);
+
 
 % Cost vector
-f_cost = eamod_problem.CreateCostVector;
+f_cost = eamod_problem.CreateCostVector();
 f_cost_ref = f_cost_full_ref(col_range);
 
 verifyEqual(test_case,f_cost,f_cost_ref)
@@ -76,7 +76,7 @@ verifyEqual(test_case,f_cost,f_cost_ref)
 [Aeq_PaxConservation, Beq_PaxConservation] = eamod_problem.CreateEqualityConstraintMatrices_PaxConservation();
 
 row_start_PaxConservation = indexer.FindEqPaxConservationtcki(1,1,1,1);
-row_end_PaxConservation = indexer.FindEqPaxConservationtcki(eamod_problem.Thor,eamod_problem.C,eamod_problem.M,eamod_problem.N);
+row_end_PaxConservation = indexer.FindEqPaxConservationtcki(spec.Thor,spec.C,spec.M,spec.N);
 row_range_PaxConservation = row_start_PaxConservation:row_end_PaxConservation;
 
 [Aeq_PaxConservation_ref,Beq_PaxConservation_ref] = ExtractConstraintSubmatrix(Aeq_ref,Beq_ref,row_range_PaxConservation,col_range);
@@ -88,7 +88,7 @@ verifyEqual(test_case,Beq_PaxConservation,Beq_PaxConservation_ref)
 [Aeq_RebConservation, Beq_RebConservation] = eamod_problem.CreateEqualityConstraintMatrices_RebConservation();
 
 row_start_RebConservation = indexer.FindEqRebConservationtci(1,1,1);
-row_end_RebConservation = indexer.FindEqRebConservationtci(eamod_problem.Thor,eamod_problem.C,eamod_problem.N);
+row_end_RebConservation = indexer.FindEqRebConservationtci(spec.Thor,spec.C,spec.N);
 row_range_RebConservation = row_start_RebConservation:row_end_RebConservation;
 [Aeq_RebConservation_ref,Beq_RebConservation_ref] = ExtractConstraintSubmatrix(Aeq_ref,Beq_ref,row_range_RebConservation,col_range);
 
@@ -99,7 +99,7 @@ verifyEqual(test_case,Beq_RebConservation,Beq_RebConservation_ref)
 [Aeq_SourceConservation, Beq_SourceConservation] = eamod_problem.CreateEqualityConstraintMatrices_SourceConservation();
 
 row_start_SourceConservation = indexer.FindEqSourceConservationks(1,1);
-row_end_SourceConservation = indexer.FindEqSourceConservationks(eamod_problem.M,length(eamod_problem.Sources{end}));
+row_end_SourceConservation = indexer.FindEqSourceConservationks(spec.M,length(spec.Sources{end}));
 row_range_SourceConservation = row_start_SourceConservation:row_end_SourceConservation;
 
 [Aeq_SourceConservation_ref,Beq_SourceConservation_ref] = ExtractConstraintSubmatrix(Aeq_ref,Beq_ref,row_range_SourceConservation,col_range);
@@ -111,7 +111,7 @@ verifyEqual(test_case,Beq_SourceConservation,Beq_SourceConservation_ref)
 [Aeq_SinkConservation, Beq_SinkConservation] = eamod_problem.CreateEqualityConstraintMatrices_SinkConservation();
 
 row_start_SinkConservation = indexer.FindEqSinkConservationk(1);
-row_end_SinkConservation = indexer.FindEqSinkConservationk(eamod_problem.NumSinks);
+row_end_SinkConservation = indexer.FindEqSinkConservationk(spec.NumSinks);
 row_range_SinkConservation = row_start_SinkConservation:row_end_SinkConservation;
 
 [Aeq_SinkConservation_ref,Beq_SinkConservation_ref] = ExtractConstraintSubmatrix(Aeq_ref,Beq_ref,row_range_SinkConservation,col_range);
@@ -123,7 +123,7 @@ verifyEqual(test_case,Beq_SinkConservation,Beq_SinkConservation_ref)
 [Ain_RoadCongestion, Bin_RoadCongestion] = eamod_problem.CreateInequalityConstraintMatrices_RoadCongestion();
 
 row_start_RoadCongestion = indexer.FindInRoadCongestiontij(1,1,1);
-row_end_RoadCongestion = indexer.FindInRoadCongestiontij(eamod_problem.Thor,eamod_problem.N,eamod_problem.RoadGraph{end}(end));
+row_end_RoadCongestion = indexer.FindInRoadCongestiontij(spec.Thor,spec.N,spec.RoadGraph{end}(end));
 row_range_RoadCongestion = row_start_RoadCongestion:row_end_RoadCongestion;
 
 [Ain_RoadCongestion_ref,Bin_RoadCongestion_ref] = ExtractConstraintSubmatrix(Ain_ref,Bin_ref,row_range_RoadCongestion,col_range);
@@ -135,7 +135,7 @@ verifyEqual(test_case,Bin_RoadCongestion,Bin_RoadCongestion_ref)
 [Ain_ChargerCongestion, Bin_ChargerCongestion] = eamod_problem.CreateInequalityConstraintMatrices_ChargerCongestion();
 
 row_start_ChargerCongestion = indexer.FindInChargerCongestiontl(1,1);
-row_end_ChargerCongestion = indexer.FindInChargerCongestiontl(eamod_problem.Thor,eamod_problem.NumChargers);
+row_end_ChargerCongestion = indexer.FindInChargerCongestiontl(spec.Thor,spec.NumChargers);
 row_range_ChargerCongestion = row_start_ChargerCongestion:row_end_ChargerCongestion;
 
 [Ain_ChargerCongestion_ref,Bin_ChargerCongestion_ref] = ExtractConstraintSubmatrix(Ain_ref,Bin_ref,row_range_ChargerCongestion,col_range);
