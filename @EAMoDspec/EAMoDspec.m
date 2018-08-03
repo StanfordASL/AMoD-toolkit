@@ -3,45 +3,8 @@ classdef EAMoDspec
         function obj = EAMoDspec()
         end
         
-        function ValidateSpec(obj)
-            % ValidateSpec asserts that the properties of the spec are
-            % consistent with eachother.
-            
-            % Properties that depend on RoadGraph
-            obj.ValidateConsistencyWithAdjancencyMatrix(obj.RoadCap,'RoadCap');
-            obj.ValidateConsistencyWithAdjancencyMatrix(obj.TravelTimes,'TravelTimes');
-            obj.ValidateConsistencyWithAdjancencyMatrix(obj.TravelDistance,'TravelDistance');
-            obj.ValidateConsistencyWithAdjancencyMatrix(obj.ChargeToTraverse,'ChargeToTraverse');
-            
-            % Properties that depend on ChargersList
-            assert(numel(obj.ChargerSpeed) == obj.NumChargers,'ChargerSpeed must have NumChargers elements.');
-            assert(numel(obj.ChargerTime) == obj.NumChargers,'ChargerTime must have NumChargers elements');
-            assert(numel(obj.ChargerTime) == obj.NumChargers,'ChargerCap must have NumChargers elements');
-            
-            % Properties that depend on Sinks
-            assert(numel(obj.Sources) == obj.NumSinks,'Sources must have NumSinks elements');
-            
-            % Properties that depend on Sources
-            assert(all(cellfun(@numel,obj.StartTimes) == obj.NumSourcesPerSink),'StartTimes must have the same number of cells and number of elements per cell as Sources');
-            assert(all(cellfun(@numel,obj.Flows) == obj.NumSourcesPerSink),'Flows must have the same number of cells and number of elements per cell as Sources');
-            
-            % Entries that must be valid road nodes
-            assert(all(obj.IsValidRoadNode(obj.ChargersList)),'Entries in ChargersList must be valid road nodes');
-            assert(all(obj.IsValidRoadNode(obj.Sinks)),'Entries in Sinks must be valid road nodes');
-            
-            for i_sink = 1:obj.NumSinks
-                sources_towards_sink = obj.Sources{i_sink};
-                assert(all(obj.IsValidRoadNode(sources_towards_sink)),'Entries in Sources{%i} must be valid road nodes',i_sink);
-            end
-            
-            % Others
-            assert(obj.MinEndCharge <= obj.C - 1,'MinEndCharge may not be more than C - 1 (recall it is exclusive)');
-            
-            assert(all(size(obj.FullVehicleInitialPos) == [obj.M,obj.N,obj.C]),'FullVehicleInitialPos must be of size M x N x C');
-            assert(all(size(obj.EmptyVehicleInitialPos) == [obj.N,obj.C]),'FullVehicleInitialPos must be of size N x C');
-            
-        end       
-       
+        ValidateSpec(obj);
+        
         function n_time_step = get.n_time_step(obj)
             n_time_step = obj.Thor;
         end
@@ -90,19 +53,9 @@ classdef EAMoDspec
         end
         
     end
-        
+    
     methods (Static)
-        function ValidateRoadGraph(RoadGraph)
-            % ValidateRoadGraph asserts that the neighbor lists in
-            % RoadGraph point to nodes that are integer and in [0,N].
-            
-            N = numel(obj.RoadGraph);
-            
-            for i = 1:numel(obj.RoadGraph)
-                neighbor_vec = RoadGraph{i};                
-                assert(all(obj.IsValidRoadNode(neighbor_vec)),'Not all neighbors of node %i are valid road nodes',i)
-            end
-        end
+        ValidateRoadGraph(RoadGraph)
     end
     
     properties (GetAccess = public, SetAccess = private)
@@ -114,7 +67,7 @@ classdef EAMoDspec
         adjacency_matrix(:,:) logical % adjacency_matrix(i,j) == 1 if there is a road going from node i to node j
         E(1,1) double % Number of road edges in RoadGraph
         NumRoadEdges(:,1) double % NumRoadEdges(i) is the number of edges starting in road node i
-        cumRoadNeighbors(:,1) double 
+        cumRoadNeighbors(:,1) double
         RoadNeighborCounter(:,:) double
         
         % Dependent on Sources
@@ -136,7 +89,7 @@ classdef EAMoDspec
         % Alias
         n_time_step
     end
-        
+    
     properties
         % TODO: add comments to all properties
         Thor
@@ -178,7 +131,7 @@ classdef EAMoDspec
         
         sourcerelaxflag(1,1) logical = false % This flag allows each vehicle flow to reduce its sources (and sinks) for a cost
         
-        time_step_s(1,1) double {mustBeNonnegative,mustBeReal} % 
+        time_step_s(1,1) double {mustBeNonnegative,mustBeReal} %
         charge_unit_j(1,1) double {mustBeNonnegative,mustBeReal}
         v2g_efficiency(1,1) double {mustBeNonnegative,mustBeReal,mustBeLessThanOrEqual(1)} = 1
         
@@ -189,86 +142,13 @@ classdef EAMoDspec
     
     
     methods (Access = private)
-        function obj = UpdatePropertiesDependentOnRoadGraph(obj)
-            obj.N = numel(obj.RoadGraph);
-            
-            obj.ReverseRoadGraph = cell(size(obj.RoadGraph));
-            for i=1:obj.N
-                for j=obj.RoadGraph{i}
-                    obj.ReverseRoadGraph{j} = [obj.ReverseRoadGraph{j} i];
-                end
-            end
-            for i=1:numel(obj.ReverseRoadGraph)
-                obj.ReverseRoadGraph{i} = sort(unique(obj.ReverseRoadGraph{i}));
-            end
-            
-            obj.adjacency_matrix = false(obj.N,obj.N);
-            for i = 1:obj.N
-                for neighbor_c = obj.RoadGraph{i}
-                    obj.adjacency_matrix(i,neighbor_c) = 1;
-                end
-            end
-            
-            obj.E = 0;
-            obj.NumRoadEdges = zeros(obj.N,1);
-            for i = 1:obj.N
-                obj.NumRoadEdges(i) = length(obj.RoadGraph{i});
-                obj.E = obj.E + length(obj.RoadGraph{i});
-            end
-            
-            obj.cumRoadNeighbors = cumsum(obj.NumRoadEdges);
-            obj.cumRoadNeighbors=[0;obj.cumRoadNeighbors(1:end-1)];
-            
-            obj.RoadNeighborCounter = sparse([],[],[],obj.N,obj.N,obj.E);
-            TempNeighVec = zeros(obj.N,1);
-            for i = 1:obj.N
-                for j = obj.RoadGraph{i}
-                    TempNeighVec(j) = 1;
-                end
-                NeighCounterLine = cumsum(TempNeighVec);
-                for j = obj.RoadGraph{i}
-                    obj.RoadNeighborCounter(i,j) = NeighCounterLine(j);
-                end
-                TempNeighVec = zeros(obj.N,1);
-            end
-        end
-        
-        function obj = UpdatePropertiesDependentOnSources(obj)
-            obj.NumSourcesPerSink = cellfun(@numel,obj.Sources);
-            
-            obj.CumNumSourcesPerSink = cumsum(obj.NumSourcesPerSink);
-            obj.TotNumSources = obj.CumNumSourcesPerSink(end);
-            obj.CumNumSourcesPerSink=[0; obj.CumNumSourcesPerSink(1:end-1)];            
-        end
-        
-        function ValidateConsistencyWithAdjancencyMatrix(obj,M,varargin)
-            % ValidateConsistencyWithAdjancencyMatrix asserts that a matrix M
-            % has the same size as adjacency_matrix and that M is zero when
-            % adjacency_matrix is zero.
-            % ValidateConsistencyWithAdjancencyMatrix(obj,M)
-            % ValidateConsistencyWithAdjancencyMatrix(obj,M,M_name) where
-            % M_name is the name of M to be included in error messages
-            
-            n_varargin = numel(varargin);
-            
-            switch n_varargin
-                case 0
-                    M_name = 'M';
-                case 1
-                    M_name = varargin{1};
-                    
-                otherwise
-                    error('Too many arguments')
-            end
-            
-            assert(all(size(M) == size(obj.adjacency_matrix)),'Size of %s must match that of adjacency_matrix.',M_name)
-            assert(all(M(obj.adjacency_matrix) == 0),'%s must be zero when adjacency_matrix is zero.',M_name)
-        end
+        obj = UpdatePropertiesDependentOnRoadGraph(obj);
+        obj = UpdatePropertiesDependentOnSources(obj);
+        ValidateConsistencyWithAdjancencyMatrix(obj,M,varargin);
         
         function res = IsValidRoadNode(obj,i)
             res = IsInteger(i) && 1 <= i && i <= obj.N;
-        end
-        
+        end        
     end
     
     
