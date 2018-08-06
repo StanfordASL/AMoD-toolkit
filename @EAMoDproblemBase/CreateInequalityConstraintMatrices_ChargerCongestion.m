@@ -1,9 +1,9 @@
 function [Ain_ChargerCongestion, Bin_ChargerCongestion] = CreateInequalityConstraintMatrices_ChargerCongestion(obj)
-n_constraint = obj.NumChargers*obj.Thor;
+n_constraint = obj.spec.NumChargers*obj.spec.Thor;
 
 % This is meant as an upper bound for memory allocation. Unused entries are
 % removed at the end.
-n_constraint_entries = obj.NumChargers*obj.Thor*2*(obj.num_passenger_flows + 1)*obj.C;
+n_constraint_entries = obj.spec.NumChargers*obj.spec.Thor*2*(obj.num_passenger_flows + 1)*obj.spec.C;
 
 Ainsparse = zeros(n_constraint_entries,3);
 Bin = zeros(n_constraint,1);
@@ -12,9 +12,9 @@ Ainrow = 1;
 Ainentry = 1;
 
 % Chargers: congestion
-for t = 1:obj.Thor
-    for l = 1:obj.NumChargers
-        for c = 1:obj.C
+for t = 1:obj.spec.Thor
+    for l = 1:obj.spec.NumChargers
+        for c = 1:obj.spec.C
             % Note that if obj.num_passenger_flows = 0, this loop does not
             % run
             for k = 1:obj.num_passenger_flows
@@ -28,7 +28,7 @@ for t = 1:obj.Thor
             Ainsparse(Ainentry,:) = [Ainrow,obj.FindDischargeLinkRtcl(t,c,l),1];
             Ainentry = Ainentry + 1;
         end
-        Bin(Ainrow) = obj.ChargerCap(l);
+        Bin(Ainrow) = obj.spec.ChargerCap(l);
         
         Ainrow=Ainrow+1;        
     end

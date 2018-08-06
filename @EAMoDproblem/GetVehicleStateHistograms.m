@@ -4,7 +4,7 @@ function [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,...
 
 switch numel(varargin)
     case 0
-        decision_vector_val = obj.EvaluateDecisionVector();
+        decision_vector_val = obj.spec.EvaluateDecisionVector();
     case 1
         decision_vector_val = varargin{1};
     otherwise
@@ -13,10 +13,10 @@ end
 
 
 % Charging vehicles
-ChargingVehicleHist = zeros(1,obj.Thor);
-for tt = 1:obj.Thor
-    for c = 1:obj.C
-        for l = 1:obj.NumChargers
+ChargingVehicleHist = zeros(1,obj.spec.Thor);
+for tt = 1:obj.spec.Thor
+    for c = 1:obj.spec.C
+        for l = 1:obj.spec.NumChargers
             for k = 1:obj.num_passenger_flows
                 ChargingVehicleHist(tt) = ChargingVehicleHist(tt) + decision_vector_val(obj.FindChargeLinkPtckl(tt,c,k,l));
             end
@@ -26,10 +26,10 @@ for tt = 1:obj.Thor
 end
 
 % Discharging vehicles
-DischargingVehicleHist = zeros(1,obj.Thor);
-for tt = 1:obj.Thor
-    for c = 1:obj.C
-        for l = 1:obj.NumChargers
+DischargingVehicleHist = zeros(1,obj.spec.Thor);
+for tt = 1:obj.spec.Thor
+    for c = 1:obj.spec.C
+        for l = 1:obj.spec.NumChargers
             for k = 1:obj.num_passenger_flows
                 DischargingVehicleHist(tt) = DischargingVehicleHist(tt) + decision_vector_val(obj.FindDischargeLinkPtckl(tt,c,k,l));
             end
@@ -39,16 +39,16 @@ for tt = 1:obj.Thor
 end
 
 % Moving vehicles
-PaxVehicleHist = zeros(1,obj.Thor);
-RebVehicleHist = zeros(1,obj.Thor);
-IdleVehicleHist = zeros(1,obj.Thor);
+PaxVehicleHist = zeros(1,obj.spec.Thor);
+RebVehicleHist = zeros(1,obj.spec.Thor);
+IdleVehicleHist = zeros(1,obj.spec.Thor);
 
-for tt = 1:obj.Thor
-    for c = 1:obj.C
-        for i = 1:obj.N
-            if ~isempty(obj.RoadGraph{i})
-                for j = obj.RoadGraph{i}
-                    for deltat = 0:obj.TravelTimes(i,j)-1
+for tt = 1:obj.spec.Thor
+    for c = 1:obj.spec.C
+        for i = 1:obj.spec.N
+            if ~isempty(obj.spec.RoadGraph{i})
+                for j = obj.spec.RoadGraph{i}
+                    for deltat = 0:obj.spec.TravelTimes(i,j)-1
                         if tt - deltat > 0
                             for k = 1:obj.num_passenger_flows
                                 PaxVehicleHist(tt) = PaxVehicleHist(tt) + decision_vector_val(obj.FindRoadLinkPtckij(tt-deltat,c,k,i,j));
@@ -78,7 +78,7 @@ end
 % Note RebVehicleHist at Thor is meaningless. Since it is unconstrained and
 % there are self-loops with distance zero it can take any value.
 % Thus, we set it to zero.
-RebVehicleHist(obj.Thor) = 0;
+RebVehicleHist(obj.spec.Thor) = 0;
 
 % IdleVehicleHist takes the final distribution of vehicles at Thor
 n_end_vehicles = obj.ComputeNumberOfVehiclesAtEnd(varargin{:});

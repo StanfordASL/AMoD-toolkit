@@ -1,9 +1,9 @@
 function [Ain_RoadCongestion, Bin_RoadCongestion] = CreateInequalityConstraintMatrices_BoilerPlate(obj)
-n_constraint = obj.TotNumSources;
+n_constraint = obj.spec.TotNumSources;
 
 % This is meant as an upper bound for memory allocation. Unused entries are
 % removed at the end.
-n_constraint_entries = obj.TotNumSources*obj.C;
+n_constraint_entries = obj.spec.TotNumSources*obj.spec.C;
 
 Aeqsparse = zeros(n_constraint_entries,3);
 Beq = zeros(n_constraint,1);

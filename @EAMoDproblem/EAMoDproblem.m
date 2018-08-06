@@ -1,8 +1,8 @@
 % This integrates EAMoDproblemBase with Yalmip
 classdef EAMoDproblem < EAMoDproblemBase
     methods
-        function obj = EAMoDproblem(eamod_spec)
-            obj@EAMoDproblemBase(eamod_spec);
+        function obj = EAMoDproblem(spec)
+            obj@EAMoDproblemBase(spec);
         end
         
         Initialize(obj)
@@ -41,7 +41,7 @@ classdef EAMoDproblem < EAMoDproblemBase
         end
         
         function res = FindChargerPowertl(obj,t,l)
-            res = obj.NumChargers*(t - 1) + l;
+            res = obj.spec.NumChargers*(t - 1) + l;
         end
         
         final_vehicle_distribution = GetFinalVehicleDistribution(obj,varargin);

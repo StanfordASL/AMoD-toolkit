@@ -6,11 +6,11 @@ if ~obj.use_real_time_formulation
     return;
 end
 
-n_constraint = obj.M*obj.Thor*obj.C;
+n_constraint = obj.spec.M*obj.spec.Thor*obj.spec.C;
 
 % This is meant as an upper bound for memory allocation. Unused entries are
 % removed at the end.
-n_constraint_entries = 2*obj.TotNumSources*obj.C;
+n_constraint_entries = 2*obj.spec.TotNumSources*obj.spec.C;
 
 Aeqsparse = zeros(n_constraint_entries,3);
 Beq = zeros(n_constraint,1);
@@ -18,15 +18,15 @@ Beq = zeros(n_constraint,1);
 Aeqrow = 1;
 Aeqentry = 1;
 
-for k = 1:obj.M
-    for t = 1:obj.Thor
-        for c = 1:obj.C
+for k = 1:obj.spec.M
+    for t = 1:obj.spec.Thor
+        for c = 1:obj.spec.C
             Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindPaxSinkChargetck(t,c,k),-1];
             Aeqentry = Aeqentry + 1;
-            for ssi = 1 :length(obj.Sources{k})
-                if obj.StartTimes{k}(ssi) == t - obj.RouteTime(obj.Sources{k}(ssi),obj.Sinks(k))
-                    if c + obj.RouteCharge(obj.Sources{k}(ssi),obj.Sinks(k)) <= obj.C && c + obj.RouteCharge(obj.Sources{k}(ssi),obj.Sinks(k)) > 0
-                        Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindPaxSourceChargecks(c + obj.RouteCharge(obj.Sources{k}(ssi),obj.Sinks(k)),k,ssi),1];
+            for ssi = 1 :length(obj.spec.Sources{k})
+                if obj.spec.StartTimes{k}(ssi) == t - obj.RouteTime(obj.spec.Sources{k}(ssi),obj.spec.Sinks(k))
+                    if c + obj.RouteCharge(obj.spec.Sources{k}(ssi),obj.spec.Sinks(k)) <= obj.spec.C && c + obj.RouteCharge(obj.spec.Sources{k}(ssi),obj.spec.Sinks(k)) > 0
+                        Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindPaxSourceChargecks(c + obj.RouteCharge(obj.spec.Sources{k}(ssi),obj.spec.Sinks(k)),k,ssi),1];
                         Aeqentry=Aeqentry+1;
                     end
                 end

@@ -8,7 +8,7 @@ obj.constraint_array = obj.DefineConstraints();
 
 objective = obj.GetAMoDcost();
 
-sdp_options = sdpsettings('solver',obj.eamod_spec.solver);
+sdp_options = sdpsettings('solver',obj.spec.solver);
 diagnostics = optimize(obj.constraint_array,objective,sdp_options);
 
 if diagnostics.problem ~= 0

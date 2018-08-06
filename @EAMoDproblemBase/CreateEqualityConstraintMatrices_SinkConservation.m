@@ -1,12 +1,12 @@
 function [Aeq_SinkConservation, Beq_SinkConservation] = CreateEqualityConstraintMatrices_SinkConservation(obj)
-n_constraint = obj.NumSinks;
+n_constraint = obj.spec.NumSinks;
 
 % This is meant as an upper bound for memory allocation. Unused entries are
 % removed at the end.
-n_constraint_entries = obj.NumSinks*obj.C*obj.Thor;
+n_constraint_entries = obj.spec.NumSinks*obj.spec.C*obj.spec.Thor;
 
-if obj.sourcerelaxflag
-    n_constraint_entries = n_constraint_entries + obj.TotNumSources;
+if obj.spec.sourcerelaxflag
+    n_constraint_entries = n_constraint_entries + obj.spec.TotNumSources;
 end
 
 Aeqsparse = zeros(n_constraint_entries,3);
@@ -16,22 +16,22 @@ Aeqrow = 1;
 Aeqentry = 1;
 
 % Sum of all FindPaxSinkChargeck = Pax. sink
-for k = 1:obj.M
+for k = 1:obj.spec.M
     
-    for c = 1:obj.C
-        for t = 1:obj.Thor
+    for c = 1:obj.spec.C
+        for t = 1:obj.spec.Thor
             Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindPaxSinkChargetck(t,c,k),1];
             Aeqentry = Aeqentry+1;
         end
     end
-    if obj.sourcerelaxflag
-        for ssi = 1:length(obj.Sources{k})
+    if obj.spec.sourcerelaxflag
+        for ssi = 1:length(obj.spec.Sources{k})
             Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindSourceRelaxks(k,ssi),1];
             Aeqentry = Aeqentry+1;
         end
     end
     
-    Beq(Aeqrow) = sum(obj.Flows{k});
+    Beq(Aeqrow) = sum(obj.spec.Flows{k});
     
     Aeqrow = Aeqrow+1;
 end
