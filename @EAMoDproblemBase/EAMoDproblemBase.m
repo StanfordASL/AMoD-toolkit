@@ -40,7 +40,12 @@ classdef EAMoDproblemBase < handle
 
         [lb_StateVector,ub_StateVector] = CreateStateVectorBounds(obj)  
         
-        decision_vector_val = EvaluateDecisionVector(obj);
+        % New methods
+        decision_vector_val = EvaluateDecisionVector(obj)
+        n_start_vehicles = ComputeNumberOfVehiclesAtStart(obj)
+        n_end_vehicles = ComputeNumberOfVehiclesAtEnd(obj,varargin)
+        A_charger_power_w = ComputeChargerPowerMatrixNew(obj)
+        
         
         % State vector indexing functions   
         function res = FindRoadLinkPtckij(obj,t,c,k,i,j)

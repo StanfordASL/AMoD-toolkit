@@ -2,7 +2,7 @@ function final_vehicle_distribution = GetFinalVehicleDistribution(obj,varargin)
 
 switch numel(varargin)
     case 0
-        decision_vector_val = obj.spec.EvaluateDecisionVector();
+        decision_vector_val = obj.EvaluateDecisionVector();
     case 1
         decision_vector_val = varargin{1};
     otherwise
