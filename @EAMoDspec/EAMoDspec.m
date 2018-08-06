@@ -132,6 +132,9 @@ classdef EAMoDspec
         % Dependent on RoadGraph
         adjacency_matrix(:,:) logical % adjacency_matrix(i,j) == 1 if there is a road going from node i to node j
         E(1,1) double % Number of road edges in RoadGraph
+        
+        % Dependent on Sources
+        TotNumSources(1,1) double % Total number of sources
     end
     
     properties (Dependent)
@@ -162,7 +165,7 @@ classdef EAMoDspec
         end
     end
     
-    properties (Access = private)
+    properties (Access = {?EAMoDproblemBase})
         % The following properties depend on others. We do not use dependent
         % properties so that we can cache them.
         
@@ -174,7 +177,6 @@ classdef EAMoDspec
         
         % Dependent on Sources
         NumSourcesPerSink(:,1) double % NumSourcesPerSink(i) is the number of Sources towards Sinks(i)
-        CumNumSourcesPerSink(:,1) double % Cumulative sum of NumSourcesPerSink
-        TotNumSources(1,1) double % Total number of sources
+        CumNumSourcesPerSink(:,1) double % Cumulative sum of NumSourcesPerSink        
     end
 end
