@@ -1,4 +1,6 @@
 function obj = CreateFromScenario(scenario)
+% CreateFromScenario Instantiates EAMoDspec based on a legacy scenario
+
 RoadNetwork = scenario.RoadNetwork;
 InitialConditions = scenario.InitialConditions;
 Passengers = scenario.Passengers;
