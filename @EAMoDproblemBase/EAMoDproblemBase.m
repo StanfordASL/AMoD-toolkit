@@ -1,16 +1,11 @@
 classdef EAMoDproblemBase < handle
     methods
         function obj = EAMoDproblemBase(spec)
+            validateattributes(spec,{EAMoDspec},{'scalar'},mfilename,'spec',1);
              
             spec.ValidateSpec();
             obj.spec = spec;                        
-                                    
-            % Stuff for real time algorithm
-            obj.spec.TVRoadCap = zeros(obj.spec.Thor,obj.spec.N,obj.spec.N);
-            for tt = 1:obj.spec.Thor
-                obj.spec.TVRoadCap(tt,:,:) = obj.spec.RoadCap;
-            end
-            
+                  
             [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();            
         end
         
@@ -187,7 +182,7 @@ classdef EAMoDproblemBase < handle
     
     
     properties
-        spec
+        spec(1,1) EAMoDspec
         
         % Stuff for real time algorithm
         use_real_time_formulation(1,1) logical = false;
