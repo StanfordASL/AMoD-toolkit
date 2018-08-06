@@ -5,7 +5,7 @@ switch numel(varargin)
     case 1
         decision_vector_val = varargin{1};
     otherwise
-        error('Too many arguments.')    
+        error('Too many arguments.')
 end
 
 DepTimeHist = zeros(1,obj.spec.Thor);

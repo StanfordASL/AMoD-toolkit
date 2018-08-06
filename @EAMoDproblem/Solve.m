@@ -1,7 +1,7 @@
 function [objective_value,solver_time,diagnostics]  = Solve(obj)
 
 if ~obj.is_initialized
-   obj.Initialize(); 
+    obj.Initialize();
 end
 
 obj.constraint_array = obj.DefineConstraints();

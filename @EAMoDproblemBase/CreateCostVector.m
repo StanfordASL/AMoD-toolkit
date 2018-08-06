@@ -32,7 +32,7 @@ for t = 1:obj.spec.Thor
                 f_cost_pax(obj.FindDischargeLinkPtckl(t,c,k,i)) = obj.spec.ValueOfTime*obj.spec.ChargerTime(i) + abs(obj.spec.ChargerSpeed(i))*obj.spec.BatteryDepreciationPerUnitCharge;
             end
             f_cost_reb(obj.FindChargeLinkRtcl(t,c,i))= abs(obj.spec.ChargerSpeed(i))*obj.spec.BatteryDepreciationPerUnitCharge;
-            f_cost_reb(obj.FindDischargeLinkRtcl(t,c,i))= abs(obj.spec.ChargerSpeed(i))*obj.spec.BatteryDepreciationPerUnitCharge;       
+            f_cost_reb(obj.FindDischargeLinkRtcl(t,c,i))= abs(obj.spec.ChargerSpeed(i))*obj.spec.BatteryDepreciationPerUnitCharge;
         end
     end
 end

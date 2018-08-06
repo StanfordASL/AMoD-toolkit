@@ -57,7 +57,7 @@ classdef EAMoDproblem < EAMoDproblemBase
         pax_cost_rt = ComputePaxCostRealTimeFormulation(obj);
         
         h = PlotVehicleState(obj,params_plot,title_text,varargin)
-
+        
         pre_routed_trip_histogram = GetPreRoutedTripHistogram(obj);
         
         h = PlotTravelTimes(obj,params_plot,title_text,varargin)

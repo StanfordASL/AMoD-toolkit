@@ -19,7 +19,7 @@ for i = 1:obj.spec.N
                 RouteDistance(i,j) = RouteDistance(i,j) + obj.spec.TravelDistance(Routes{i,j}(k),Routes{i,j}(k+1));
             end
         end
-    end    
+    end
 end
 
 end
@@ -62,7 +62,7 @@ while ~isempty(OpenSet)
         if ~sum(ClosedSet == neigh)             %If neighbor is not in closed set
             tentative_g = g_score(currNode) + RoadCost(currNode,neigh);
             if (~sum(neigh == OpenSet))         %If the neighbor is not already in OpenSet, add it
-                OpenSet = [OpenSet, neigh];     
+                OpenSet = [OpenSet, neigh];
             elseif tentative_g>=g_score(neigh)
                 continue
             end

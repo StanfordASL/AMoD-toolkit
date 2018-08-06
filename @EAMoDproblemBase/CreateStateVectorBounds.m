@@ -49,7 +49,7 @@ for i = 1:obj.spec.N
 end
 
 % Don't create chargers/dischargers from thin air
-% Prevent charging that would result in invalid charge levels i.e., outside [0,obj.spec.C] 
+% Prevent charging that would result in invalid charge levels i.e., outside [0,obj.spec.C]
 for t = 1:obj.spec.Thor
     for l = 1:obj.spec.NumChargers
         for c = 1:obj.spec.ChargerSpeed(l)
@@ -69,7 +69,7 @@ for t = 1:obj.spec.Thor
     end
 end
 
-% Prevent charging that would end after Thor 
+% Prevent charging that would end after Thor
 for l = 1:obj.spec.NumChargers
     for t = (obj.spec.Thor - obj.spec.ChargerTime(l) + 1):obj.spec.Thor
         for c = 1:obj.spec.C

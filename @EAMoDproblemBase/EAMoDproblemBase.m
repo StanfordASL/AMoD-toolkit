@@ -2,11 +2,11 @@ classdef EAMoDproblemBase < handle
     methods
         function obj = EAMoDproblemBase(spec)
             validateattributes(spec,{EAMoDspec},{'scalar'},mfilename,'spec',1);
-             
+            
             spec.ValidateSpec();
-            obj.spec = spec;                        
-                  
-            [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();            
+            obj.spec = spec;
+            
+            [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();
         end
         
         [f_cost,f_cost_pax,f_cost_reb,f_cost_relax] = CreateCostVector(obj);
@@ -47,15 +47,15 @@ classdef EAMoDproblemBase < handle
         
         function res = FindChargeLinkPtckl(obj,t,c,k,i)
             if obj.use_real_time_formulation
-               error('FindChargeLinkPtckl is undefined for real time formulation.');
+                error('FindChargeLinkPtckl is undefined for real time formulation.');
             else
-               res = obj.FindChargeLinkHelpertckij(t,c,k,i);
+                res = obj.FindChargeLinkHelpertckij(t,c,k,i);
             end
         end
         
         function res = FindChargeLinkRtcl(obj,t,c,i)
             if obj.use_real_time_formulation
-                res = obj.FindChargeLinkHelpertckij(t,c,1,i);                
+                res = obj.FindChargeLinkHelpertckij(t,c,1,i);
             else
                 res = obj.FindChargeLinkPtckl(t,c,obj.spec.M+1,i);
             end
@@ -69,13 +69,13 @@ classdef EAMoDproblemBase < handle
             if obj.use_real_time_formulation
                 error('FindDischargeLinkPtckl is undefined for real time formulation.');
             else
-                res = obj.FindDischargeLinkHelpertckl(t,c,k,i);        
+                res = obj.FindDischargeLinkHelpertckl(t,c,k,i);
             end
         end
         
         function res = FindDischargeLinkRtcl(obj,t,c,i)
             if obj.use_real_time_formulation
-                res = obj.FindDischargeLinkHelpertckl(t,c,1,i);    
+                res = obj.FindDischargeLinkHelpertckl(t,c,1,i);
             else
                 res = obj.FindDischargeLinkPtckl(t,c,obj.spec.M + 1,i);
             end
@@ -88,7 +88,7 @@ classdef EAMoDproblemBase < handle
         function res = FindPaxSinkChargetck(obj,t,c,k)
             res = obj.FindPaxSourceChargecks(obj.spec.C,obj.spec.M,obj.spec.NumSourcesPerSink(end)) + obj.spec.C*obj.spec.M*(t-1) + obj.spec.M*(c-1) + k;
         end
-                
+        
         function res = FindEndRebLocationci(obj,c,i)
             res = obj.FindPaxSinkChargetck(obj.spec.Thor,obj.spec.C,obj.spec.M) + obj.spec.N*(c-1) + i;
         end
@@ -120,7 +120,7 @@ classdef EAMoDproblemBase < handle
                 remainder = remainder - divisor*quotient;
             end
             
-            varargout{n_varargin + 1} = remainder;            
+            varargout{n_varargin + 1} = remainder;
         end
         
         
@@ -162,20 +162,20 @@ classdef EAMoDproblemBase < handle
                 res = obj.FindSourceRelaxks(obj.spec.NumSinks,obj.spec.NumSourcesPerSink(obj.spec.NumSinks));
             else
                 res = obj.FindEndRebLocationci(obj.spec.C,obj.spec.N);
-            end            
+            end
         end
         
         function res = get.num_passenger_flows(obj)
             if obj.use_real_time_formulation
                 res = 0;
             else
-                res = obj.spec.M; 
+                res = obj.spec.M;
             end
         end
     end
     
     properties (Dependent)
-        StateSize       
+        StateSize
         num_passenger_flows
     end
     
@@ -189,7 +189,7 @@ classdef EAMoDproblemBase < handle
         RouteTime
         RouteCharge
         RouteDistance
-        Routes        
+        Routes
     end
     
     

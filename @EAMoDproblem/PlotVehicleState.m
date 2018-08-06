@@ -6,13 +6,13 @@ switch numel(varargin)
     case 1
         decision_vector_val = varargin{1};
     otherwise
-        error('Too many arguments.')    
+        error('Too many arguments.')
 end
 
 [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,...
-            RebVehicleHist,IdleVehicleHist,AllVehicleHist] ...
-            = obj.GetVehicleStateHistograms(decision_vector_val);
-        
+    RebVehicleHist,IdleVehicleHist,AllVehicleHist] ...
+    = obj.GetVehicleStateHistograms(decision_vector_val);
+
 date_time_range = GetDateTimeRange(obj.spec);
 
 % Note that we are concatenating horizontally. Multi-line notation is only
@@ -24,11 +24,11 @@ legend_cell = {'Charging vehicles','Discharging vehicles','Rebalancing vehicles'
 
 % Do not plot Discharging vehicles if there are none of them
 if all(DischargingVehicleHist < 1e-3)
- DischargingVehicleHist_ind = 2;
- state_matrix(:,DischargingVehicleHist_ind) = [];
- legend_cell(:,DischargingVehicleHist_ind) = [];    
+    DischargingVehicleHist_ind = 2;
+    state_matrix(:,DischargingVehicleHist_ind) = [];
+    legend_cell(:,DischargingVehicleHist_ind) = [];
 end
-    
+
 h = figure;
 
 h_area = area(date_time_range,state_matrix);

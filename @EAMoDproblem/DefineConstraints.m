@@ -6,12 +6,12 @@ if obj.use_real_time_formulation
     [Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = obj.CreateEqualityConstraintMatrices_CustomerChargeConservation();
     
     customer_conservation = Aeq_CustomerChargeConservation*decision_vector == Beq_CustomerChargeConservation;
-    customer_conservation = TagConstraintIfNonEmpty(customer_conservation,'CustomerChargeConservation');   
+    customer_conservation = TagConstraintIfNonEmpty(customer_conservation,'CustomerChargeConservation');
 else
     [Aeq_PaxConservation, Beq_PaxConservation] = obj.CreateEqualityConstraintMatrices_PaxConservation();
-
+    
     customer_conservation = Aeq_PaxConservation*decision_vector == Beq_PaxConservation;
-    customer_conservation = TagConstraintIfNonEmpty(customer_conservation,'PaxConservation');   
+    customer_conservation = TagConstraintIfNonEmpty(customer_conservation,'PaxConservation');
 end
 
 [Aeq_RebConservation, Beq_RebConservation] = obj.CreateEqualityConstraintMatrices_RebConservation();

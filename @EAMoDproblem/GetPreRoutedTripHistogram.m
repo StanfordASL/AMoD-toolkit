@@ -5,7 +5,7 @@ pre_routed_trip_histogram = zeros(1,obj.spec.Thor);
 for i_sink = 1:obj.spec.NumSinks
     sink = obj.spec.Sinks(i_sink);
     
-    source_array = obj.spec.Sources{i_sink};    
+    source_array = obj.spec.Sources{i_sink};
     
     for i_source = 1:numel(source_array)
         source = source_array(i_source);

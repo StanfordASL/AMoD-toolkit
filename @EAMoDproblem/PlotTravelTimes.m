@@ -6,17 +6,17 @@ switch numel(varargin)
     case 1
         decision_vector_val = varargin{1};
     otherwise
-        error('Too many arguments.')    
+        error('Too many arguments.')
 end
 
 [DepTimeHist, ArrivalTimeHist] = obj.GetTravelTimesHistograms(decision_vector_val);
-        
+
 date_time_range = GetDateTimeRange(obj.spec);
 
 PassengerCarsDeltaHist = DepTimeHist - ArrivalTimeHist;
 
 PassengerCarsHist = cumsum(PassengerCarsDeltaHist);
-    
+
 h = figure;
 hold on
 plot(date_time_range,DepTimeHist,'-.')

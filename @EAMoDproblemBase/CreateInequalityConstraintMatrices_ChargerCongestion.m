@@ -30,7 +30,7 @@ for t = 1:obj.spec.Thor
         end
         Bin(Ainrow) = obj.spec.ChargerCap(l);
         
-        Ainrow=Ainrow+1;        
+        Ainrow=Ainrow+1;
     end
 end
 
