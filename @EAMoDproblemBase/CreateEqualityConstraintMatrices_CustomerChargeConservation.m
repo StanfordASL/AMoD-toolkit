@@ -1,4 +1,8 @@
 function [Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = CreateEqualityConstraintMatrices_CustomerChargeConservation(obj)
+% CreateEqualityConstraintMatrices_CustomerChargeConservation Creates equality constraints for conservation of charge in customer-carrying vehicles in the real-time formulation (Eq. 11)
+%   [Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = CreateEqualityConstraintMatrices_CustomerChargeConservation
+
+
 if ~obj.use_real_time_formulation
     warning('CreateEqualityConstraintMatrices_CustomerChargeConservation applies only for real-time formulation.')
     Aeq_CustomerChargeConservation = [];

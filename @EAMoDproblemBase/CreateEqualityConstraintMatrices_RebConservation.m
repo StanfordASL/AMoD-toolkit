@@ -1,4 +1,6 @@
 function [Aeq_RebConservation, Beq_RebConservation] = CreateEqualityConstraintMatrices_RebConservation(obj)
+% CreateEqualityConstraintMatrices_RebConservation Creates equality constraints for conservation of rebalancing flow, and enforcement of initial and final conditions (Eq. 2)
+%   [Aeq_RebConservation, Beq_RebConservation] = CreateEqualityConstraintMatrices_RebConservation(obj)
 
 n_constraint = obj.spec.N*obj.spec.C*obj.spec.Thor;
 

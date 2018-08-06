@@ -1,4 +1,7 @@
 function [Aeq_PaxConservation, Beq_PaxConservation] = CreateEqualityConstraintMatrices_PaxConservation(obj)
+% CreateEqualityConstraintMatrices_PaxConservation Creates equality constraints for customer flow conservation (Eq. 9a)
+%   [Aeq_PaxConservation, Beq_PaxConservation] = CreateEqualityConstraintMatrices_PaxConservation(obj)
+
 if obj.use_real_time_formulation
     warning('CreateEqualityConstraintMatrices_PaxConservation does not apply for real-time formulation.')
     Aeq_PaxConservation = [];

@@ -1,4 +1,7 @@
 function [Ain_ChargerCongestion, Bin_ChargerCongestion] = CreateInequalityConstraintMatrices_ChargerCongestion(obj)
+% CreateInequalityConstraintMatrices_ChargerCongestion Creates inequality constraints to limit the number of vehicles that can use a charging station concurrently (Eq. 4)
+%   [Ain_ChargerCongestion, Bin_ChargerCongestion] = CreateInequalityConstraintMatrices_ChargerCongestion(obj)
+
 n_constraint = obj.spec.NumChargers*obj.spec.Thor;
 
 % This is meant as an upper bound for memory allocation. Unused entries are
@@ -46,5 +49,4 @@ Ainsparse = Ainsparse(1:(Ainentry - 1),:);
 
 Ain_ChargerCongestion = sparse(Ainsparse(:,1),Ainsparse(:,2),Ainsparse(:,3),n_constraint,obj.StateSize);
 Bin_ChargerCongestion = Bin;
-
 end

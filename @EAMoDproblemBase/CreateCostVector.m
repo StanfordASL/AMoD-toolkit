@@ -1,4 +1,11 @@
 function [f_cost,f_cost_pax,f_cost_reb,f_cost_relax] = CreateCostVector(obj)
+% CreateCostVector Creates the cost vector for the linear program
+%   [f_cost,f_cost_pax,f_cost_reb,f_cost_relax] = CreateCostVector(obj)
+%   where f_cost is used for the total cost, f_cost_pax for the cost
+%   associated with passenger-carrying vehicles, f_cost_reb for the cost
+%   associated with rebalancing trips and f_cost_relax for the cost
+%   associated with the relaxations.
+
 f_cost_pax = zeros(obj.StateSize,1);
 f_cost_reb = zeros(obj.StateSize,1);
 f_cost_relax = zeros(obj.StateSize,1);
@@ -43,5 +50,4 @@ if obj.spec.sourcerelaxflag
 end
 
 f_cost = f_cost_pax + f_cost_reb + f_cost_relax;
-
 end

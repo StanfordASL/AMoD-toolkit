@@ -1,4 +1,7 @@
 function [Ain_RoadCongestion, Bin_RoadCongestion] = CreateInequalityConstraintMatrices_RoadCongestion(obj)
+% CreateInequalityConstraintMatrices_RoadCongestion Creates inequality constraints to limit the flow along the road edges to be less than their capacity (Eq. 3) 
+%   [Ain_RoadCongestion, Bin_RoadCongestion] = CreateInequalityConstraintMatrices_RoadCongestion(obj)
+
 n_constraint = obj.spec.E*obj.spec.Thor;
 
 % This is meant as an upper bound for memory allocation. Unused entries are

@@ -1,4 +1,12 @@
 function [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj)
+% BuildRoutes Precomputes routes for passenger carrying vehicles in real-time implementation
+%   [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj) where 
+%   RouteTime(i,j) is the number of time-steps needed to go from i to j,
+%   RouteCharge(i,j) is the number of charge units needed to go from i to j,
+%   RouteDistance(i,j) is the distance in meters to go from i to j,
+%   Routes{i,j} is the route from i to j expresed as a vector of connected 
+%   nodes that need to be traversed
+
 RouteTime = zeros(obj.spec.N);
 RouteCharge = zeros(obj.spec.N);
 RouteDistance = zeros(obj.spec.N);

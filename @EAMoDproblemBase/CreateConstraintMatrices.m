@@ -1,4 +1,7 @@
 function [A_eq,B_eq,A_in,B_in] = CreateConstraintMatrices(obj)
+% CreateConstraintMatrices Consolidates constraints into matrices
+%   [A_eq,B_eq,A_in,B_in] = CreateConstraintMatrices(obj) where A_eq*x =
+%   B_eq and A_in*x <= B_in.
 [Aeq_PaxConservation, Beq_PaxConservation] = obj.CreateEqualityConstraintMatrices_PaxConservation();
 [Aeq_RebConservation, Beq_RebConservation] = obj.CreateEqualityConstraintMatrices_RebConservation;
 [Aeq_SourceConservation, Beq_SourceConservation] = obj.CreateEqualityConstraintMatrices_SourceConservation;

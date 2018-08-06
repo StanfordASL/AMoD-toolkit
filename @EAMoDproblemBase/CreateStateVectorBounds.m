@@ -1,4 +1,6 @@
 function [lb_StateVector,ub_StateVector] = CreateStateVectorBounds(obj)
+% CreateStateVectorBounds Creates upper and lower bounds for the state vector in the LP
+%   [lb_StateVector,ub_StateVector] = CreateStateVectorBounds(obj)
 
 lb_StateVector = zeros(obj.StateSize,1); %Passenger and rebalancing flows, passenger sources and sinks
 ub_StateVector = Inf*ones(obj.StateSize,1); %Why not? We enforce capacity separately
