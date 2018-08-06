@@ -1,4 +1,7 @@
-function constraint_array = DefineConstraints(obj)
+function constraint_array = GetConstraintArray(obj)
+if obj.verbose
+    DispWithTimeStamp('Starting GetConstraintArray of eamod_problem.');
+end
 
 decision_vector = obj.decision_variables.decision_vector;
 
@@ -68,4 +71,8 @@ constraint_array = [
     decision_vector_lower_bound;
     decision_vector_upper_bound;
     ];
+
+if obj.verbose
+    DispWithTimeStamp('Finished GetConstraintArray of eamod_problem.');
+end
 end

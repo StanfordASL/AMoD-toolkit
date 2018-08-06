@@ -120,8 +120,6 @@ classdef EAMoDspec
         charge_unit_j(1,1) double {mustBeNonnegative,mustBeReal} % Energy of a charge unit in joule, 1 kWh = 3.6e6 J
         v2g_efficiency(1,1) double {mustBeNonnegative,mustBeReal,mustBeLessThanOrEqual(v2g_efficiency,1)} = 1 % Efficiency of sending power back to the grid (vehicle2grid)
         
-        yalmip_settings(1,1) = sdpsettings() % Struct with YALMIP settings
-        
         start_date_time(1,1) datetime = datetime('01-Jan-2010 00:00:00') % Starting time of the simulation
     end
     

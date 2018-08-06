@@ -19,7 +19,7 @@ classdef EAMoDproblemBase < handle
             spec.ValidateSpec();
             obj.spec = spec;
             
-            [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();
+            [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();   
         end
         
         [A_eq,B_eq,A_in,B_in] = CreateConstraintMatrices(obj)
@@ -38,7 +38,9 @@ classdef EAMoDproblemBase < handle
         [Ain_RoadCongestion, Bin_RoadCongestion] = CreateInequalityConstraintMatrices_RoadCongestion(obj)
         [Ain_ChargerCongestion, Bin_ChargerCongestion] = CreateInequalityConstraintMatrices_ChargerCongestion(obj)
 
-        [lb_StateVector,ub_StateVector] = CreateStateVectorBounds(obj)        
+        [lb_StateVector,ub_StateVector] = CreateStateVectorBounds(obj)  
+        
+        decision_vector_val = EvaluateDecisionVector(obj);
         
         % State vector indexing functions   
         function res = FindRoadLinkPtckij(obj,t,c,k,i,j)
@@ -177,11 +179,15 @@ classdef EAMoDproblemBase < handle
     end
     
     properties        
-        use_real_time_formulation(1,1) logical = false % Flag to use real-time formulation       
+        use_real_time_formulation(1,1) logical = false % Flag to use real-time formulation  
+        verbose(1,1) logical = false % Flag for verbose output
+        yalmip_settings(1,1) = sdpsettings() % Struct with YALMIP settings
     end
     
     properties (SetAccess = private, GetAccess = public)
         spec(1,1) EAMoDspec % Object of class EAMoDspec specifying the problem
+        
+        is_initialized(1,1) logical = false % Flag denoting if Initialize has run already
         
         % For real-time formulation        
         
@@ -189,6 +195,13 @@ classdef EAMoDproblemBase < handle
         RouteCharge(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger} % RouteCharge(i,j) is the number of charge units needed to go from i to j
         RouteDistance(:,:)  double {mustBeNonnegative,mustBeReal} % RouteDistance(i,j) is the distance in meters to go from i to j
         Routes(:,:) cell % Routes{i,j} is the route from i to j expresed as a vector of connected nodes that need to be traversed
+    end
+    
+    properties (Access = private)
+        % TODO: rename to optimization_variables
+        decision_variables(1,1) % Struct with optimization variables       
+        state_range(1,:) double
+        relax_range(1,:) double        
     end
     
     methods (Access = private)
