@@ -1,6 +1,5 @@
 function ValidateSpec(obj)
-% ValidateSpec asserts that the properties of the spec are
-% consistent with eachother.
+% ValidateSpec Asserts that the properties of the EAMoDspec object are consistent with eachother
 
 % Properties that depend on RoadGraph
 obj.ValidateConsistencyWithAdjancencyMatrix(obj.RoadCap,'RoadCap');
@@ -18,7 +17,10 @@ assert(numel(obj.Sources) == obj.NumSinks,'Sources must have NumSinks elements')
 
 % Properties that depend on Sources
 assert(all(cellfun(@numel,obj.StartTimes) == obj.NumSourcesPerSink),'StartTimes must have the same number of cells and number of elements per cell as Sources');
+assert(all(cellfun(@(x) all(x >= 0) & all(x <= obj.Thor),obj.StartTimes)),'All StartTimes must be in range [0,Thor]');
+
 assert(all(cellfun(@numel,obj.Flows) == obj.NumSourcesPerSink),'Flows must have the same number of cells and number of elements per cell as Sources');
+assert(all(cellfun(@(x) all(x >= 0),obj.Flows)),'All Flows must be non-negative');
 
 % Entries that must be valid road nodes
 assert(all(obj.IsValidRoadNode(obj.ChargersList)),'Entries in ChargersList must be valid road nodes');
@@ -34,5 +36,6 @@ assert(obj.MinEndCharge <= obj.C - 1,'MinEndCharge may not be more than C - 1 (r
 
 assert(all(size(obj.FullVehicleInitialPos) == [obj.M,obj.N,obj.C]),'FullVehicleInitialPos must be of size M x N x C');
 assert(all(size(obj.EmptyVehicleInitialPos) == [obj.N,obj.C]),'FullVehicleInitialPos must be of size N x C');
+
 
 end

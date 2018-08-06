@@ -1,10 +1,8 @@
 function ValidateConsistencyWithAdjancencyMatrix(obj,M,varargin)
-% ValidateConsistencyWithAdjancencyMatrix asserts that a matrix M
-% has the same size as adjacency_matrix and that M is zero when
-% adjacency_matrix is zero.
-% ValidateConsistencyWithAdjancencyMatrix(obj,M)
-% ValidateConsistencyWithAdjancencyMatrix(obj,M,M_name) where
-% M_name is the name of M to be included in error messages
+% ValidateConsistencyWithAdjancencyMatrix asserts that a matrix M has the same size as adjacency_matrix and that M is zero when adjacency_matrix is zero.
+%   ValidateConsistencyWithAdjancencyMatrix(obj,M)
+%   ValidateConsistencyWithAdjancencyMatrix(obj,M,M_name) where
+%   M_name is the name of M to be included in error messages
 
 n_varargin = numel(varargin);
 

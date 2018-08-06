@@ -1,4 +1,6 @@
 function obj = UpdatePropertiesDependentOnRoadGraph(obj)
+% UpdatePropertiesDependentOnRoadGraph updates properties that depend on RoadGraph
+
 obj.ReverseRoadGraph = cell(size(obj.RoadGraph));
 for i=1:obj.N
     for j=obj.RoadGraph{i}
