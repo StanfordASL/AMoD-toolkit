@@ -50,8 +50,22 @@ end
 function ProblemMatricesMatchHelper(test_case,scenario)
 spec = EAMoDspec.CreateFromScenario(scenario);
 
-[f_cost_full_ref,Ain_ref,Bin_ref,Aeq_ref,Beq_ref,lb_StateVector_full_ref,ub_StateVector_full_ref,~,~,indexer,SourceRelaxCost] = ...
-    TVPowerBalancedFlow_withpower_sinkbundle_ConstraintMatrices(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
+% Do not solve problem as we only care about the matrices
+scenario.Flags.SolveProblem = false;
+
+[cplex_out,fval,exitflag,output,lambdas,dual_prices_ix,dual_charger_prices_ix,power_relax_ix,lp_matrices] = ...
+    TVPowerBalancedFlow_withpower_sinkbundle(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
+
+indexer = GetIndexer(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
+
+f_cost_full_ref = lp_matrices.f_cost;
+Ain_ref = lp_matrices.Aineq;
+Bin_ref = lp_matrices.Bineq;
+Aeq_ref = lp_matrices.Aeq;
+Beq_ref = lp_matrices.Beq;
+lb_StateVector_full_ref = lp_matrices.lb;
+ub_StateVector_full_ref = lp_matrices.ub;
+SourceRelaxCost = lp_matrices.SourceRelaxCost;
 
 col_range = indexer.FindRoadLinkPtckij(1,1,1,1,1):indexer.FindEndRebLocationci(spec.C,spec.N);
 
