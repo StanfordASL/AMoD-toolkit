@@ -5,8 +5,6 @@ function [total_cost, pax_cost,reb_cost, relax_cost] = GetAMoDcost(obj,varargin)
 %   For the meaning of total_cost, pax_cost, reb_cost and relax_cost see EAMoDProblemBase.CreateCostVector
 %   See also EAMoDProblemBase.CreateCostVector
 
-
-
 switch numel(varargin)
     case 0
         decision_vector = obj.decision_variables.decision_vector;

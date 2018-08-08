@@ -1,5 +1,6 @@
 function figure_handle = PlotRoadGraph(obj)
 % PlotRoadGraph Creates a plot with obj.RoadGraph. Displays distance for road edges and nodes with charging stations are shown in red.
+
 figure_handle = figure;
 hold on
 
