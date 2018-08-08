@@ -1,6 +1,6 @@
 function transportation_power_demand_w = ComputeTransportationPowerDemand(obj)
 
-decision_vector_val = obj.spec.EvaluateDecisionVector();
+decision_vector_val = obj.EvaluateDecisionVector();
 pax_vehicle_charge_demand = zeros(obj.spec.Thor,1);
 reb_vehicle_charge_demand = zeros(obj.spec.Thor,1);
 

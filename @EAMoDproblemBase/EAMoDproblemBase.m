@@ -32,10 +32,14 @@ classdef EAMoDproblemBase < handle
         n_end_vehicles = ComputeNumberOfVehiclesAtEnd(obj,varargin)        
         [total_cost_val, pax_cost_val, reb_cost_val,relax_cost_val] = EvaluateAMoDcost(obj,varargin)        
         final_vehicle_distribution = GetFinalVehicleDistribution(obj,varargin)
-        
-        % Ploting functions
+        [DepTimeHist, ArrivalTimeHist] = GetTravelTimesHistograms(obj,varargin);
+        [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,RebVehicleHist,IdleVehicleHist,AllVehicleHist] = GetVehicleStateHistograms(obj,varargin)
+        [objective_value,solver_time,diagnostics] = Solve(obj)
+                
+        % Ploting methods
         figure_handle = PlotRoadGraph(obj)
         figure_handle = PlotDeparturesAndArrivals(obj,varargin)
+        figure_handle = PlotVehicleState(obj,params_plot,varargin)
         
         % Determine matrices for the linear program
         [f_cost,f_cost_pax,f_cost_reb,f_cost_relax] = CreateCostVector(obj)
@@ -54,19 +58,7 @@ classdef EAMoDproblemBase < handle
         [Ain_ChargerCongestion, Bin_ChargerCongestion] = CreateInequalityConstraintMatrices_ChargerCongestion(obj)
         
         [lb_StateVector,ub_StateVector] = CreateStateVectorBounds(obj)
-        
-               
-        % New methods          
-        [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,...
-            RebVehicleHist,IdleVehicleHist,AllVehicleHist] ...
-            = GetVehicleStateHistograms(obj,varargin)
-        [objective_value,solver_time,diagnostics] = Solve(obj)
-        [DepTimeHist, ArrivalTimeHist] = GetTravelTimesHistograms(obj,varargin);
-        
-        
-        
-        h = PlotVehicleState(obj,params_plot,title_text,varargin)   
-        
+                            
         % State vector indexing functions
         function res = FindRoadLinkPtckij(obj,t,c,k,i,j)
             % FindRoadLinkPtckij Indexer for customer flow in road edges in the extended network

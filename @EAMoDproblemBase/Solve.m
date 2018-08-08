@@ -1,4 +1,9 @@
 function [objective_value,solver_time,diagnostics] = Solve(obj)
+% Solve Solves the optimization problem
+%   [objective_value,solver_time,diagnostics] = Solve(obj)
+%   objective_value is the value of the objective function at the optimum
+%   solver_time is the solver time reported by YALMIP
+%   diagnostics contains YALMIP diagnostic information
 
 constraint_array = obj.GetConstraintArray();
 objective = obj.GetObjective();

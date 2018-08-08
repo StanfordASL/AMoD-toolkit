@@ -14,15 +14,8 @@ end
 
 [DepTimeHist, ArrivalTimeHist] = obj.GetTravelTimesHistograms(decision_vector_val);
 
-if obj.spec.time_step_s == 0
-    time = 1:obj.spec.Thor;
-    x_label = 'Time step';
-else
-    
-    time = GetDateTimeRange(obj.spec);   
-    x_label = 'Time [h]';
-end
 
+[time_range,x_label] = obj.spec.GetTimeRange();
 
 PassengerCarsDeltaHist = DepTimeHist - ArrivalTimeHist;
 
@@ -30,14 +23,14 @@ PassengerCarsHist = cumsum(PassengerCarsDeltaHist);
 
 figure_handle = figure;
 hold on
-plot(time,DepTimeHist,'-.')
-plot(time,ArrivalTimeHist,'--')
-plot(time,PassengerCarsDeltaHist,'-')
-plot(time,PassengerCarsHist,':')
+plot(time_range,DepTimeHist)
+plot(time_range,ArrivalTimeHist)
+plot(time_range,PassengerCarsDeltaHist,'--')
+plot(time_range,PassengerCarsHist,'--')
 
 legend('Departures','Arrivals','Change in passenger-carrying vehicles','Passenger-carrying vehicles','location','northeast')
 xlabel(x_label)
 ylabel('Number of vehicles [-]')
 
-xlim([time(1),time(end)])
+xlim([time_range(1),time_range(end)])
 end

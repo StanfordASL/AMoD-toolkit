@@ -1,6 +1,6 @@
 function stored_energy_j = ComputeStoredEnergy(obj)
 
-decision_vector_val = obj.spec.EvaluateDecisionVector();
+decision_vector_val = obj.EvaluateDecisionVector();
 
 stored_energy = zeros(obj.spec.Thor,1);
 
