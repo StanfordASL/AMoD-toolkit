@@ -1,4 +1,7 @@
 function [Aeq_PaxConservation, Beq_PaxConservation] = CreateEqualityConstraintMatrices_PaxConservation(obj)
+% CreateEqualityConstraintMatrices_PaxConservation Creates equality constraints for customer flow conservation (Eq. 9a)
+%   [Aeq_PaxConservation, Beq_PaxConservation] = CreateEqualityConstraintMatrices_PaxConservation(obj)
+
 if obj.use_real_time_formulation
     warning('CreateEqualityConstraintMatrices_PaxConservation does not apply for real-time formulation.')
     Aeq_PaxConservation = [];
@@ -10,7 +13,7 @@ n_constraint = obj.spec.N*obj.spec.M*obj.spec.C*obj.spec.Thor;
 
 % This is meant as an upper bound for memory allocation. Unused entries are
 % removed at the end.
-n_constraint_entries = 2*(obj.spec.E + 2*obj.spec.NumChargers)*obj.spec.M*obj.spec.C*obj.spec.Thor + obj.spec.TotNumSources*obj.spec.C + obj.spec.M*obj.spec.Thor*obj.spec.C; 
+n_constraint_entries = 2*(obj.spec.E + 2*obj.spec.NumChargers)*obj.spec.M*obj.spec.C*obj.spec.Thor + obj.spec.TotNumSources*obj.spec.C + obj.spec.M*obj.spec.Thor*obj.spec.C;
 
 Aeqsparse = zeros(n_constraint_entries,3);
 Beq = zeros(n_constraint,1);
@@ -24,7 +27,7 @@ Aeqentry = 1;
 for t = 1:obj.spec.Thor
     for c = 1:obj.spec.C
         for k = 1:obj.spec.M
-            for i = 1:obj.spec.N                
+            for i = 1:obj.spec.N
                 if ~isempty(obj.spec.RoadGraph{i})
                     for j = obj.spec.RoadGraph{i} %Out-flows
                         if ((obj.spec.ChargeToTraverse(i,j) < c) & (t + full(obj.spec.TravelTimes(i,j)) <= obj.spec.Thor))
@@ -70,7 +73,7 @@ for t = 1:obj.spec.Thor
                 for ssi = 1:length(obj.spec.Sources{k})
                     if (obj.spec.Sources{k}(ssi) == i && obj.spec.StartTimes{k}(ssi) == t)
                         Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindPaxSourceChargecks(c,k,ssi),-1];
-                        Aeqentry = Aeqentry + 1;             
+                        Aeqentry = Aeqentry + 1;
                     end
                 end
                 if (obj.spec.Sinks(k) == i)
@@ -94,7 +97,7 @@ end
 assert(Aeqrow - 1 == n_constraint);
 
 if (Aeqentry - 1 > n_constraint_entries)
-   warning('More constraints than expected.') 
+    warning('More constraints than expected.')
 end
 
 % Remove extra rows in Aeqsparse

@@ -1,4 +1,9 @@
-function constraint_array = DefineConstraints(obj)
+function constraint_array = GetConstraintArray(obj)
+% GetConstraintArray Returns the constraints for the electric AMoD problem for use in YALMIP
+
+if obj.verbose
+    DispWithTimeStamp('Starting GetConstraintArray of eamod_problem.');
+end
 
 decision_vector = obj.decision_variables.decision_vector;
 
@@ -6,12 +11,12 @@ if obj.use_real_time_formulation
     [Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = obj.CreateEqualityConstraintMatrices_CustomerChargeConservation();
     
     customer_conservation = Aeq_CustomerChargeConservation*decision_vector == Beq_CustomerChargeConservation;
-    customer_conservation = TagConstraintIfNonEmpty(customer_conservation,'CustomerChargeConservation');   
+    customer_conservation = TagConstraintIfNonEmpty(customer_conservation,'CustomerChargeConservation');
 else
     [Aeq_PaxConservation, Beq_PaxConservation] = obj.CreateEqualityConstraintMatrices_PaxConservation();
-
+    
     customer_conservation = Aeq_PaxConservation*decision_vector == Beq_PaxConservation;
-    customer_conservation = TagConstraintIfNonEmpty(customer_conservation,'PaxConservation');   
+    customer_conservation = TagConstraintIfNonEmpty(customer_conservation,'PaxConservation');
 end
 
 [Aeq_RebConservation, Beq_RebConservation] = obj.CreateEqualityConstraintMatrices_RebConservation();
@@ -68,4 +73,8 @@ constraint_array = [
     decision_vector_lower_bound;
     decision_vector_upper_bound;
     ];
+
+if obj.verbose
+    DispWithTimeStamp('Finished GetConstraintArray of eamod_problem.');
+end
 end

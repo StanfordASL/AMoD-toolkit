@@ -1,6 +1,5 @@
-% chargher_power_w = A_charger_power_w*obj.decision_variables.decision_vector;
-% as in GetChargerPowerDemand. The result is a vector indexed by 
 function A_charger_power_w = ComputeChargerPowerMatrixNew(obj)
+% ComputeChargerPowerMatrixNew Computes A_charger_power_w such that charger_power_w = A_charger_power_w*obj.decision_variables.decision_vector
 
 n_row = obj.spec.NumChargers*obj.spec.Thor;
 
@@ -44,18 +43,18 @@ for t = 1:obj.spec.Thor
                 for k = 1:obj.num_passenger_flows
                     for deltat = 0:obj.spec.ChargerTime(l) - 1
                         if t - deltat > 0 && t - deltat + obj.spec.ChargerTime(l) <= obj.spec.Thor
-                        A_sparse(i_entry,:) = [obj.FindChargerPowertl(t,l),obj.FindDischargeLinkPtckl(t - deltat,c,k,l),-obj.spec.v2g_efficiency*charger_power_w];
-                        i_entry = i_entry + 1;                      
+                            A_sparse(i_entry,:) = [obj.FindChargerPowertl(t,l),obj.FindDischargeLinkPtckl(t - deltat,c,k,l),-obj.spec.v2g_efficiency*charger_power_w];
+                            i_entry = i_entry + 1;
                         end
                     end
-                end                
+                end
                 for deltat = 0:obj.spec.ChargerTime(l) - 1
                     if t - deltat > 0 && t - deltat + obj.spec.ChargerTime(l) <= obj.spec.Thor
                         A_sparse(i_entry,:) = [obj.FindChargerPowertl(t,l),obj.FindDischargeLinkRtcl(t - deltat,c,l),-obj.spec.v2g_efficiency*charger_power_w];
                         i_entry = i_entry + 1;
                     end
                 end
-            end            
+            end
         end
         i_row = i_row + 1;
     end

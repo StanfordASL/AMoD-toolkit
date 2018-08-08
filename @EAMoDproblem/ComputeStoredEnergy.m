@@ -1,6 +1,6 @@
 function stored_energy_j = ComputeStoredEnergy(obj)
 
-decision_vector_val = obj.spec.EvaluateDecisionVector();
+decision_vector_val = obj.EvaluateDecisionVector();
 
 stored_energy = zeros(obj.spec.Thor,1);
 
@@ -51,7 +51,7 @@ end
 % % Book energy at end
 % if obj.use_real_time_formulation
 %     % This is based on
-%     % CreateEqualityConstraintMatrices_CustomerChargeConservation. 
+%     % CreateEqualityConstraintMatrices_CustomerChargeConservation.
 %     % When a customer boards a vehicle, we account for the energy that will
 %     % be remain at the end of the trip given by
 %     % obj.FindPaxSinkChargetck(t,c,k). This is for consistency with
@@ -63,9 +63,9 @@ end
 %                 % This is only here for reference to FindPaxSinkChargetck.
 %                 %Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindPaxSinkChargetck(t,c,k),-1];
 %                 for ssi = 1 :length(obj.spec.Sources{k})
-%                     if obj.spec.StartTimes{k}(ssi) == tt - obj.RouteTime(obj.spec.Sources{k}(ssi),obj.spec.Sinks(k))                             
-%                         if c + obj.RouteCharge(obj.spec.Sources{k}(ssi),obj.spec.Sinks(k)) <= obj.spec.C && c + obj.RouteCharge(obj.spec.Sources{k}(ssi),obj.spec.Sinks(k)) > 0                            
-%                             stored_energy(tt) = stored_energy(tt) + c*decision_vector_val(obj.FindPaxSourceChargecks(c + obj.RouteCharge(obj.spec.Sources{k}(ssi),obj.spec.Sinks(k)),k,ssi));                            
+%                     if obj.spec.StartTimes{k}(ssi) == tt - obj.RouteTime(obj.spec.Sources{k}(ssi),obj.spec.Sinks(k))
+%                         if c + obj.RouteCharge(obj.spec.Sources{k}(ssi),obj.spec.Sinks(k)) <= obj.spec.C && c + obj.RouteCharge(obj.spec.Sources{k}(ssi),obj.spec.Sinks(k)) > 0
+%                             stored_energy(tt) = stored_energy(tt) + c*decision_vector_val(obj.FindPaxSourceChargecks(c + obj.RouteCharge(obj.spec.Sources{k}(ssi),obj.spec.Sinks(k)),k,ssi));
 %                         end
 %                     end
 %                 end
@@ -86,10 +86,10 @@ if obj.use_real_time_formulation
                     route_time = obj.RouteTime(obj.spec.Sources{k}(ssi),obj.spec.Sinks(k));
                     end_time = start_time + route_time - 1;
                     start_charge = c + obj.RouteCharge(obj.spec.Sources{k}(ssi),obj.spec.Sinks(k));
-                   
-                    if start_time == tt - route_time                  
-                        if start_charge <= obj.spec.C && start_charge > 0                            
-                            stored_energy(start_time:end_time) = stored_energy(start_time:end_time) + start_charge*decision_vector_val(obj.FindPaxSourceChargecks(start_charge,k,ssi));                            
+                    
+                    if start_time == tt - route_time
+                        if start_charge <= obj.spec.C && start_charge > 0
+                            stored_energy(start_time:end_time) = stored_energy(start_time:end_time) + start_charge*decision_vector_val(obj.FindPaxSourceChargecks(start_charge,k,ssi));
                         end
                     end
                 end

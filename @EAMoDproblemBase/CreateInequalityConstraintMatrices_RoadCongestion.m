@@ -1,9 +1,12 @@
 function [Ain_RoadCongestion, Bin_RoadCongestion] = CreateInequalityConstraintMatrices_RoadCongestion(obj)
+% CreateInequalityConstraintMatrices_RoadCongestion Creates inequality constraints to limit the flow along the road edges to be less than their capacity (Eq. 3) 
+%   [Ain_RoadCongestion, Bin_RoadCongestion] = CreateInequalityConstraintMatrices_RoadCongestion(obj)
+
 n_constraint = obj.spec.E*obj.spec.Thor;
 
 % This is meant as an upper bound for memory allocation. Unused entries are
 % removed at the end.
-n_constraint_entries = obj.spec.E*obj.spec.Thor*(obj.num_passenger_flows + 1)*obj.spec.C;  
+n_constraint_entries = obj.spec.E*obj.spec.Thor*(obj.num_passenger_flows + 1)*obj.spec.C;
 
 Ainsparse = zeros(n_constraint_entries,3);
 Bin = zeros(n_constraint,1);
@@ -24,11 +27,11 @@ for t = 1:obj.spec.Thor
                 end
                 Ainsparse(Ainentry,:) = [Ainrow,obj.FindRoadLinkRtcij(t,c,i,j),1];
                 Ainentry = Ainentry + 1;
-            end   
+            end
             
             if obj.use_real_time_formulation
                 Bin(Ainrow) = obj.spec.TVRoadCap(t,i,j);
-            else                
+            else
                 Bin(Ainrow) = obj.spec.RoadCap(i,j);
             end
             

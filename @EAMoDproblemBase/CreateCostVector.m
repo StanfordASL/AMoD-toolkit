@@ -1,4 +1,11 @@
 function [f_cost,f_cost_pax,f_cost_reb,f_cost_relax] = CreateCostVector(obj)
+% CreateCostVector Creates the cost vector for the linear program
+%   [f_cost,f_cost_pax,f_cost_reb,f_cost_relax] = CreateCostVector(obj)
+%   where f_cost is used for the total cost, f_cost_pax for the cost
+%   associated with passenger-carrying vehicles, f_cost_reb for the cost
+%   associated with rebalancing trips and f_cost_relax for the cost
+%   associated with the relaxations.
+
 f_cost_pax = zeros(obj.StateSize,1);
 f_cost_reb = zeros(obj.StateSize,1);
 f_cost_relax = zeros(obj.StateSize,1);
@@ -32,7 +39,7 @@ for t = 1:obj.spec.Thor
                 f_cost_pax(obj.FindDischargeLinkPtckl(t,c,k,i)) = obj.spec.ValueOfTime*obj.spec.ChargerTime(i) + abs(obj.spec.ChargerSpeed(i))*obj.spec.BatteryDepreciationPerUnitCharge;
             end
             f_cost_reb(obj.FindChargeLinkRtcl(t,c,i))= abs(obj.spec.ChargerSpeed(i))*obj.spec.BatteryDepreciationPerUnitCharge;
-            f_cost_reb(obj.FindDischargeLinkRtcl(t,c,i))= abs(obj.spec.ChargerSpeed(i))*obj.spec.BatteryDepreciationPerUnitCharge;       
+            f_cost_reb(obj.FindDischargeLinkRtcl(t,c,i))= abs(obj.spec.ChargerSpeed(i))*obj.spec.BatteryDepreciationPerUnitCharge;
         end
     end
 end
@@ -43,5 +50,4 @@ if obj.spec.sourcerelaxflag
 end
 
 f_cost = f_cost_pax + f_cost_reb + f_cost_relax;
-
 end

@@ -6,7 +6,9 @@ classdef EAMoDspec
             % EAMoDspec Constructs an empty object.  All fields without default values must be manually filled to fully specify the problem.
         end
         
-        ValidateSpec(obj);        
+        ValidateSpec(obj)
+        
+        [time_range,label] = GetTimeRange(obj)
         
         % Get methods for dependent properties
         function n_time_step = get.n_time_step(obj)
@@ -116,13 +118,11 @@ classdef EAMoDspec
         
         % Others
         
-        time_step_s(1,1) double {mustBeNonnegative,mustBeReal} % Duration in seconds of a time step
+        time_step_s(1,:) double {mustBeNonnegative,mustBeReal,NumelMustBeLessThanOrEqual(time_step_s,1)} % Duration in seconds of a time step
         charge_unit_j(1,1) double {mustBeNonnegative,mustBeReal} % Energy of a charge unit in joule, 1 kWh = 3.6e6 J
         v2g_efficiency(1,1) double {mustBeNonnegative,mustBeReal,mustBeLessThanOrEqual(v2g_efficiency,1)} = 1 % Efficiency of sending power back to the grid (vehicle2grid)
         
-        yalmip_settings(1,1) = sdpsettings() % Struct with YALMIP settings
-        
-        start_date_time(1,1) datetime = datetime('01-Jan-2010 00:00:00') % Starting time of the simulation
+        start_date_time(1,:) datetime {NumelMustBeLessThanOrEqual(start_date_time,1)} % Starting time of the simulation
     end
     
     properties (GetAccess = public, SetAccess = private)

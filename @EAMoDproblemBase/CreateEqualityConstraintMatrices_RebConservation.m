@@ -1,10 +1,12 @@
 function [Aeq_RebConservation, Beq_RebConservation] = CreateEqualityConstraintMatrices_RebConservation(obj)
+% CreateEqualityConstraintMatrices_RebConservation Creates equality constraints for conservation of rebalancing flow, and enforcement of initial and final conditions (Eq. 2)
+%   [Aeq_RebConservation, Beq_RebConservation] = CreateEqualityConstraintMatrices_RebConservation(obj)
 
 n_constraint = obj.spec.N*obj.spec.C*obj.spec.Thor;
 
 % This is meant as an upper bound for memory allocation. Unused entries are
 % removed at the end.
-n_constraint_entries = 2*(obj.spec.E + 2*obj.spec.NumChargers)*obj.spec.C*obj.spec.Thor + obj.spec.TotNumSources*obj.spec.C + obj.spec.M*obj.spec.Thor*obj.spec.C; 
+n_constraint_entries = 2*(obj.spec.E + 2*obj.spec.NumChargers)*obj.spec.C*obj.spec.Thor + obj.spec.TotNumSources*obj.spec.C + obj.spec.M*obj.spec.Thor*obj.spec.C;
 
 Aeqsparse = zeros(n_constraint_entries,3);
 Beq = zeros(n_constraint,1);
@@ -15,7 +17,7 @@ Aeqentry = 1;
 % Conservation of rebalancers
 for t = 1:obj.spec.Thor
     for c = 1:obj.spec.C
-        for i = 1:obj.spec.N            
+        for i = 1:obj.spec.N
             if ~isempty(obj.spec.RoadGraph{i})
                 for j = obj.spec.RoadGraph{i} %Out-flows
                     if ((obj.spec.ChargeToTraverse(i,j)< c) && (t + full(obj.spec.TravelTimes(i,j)) <= obj.spec.Thor))
@@ -95,7 +97,7 @@ end
 assert(Aeqrow - 1 == n_constraint);
 
 if (Aeqentry - 1 > n_constraint_entries)
-   warning('More constraints than expected.') 
+    warning('More constraints than expected.')
 end
 
 % Remove extra rows in Aeqsparse

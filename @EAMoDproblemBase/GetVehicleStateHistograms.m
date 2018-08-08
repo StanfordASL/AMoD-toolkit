@@ -1,14 +1,23 @@
 function [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,...
     RebVehicleHist,IdleVehicleHist,AllVehicleHist] ...
     = GetVehicleStateHistograms(obj,varargin)
+% GetVehicleStateHistograms Returns the distribution of vehicles across states as a function of time
+%   [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,RebVehicleHist,IdleVehicleHist,AllVehicleHist] = GetVehicleStateHistograms(obj) uses the decision_vector in obj.decision_variables
+%   [...] = GetVehicleStateHistograms(obj,decision_vector_val) uses decision_vector_val
+%   ChargingVehicleHist contains the number of vehicles charging (including rebalancing and passenger-carrying), 
+%   DischargingVehicleHist contains the number of vehicles discharging (including rebalancing and passenger-carrying), 
+%   PaxVehicleHist contains the number of passenger-carrying moving vehicles
+%   RebVehicleHist contains the number of rebalancing vehicles
+%   IdleVehicleHist contains the number of idle rebalancing vehicles
+%   AllVehicleHist contains the sum of all previous outputs 
 
 switch numel(varargin)
     case 0
-        decision_vector_val = obj.spec.EvaluateDecisionVector();
+        decision_vector_val = obj.EvaluateDecisionVector();
     case 1
         decision_vector_val = varargin{1};
     otherwise
-        error('Too many arguments.')    
+        error('Too many arguments.')
 end
 
 
@@ -72,8 +81,6 @@ end
 if obj.use_real_time_formulation
     PaxVehicleHist = obj.GetPreRoutedTripHistogram();
 end
-
-
 
 % Note RebVehicleHist at Thor is meaningless. Since it is unconstrained and
 % there are self-loops with distance zero it can take any value.

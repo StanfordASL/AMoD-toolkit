@@ -32,8 +32,8 @@ for i = 1:obj.spec.N
         % Minimal charge to get from i to j
         [~,min_charge_ij] =  shortestpath(G_charge,i,j);
         
-        ChargeToTraverse_shortest_path(i,j) = min_charge_ij;        
-    end    
+        ChargeToTraverse_shortest_path(i,j) = min_charge_ij;
+    end
 end
 
 E_trip_min_cell = cell(obj.spec.M,1);
@@ -43,19 +43,19 @@ for m = 1:obj.spec.M
     
     n_sources_for_sink = numel(obj.spec.Sources{m});
     
-    E_trip_min_source_sink_array = zeros(n_sources_for_sink,1);   
+    E_trip_min_source_sink_array = zeros(n_sources_for_sink,1);
     
     for i_sources_for_sink = 1:n_sources_for_sink
         source = obj.spec.Sources{m}(i_sources_for_sink);
         flow = obj.spec.Flows{m}(i_sources_for_sink);
         
         charge_source_sink = ChargeToTraverse_shortest_path(source,sink);
-        E_trip_min_source_sink = charge_source_sink*flow;                
+        E_trip_min_source_sink = charge_source_sink*flow;
         
         E_trip_min_source_sink_array(i_sources_for_sink) = E_trip_min_source_sink;
-    end   
+    end
     
-    E_trip_min_cell{m} = E_trip_min_source_sink_array;    
+    E_trip_min_cell{m} = E_trip_min_source_sink_array;
 end
 
 E_trip_min_per_sink = cellfun(@(x) sum(x),E_trip_min_cell);

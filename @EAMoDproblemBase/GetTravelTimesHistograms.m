@@ -1,11 +1,17 @@
 function [DepTimeHist, ArrivalTimeHist] = GetTravelTimesHistograms(obj,varargin)
+% GetTravelTimesHistograms Returns the number of departing and arriving trips as a function of time
+%   [DepTimeHist, ArrivalTimeHist] = GetTravelTimesHistograms(obj) uses the decision_vector in obj.decision_variables
+%   [DepTimeHist, ArrivalTimeHist] = GetTravelTimesHistograms(obj,decision_vector_val) uses decision_vector_val
+%   DepTimeHist contains the number of departing trips
+%   ArrivalTimeHist contains the number of arriving trips
+
 switch numel(varargin)
     case 0
-        decision_vector_val = obj.spec.EvaluateDecisionVector();
+        decision_vector_val = obj.EvaluateDecisionVector();
     case 1
         decision_vector_val = varargin{1};
     otherwise
-        error('Too many arguments.')    
+        error('Too many arguments.')
 end
 
 DepTimeHist = zeros(1,obj.spec.Thor);
