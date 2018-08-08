@@ -1,16 +1,16 @@
 classdef EAMoDproblemBase < handle
     % EAMoDproblemBase Represents an electric AMoD problem using a network flow model
-    %   The model of the electric AMoD system used here is described in the 
+    %   The model of the electric AMoD system used here is described in the
     %   paper:
-    %   F. Rossi, R. Iglesias, M. Alizadeh, and M. Pavone, “On the interaction 
-    %   between Autonomous Mobility-on-Demand systems and the power network: 
-    %   models and coordination algorithms,” in Robotics: Science and Systems, 
+    %   F. Rossi, R. Iglesias, M. Alizadeh, and M. Pavone, “On the interaction
+    %   between Autonomous Mobility-on-Demand systems and the power network:
+    %   models and coordination algorithms,” in Robotics: Science and Systems,
     %   Pittsburgh, Pennsylvania, 2018
-       
+    
     methods
         function obj = EAMoDproblemBase(spec)
-            % EAMoDproblemBase Constructs an EAMoDproblemBase object 
-            %   obj = EAMoDproblemBase(spec) where spec is an instance of 
+            % EAMoDproblemBase Constructs an EAMoDproblemBase object
+            %   obj = EAMoDproblemBase(spec) where spec is an instance of
             %   EAMoDspec specifying the problem.
             %   See also EAMoDspec
             
@@ -19,10 +19,25 @@ classdef EAMoDproblemBase < handle
             spec.ValidateSpec();
             obj.spec = spec;
             
-            [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();   
+            [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();
+            
+            obj.state_range = 1:obj.FindEndRebLocationci(obj.spec.C,obj.spec.N);
+            obj.relax_range = (obj.FindEndRebLocationci(obj.spec.C,obj.spec.N) + 1):obj.StateSize;
+            
+            obj.decision_variables = DefineDecisionVariables(obj);
         end
         
-        [A_eq,B_eq,A_in,B_in] = CreateConstraintMatrices(obj)
+        decision_vector_val = EvaluateDecisionVector(obj);        
+        n_start_vehicles = ComputeNumberOfVehiclesAtStart(obj)
+        n_end_vehicles = ComputeNumberOfVehiclesAtEnd(obj,varargin)        
+        [total_cost_val, pax_cost_val, reb_cost_val,relax_cost_val] = EvaluateAMoDcost(obj,varargin)        
+        final_vehicle_distribution = GetFinalVehicleDistribution(obj,varargin)
+        
+        % Ploting functions
+        figure_handle = PlotRoadGraph(obj)
+        figure_handle = PlotDeparturesAndArrivals(obj,varargin)
+        
+        % Determine matrices for the linear program
         [f_cost,f_cost_pax,f_cost_reb,f_cost_relax] = CreateCostVector(obj)
         
         % Equality constraints for standard formulation
@@ -31,25 +46,30 @@ classdef EAMoDproblemBase < handle
         [Aeq_SourceConservation, Beq_SourceConservation] = CreateEqualityConstraintMatrices_SourceConservation(obj)
         [Aeq_SinkConservation, Beq_SinkConservation] = CreateEqualityConstraintMatrices_SinkConservation(obj)
         
-        % Equality constraints for real-time formulation      
+        % Equality constraints for real-time formulation
         [Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = CreateEqualityConstraintMatrices_CustomerChargeConservation(obj)
-                
+        
         % Inequality constraints
         [Ain_RoadCongestion, Bin_RoadCongestion] = CreateInequalityConstraintMatrices_RoadCongestion(obj)
         [Ain_ChargerCongestion, Bin_ChargerCongestion] = CreateInequalityConstraintMatrices_ChargerCongestion(obj)
-
-        [lb_StateVector,ub_StateVector] = CreateStateVectorBounds(obj)  
         
-        % New methods
-        decision_vector_val = EvaluateDecisionVector(obj)
-        n_start_vehicles = ComputeNumberOfVehiclesAtStart(obj)
-        n_end_vehicles = ComputeNumberOfVehiclesAtEnd(obj,varargin)
-        A_charger_power_w = ComputeChargerPowerMatrixNew(obj)
+        [lb_StateVector,ub_StateVector] = CreateStateVectorBounds(obj)
+        
+               
+        % New methods          
+        [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,...
+            RebVehicleHist,IdleVehicleHist,AllVehicleHist] ...
+            = GetVehicleStateHistograms(obj,varargin)
+        [objective_value,solver_time,diagnostics] = Solve(obj)
+        [DepTimeHist, ArrivalTimeHist] = GetTravelTimesHistograms(obj,varargin);
         
         
-        % State vector indexing functions   
+        
+        h = PlotVehicleState(obj,params_plot,title_text,varargin)   
+        
+        % State vector indexing functions
         function res = FindRoadLinkPtckij(obj,t,c,k,i,j)
-            % FindRoadLinkPtckij Indexer for customer flow in road edges in the extended network 
+            % FindRoadLinkPtckij Indexer for customer flow in road edges in the extended network
             if obj.use_real_time_formulation
                 error('FindRoadLinkPtckij is undefined for real time formulation.');
             else
@@ -58,7 +78,7 @@ classdef EAMoDproblemBase < handle
         end
         
         function res = FindRoadLinkRtcij(obj,t,c,i,j)
-            % FindRoadLinkRtcij Indexer for rebalancing flow in road edges in the extended network 
+            % FindRoadLinkRtcij Indexer for rebalancing flow in road edges in the extended network
             if obj.use_real_time_formulation
                 res = obj.FindRoadLinkHelpertckij(t,c,1,i,j);
             else
@@ -67,7 +87,7 @@ classdef EAMoDproblemBase < handle
         end
         
         function res = FindChargeLinkPtckl(obj,t,c,k,i)
-            % FindChargeLinkPtckl Indexer for customer flow in charging edges in the extended network 
+            % FindChargeLinkPtckl Indexer for customer flow in charging edges in the extended network
             if obj.use_real_time_formulation
                 error('FindChargeLinkPtckl is undefined for real time formulation.');
             else
@@ -76,7 +96,7 @@ classdef EAMoDproblemBase < handle
         end
         
         function res = FindChargeLinkRtcl(obj,t,c,i)
-            % FindChargeLinkRtcl Indexer for rebalancing flow in charging edges in the extended network 
+            % FindChargeLinkRtcl Indexer for rebalancing flow in charging edges in the extended network
             if obj.use_real_time_formulation
                 res = obj.FindChargeLinkHelpertckij(t,c,1,i);
             else
@@ -85,7 +105,7 @@ classdef EAMoDproblemBase < handle
         end
         
         function res = FindDischargeLinkPtckl(obj,t,c,k,i)
-            % FindDischargeLinkPtckl Indexer for customer flow in discharging edges in the extended network 
+            % FindDischargeLinkPtckl Indexer for customer flow in discharging edges in the extended network
             if obj.use_real_time_formulation
                 error('FindDischargeLinkPtckl is undefined for real time formulation.');
             else
@@ -94,7 +114,7 @@ classdef EAMoDproblemBase < handle
         end
         
         function res = FindDischargeLinkRtcl(obj,t,c,i)
-             % FindDischargeLinkRtcl Indexer for rebalancing flow in discharging edges in the extended network
+            % FindDischargeLinkRtcl Indexer for rebalancing flow in discharging edges in the extended network
             if obj.use_real_time_formulation
                 res = obj.FindDischargeLinkHelpertckl(t,c,1,i);
             else
@@ -121,10 +141,10 @@ classdef EAMoDproblemBase < handle
         function res = FindEqPaxConservationtcki(obj,t,c,k,i)
             % FindEqPaxConservationtcki Indexer for customer flow conservation constraints
             res = obj.spec.N*obj.spec.M*obj.spec.C*(t - 1) + obj.spec.N*obj.spec.M*(c - 1) + obj.spec.N*(k - 1) + i;
-        end       
+        end
         
         function res = FindEqRebConservationtci(obj,t,c,i)
-            % FindEqRebConservationtci Indexer for rebalancing flow conservation constraints 
+            % FindEqRebConservationtci Indexer for rebalancing flow conservation constraints
             res = obj.spec.N*obj.spec.C*(t - 1) + obj.spec.N*(c - 1) + i;
         end
         
@@ -158,7 +178,7 @@ classdef EAMoDproblemBase < handle
             else
                 res = nan;
             end
-        end        
+        end
         
         % Get methods for dependent properties
         function res = get.StateSize(obj)
@@ -183,18 +203,16 @@ classdef EAMoDproblemBase < handle
         num_passenger_flows % Number of passenger flows. Is equal to spec.M in the normal case and zero in the real-time formulation
     end
     
-    properties        
-        use_real_time_formulation(1,1) logical = false % Flag to use real-time formulation  
+    properties
+        use_real_time_formulation(1,1) logical = false % Flag to use real-time formulation
         verbose(1,1) logical = false % Flag for verbose output
         yalmip_settings(1,1) = sdpsettings() % Struct with YALMIP settings
     end
     
     properties (SetAccess = private, GetAccess = public)
         spec(1,1) EAMoDspec % Object of class EAMoDspec specifying the problem
-        
-        is_initialized(1,1) logical = false % Flag denoting if Initialize has run already
-        
-        % For real-time formulation        
+                
+        % For real-time formulation
         
         RouteTime(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger}  % RouteTime(i,j) is the number of time-steps needed to go from i to j
         RouteCharge(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger} % RouteCharge(i,j) is the number of charge units needed to go from i to j
@@ -204,13 +222,18 @@ classdef EAMoDproblemBase < handle
     
     properties (Access = private)
         % TODO: rename to optimization_variables
-        decision_variables(1,1) % Struct with optimization variables       
+        decision_variables(1,1) % Struct with optimization variables
         state_range(1,:) double
-        relax_range(1,:) double        
+        relax_range(1,:) double
     end
     
     methods (Access = private)
-        [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj)
+        [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj)        
+        A_charger_power_w = ComputeChargerPowerMatrixNew(obj)        
+        decision_variables = DefineDecisionVariables(obj)
+        [total_cost, pax_cost,reb_cost, relax_cost] = GetAMoDcost(obj,varargin)
+        constraint_array = GetConstraintArray(obj)
+        objective = GetObjective(obj)
         
         function res = FindRoadLinkHelpertckij(obj,t,c,k,i,j)
             res = (t-1)*(obj.spec.E*(obj.num_passenger_flows + 1)*(obj.spec.C) + 2*(obj.num_passenger_flows+1)*obj.spec.NumChargers*(obj.spec.C)) + (c-1)*obj.spec.E*(obj.num_passenger_flows+1) + (k-1)*obj.spec.E + (obj.spec.cumRoadNeighbors(i) + obj.spec.RoadNeighborCounter(i,j));
@@ -223,5 +246,5 @@ classdef EAMoDproblemBase < handle
         function res = FindDischargeLinkHelpertckl(obj,t,c,k,i)
             res = obj.FindChargeLinkRtcl(t,obj.spec.C,obj.spec.NumChargers) + obj.spec.NumChargers*(obj.num_passenger_flows + 1)*(c-1) + obj.spec.NumChargers*(k-1) + i;
         end
-    end    
+    end
 end

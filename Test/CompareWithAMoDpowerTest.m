@@ -1,4 +1,8 @@
 function tests = CompareWithAMoDpowerTest
+% CompareWithAMoDpowerTest verifies that the results match the implementation in AMoD-power
+%   This includes checking that the matrices for the linear program are the 
+%   same and verifying that the optimization results are close.
+
 % This enables us to run the test by calling the functinwithout calling it from runtests
 call_stack = dbstack;
 
@@ -31,7 +35,6 @@ test_case.TestData.data_path_cell = {'dfw_roadgraph_kmeans_tv_federico_5cl_winds
 end
 
 function TestProblemMatricesMatch(test_case)
-
 n_data_path = numel(test_case.TestData.data_path_cell);
 
 for i_data_path = 1:n_data_path
@@ -75,6 +78,7 @@ OptimizationResultsMatch(test_case,eamod_problem,cplex_out,fval,indexer);
 end
 
 function LPmatricesMatch(test_case,eamod_problem,lp_matrices,indexer)
+
 spec = eamod_problem.spec;
 
 f_cost_full_ref = lp_matrices.f_cost;
@@ -212,5 +216,32 @@ verifyEqual(test_case,objective_value,objective_value_ref,'RelTol',rel_tol_equal
 if ~eamod_problem.spec.sourcerelaxflag
     verifyEqual(test_case,decision_vector_val,decision_vector_val_ref,'RelTol',rel_tol_equality,'AbsTol',test_case.TestData.abs_tol_equality);
 end
+end
+
+
+function PowerNetworkR = CreateDummyPowerNetwork(Thor,numChargers,v2g_efficiency,power_costs)
+% CreateDummyPowerNetwork creates a dummy power network with an unbounded generator at every node with power priced according to power_costs
+%   This is for compatibility with the implementation in AMoD-power
+
+PowerGraphR = cell(1,numChargers);
+PowerLineCapR = PowerGraphR;
+PowerLineReactanceR = PowerGraphR;
+PowerGensListR = 1:numChargers;
+PowerGensMaxR = Inf*ones(numChargers,Thor);
+PowerGensMinR = -Inf*ones(numChargers,Thor);
+PowerExtLoadsR = zeros(numChargers,Thor);
+RoadToPowerMapR =  1:numChargers;
+
+PowerNetworkR.PowerGraphM = PowerGraphR;
+PowerNetworkR.PowerLineCapM = PowerLineCapR;
+PowerNetworkR.PowerLineReactanceM = PowerLineReactanceR;
+PowerNetworkR.PowerGensList = PowerGensListR;
+PowerNetworkR.PowerGensMax = PowerGensMaxR';
+PowerNetworkR.PowerGensMin = PowerGensMinR';
+PowerNetworkR.PowerCosts = power_costs;
+PowerNetworkR.PowerExtLoads = PowerExtLoadsR;
+PowerNetworkR.RoadToPowerMap = RoadToPowerMapR;
+PowerNetworkR.v2g_efficiency = v2g_efficiency;
+
 end
 

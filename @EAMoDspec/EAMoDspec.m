@@ -116,7 +116,7 @@ classdef EAMoDspec
         
         % Others
         
-        time_step_s(1,1) double {mustBeNonnegative,mustBeReal} % Duration in seconds of a time step
+        time_step_s(1,1) double {mustBeNonnegative,mustBeReal} = 0 % Duration in seconds of a time step
         charge_unit_j(1,1) double {mustBeNonnegative,mustBeReal} % Energy of a charge unit in joule, 1 kWh = 3.6e6 J
         v2g_efficiency(1,1) double {mustBeNonnegative,mustBeReal,mustBeLessThanOrEqual(v2g_efficiency,1)} = 1 % Efficiency of sending power back to the grid (vehicle2grid)
         

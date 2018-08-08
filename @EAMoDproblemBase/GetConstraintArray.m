@@ -1,4 +1,6 @@
 function constraint_array = GetConstraintArray(obj)
+% GetConstraintArray Returns the constraints for the electric AMoD problem for use in YALMIP
+
 if obj.verbose
     DispWithTimeStamp('Starting GetConstraintArray of eamod_problem.');
 end

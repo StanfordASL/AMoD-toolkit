@@ -1,4 +1,6 @@
 function scenario = LoadScenario(data_path)
+% LoadScenario Reads legacy data used in the AMoD-power implementation, preprocesses them and collects the results in a struct 
+
 % This was copied from RSS17_ATX_TV_tract_sinkbundle_nb on March 5, 2018
 
 %num_vehicles=4.5*1e5;
@@ -190,14 +192,6 @@ for tt=1:Thor
 end
 RoadNetwork.TVRoadCap=TVRoadCap;
 
-%     - RouteTime, a nxn matrix of floats. RouteTime(i,j) is the shortest
-%       travel time from node i to node j (along some path).
-%     - RouteCharge, a nxn matrix. RouteCharge(i,j) is the charge level
-%       required to travel along the shortest path from i to j.
-[RouteTime,RouteCharge,Routes] = build_routes(RoadNetwork.RoadGraph,RoadNetwork.TravelTimes,RoadNetwork.ChargeToTraverse);
-
-RoadNetwork.RouteTime=RouteTime;
-RoadNetwork.RouteCharge=RouteCharge;
 
 
 %     - EmptyVehicleInitialPosRT, a ThorxNxC matrix encoding the initial

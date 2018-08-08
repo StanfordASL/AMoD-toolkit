@@ -1,5 +1,5 @@
 function [A_sub,B_sub] = ExtractConstraintSubmatrix(A,B,row_range,col_range)
-
+% ExtractConstraintSubmatrix extracts the rows and columns that correspond to a constraint in a linear program
 n_col = size(A,2);
 
 A_sub = A(row_range,col_range);
@@ -22,7 +22,4 @@ for col = col_range_inverse.'
    
    assert(n_nnz_neglected_elements_col == 0,sprintf('Constraint is not fit for extraction at col = %d',col));
 end
-
-
-
 end

@@ -1,4 +1,6 @@
 function tests = VehicleConservationTest
+% VehicleConservationTest verifies that vehicles are conserved across time
+
 % This enables us to run the test by calling the functinwithout calling it from runtests
 call_stack = dbstack;
 

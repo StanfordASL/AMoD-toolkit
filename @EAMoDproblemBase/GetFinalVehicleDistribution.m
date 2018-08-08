@@ -1,4 +1,8 @@
 function final_vehicle_distribution = GetFinalVehicleDistribution(obj,varargin)
+% GetFinalVehicleDistribution Returns a matrix indicating the state of the vehicles at the end of the time period (t = obj.spec.Thor)
+%   final_vehicle_distribution = GetFinalVehicleDistribution(obj) uses the decision_vector in obj.decision_variables
+%   final_vehicle_distribution = GetFinalVehicleDistribution(obj,decision_vector_val) uses decision_vector_val
+%   final_vehicle_distribution(c,i) represents the number of vehicles in road node i with charge level c. 
 
 switch numel(varargin)
     case 0

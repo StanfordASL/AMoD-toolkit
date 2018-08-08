@@ -1,6 +1,5 @@
-% chargher_power_w = A_charger_power_w*obj.decision_variables.decision_vector;
-% as in GetChargerPowerDemand. The result is a vector indexed by
 function A_charger_power_w = ComputeChargerPowerMatrixNew(obj)
+% ComputeChargerPowerMatrixNew Computes A_charger_power_w such that charger_power_w = A_charger_power_w*obj.decision_variables.decision_vector
 
 n_row = obj.spec.NumChargers*obj.spec.Thor;
 
