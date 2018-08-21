@@ -86,6 +86,21 @@ for l = 1:obj.spec.NumChargers
     end
 end
 
+% We check obj.use_real_time_formulation because this appears in TVPowerBalancedFlow_realtime 
+% but not in TVPowerBalancedFlow_withpower_bundle.
+if obj.use_real_time_formulation    
+   % Number of relaxed pax should never be negative
+    if obj.spec.sourcerelaxflag
+        for k= 1:obj.spec.M
+            for ssi=1:length(obj.spec.Sources{k})
+                ub_StateVector(obj.FindSourceRelaxks(k,ssi)) = obj.spec.Flows{k}(ssi);
+                lb_StateVector(obj.FindSourceRelaxks(k,ssi)) = 0;
+            end
+        end
+    end
+end
+
+
 end
 
 

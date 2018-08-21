@@ -31,8 +31,6 @@ test_case.TestData.rel_tol_equality_hard = 1e-8;
 test_case.TestData.rel_tol_equality = 1e-4;
 test_case.TestData.abs_tol_equality = 5e-4;
 
-
-
 test_case.TestData.data_path_cell = {'dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_feas'};
 end
 
@@ -46,8 +44,8 @@ for i_data_path = 1:n_data_path
     scenario = AdaptScenarioForRealTime(scenario);    
     
     % Test with non-relaxed source constraints
-    scenario.Flags.sourcerelaxflag = false;
-    CompareWithAMoDpowerHelper(test_case,scenario);
+%     scenario.Flags.sourcerelaxflag = false;
+%     CompareWithAMoDpowerHelper(test_case,scenario);
     
     % Test with relaxed source constraints
     scenario_sourcerelaxflag = scenario;
