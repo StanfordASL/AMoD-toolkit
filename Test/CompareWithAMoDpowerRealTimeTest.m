@@ -1,5 +1,5 @@
-function tests = CompareWithAMoDpowerTest
-% CompareWithAMoDpowerTest verifies that the results match the implementation in AMoD-power
+function tests = CompareWithAMoDpowerRealTimeTest
+% CompareWithAMoDpowerRealTimeTest verifies that the results match the implementation in AMoD-power using the real-time formulation
 %   This includes checking that the matrices for the linear program are the 
 %   same and verifying that the optimization results are close.
 
@@ -40,12 +40,8 @@ n_data_path = numel(test_case.TestData.data_path_cell);
 for i_data_path = 1:n_data_path
     data_path = test_case.TestData.data_path_cell{i_data_path};
     
-    scenario = LoadScenario(data_path);    
-    
-    numChargers = length(scenario.RoadNetwork.ChargersList);
-    power_costs = zeros(numChargers,scenario.Thor)';
-    PowerNetwork_dummy = CreateDummyPowerNetwork(scenario.Thor,numChargers,scenario.PowerNetwork.v2g_efficiency,power_costs);
-    scenario.PowerNetwork = PowerNetwork_dummy;
+    scenario = GetScenario(data_path);
+    scenario = AdaptScenarioForRealTime(scenario);    
     
     % Test with non-relaxed source constraints
     scenario.Flags.sourcerelaxflag = false;
@@ -58,27 +54,47 @@ for i_data_path = 1:n_data_path
 end
 end
 
-function CompareWithAMoDpowerHelper(test_case,scenario)
-[cplex_out,fval,exitflag,output,lambdas,dual_prices_ix,dual_charger_prices_ix,power_relax_ix,lp_matrices] = ...
-    TVPowerBalancedFlow_withpower_sinkbundle(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
+function scenario = AdaptScenarioForRealTime(scenario)
+N = numel(scenario.RoadNetwork.RoadGraph);
 
+% Neglect MinNumVehiclesAti
+scenario.InitialConditions.MinNumVehiclesAti = zeros(N,1);
+
+% Prevent outstanding customers 
+scenario.Passengers.StarterSinks = [];
+scenario.Passengers.StarterSources = [];
+scenario.Passengers.StarterFlows = [];
+
+% Real-time formulation uses RebWeight but EAMoDproblem does not.
+scenario.RebWeight = 0;
+
+% EAMoDproblem handles MinEndCharge using state vector bounds (the same way as TVPowerBalancedFlow_withpower_sinkbundle).
+% TVPowerBalancedFlow_realtime does it with a special constraint.
+% For simplicity, we neglect it here
+scenario.RoadNetwork.MinEndCharge = 0;
+end
+
+function CompareWithAMoDpowerHelper(test_case,scenario)
 spec = EAMoDspec.CreateFromScenario(scenario);
 
+eamod_problem = EAMoDproblemBase(spec);
+eamod_problem.use_real_time_formulation = true;
+
+[cplex_out,fval,exitflag,output,lambdas,dual_prices_ix,dual_charger_prices_ix,lb,solveTime,lp_matrices] =...
+    TVPowerBalancedFlow_realtime(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
+
 if spec.sourcerelaxflag
-    % This is hardcoded in TVPowerBalancedFlowFinder_sinkbundle
     spec.SourceRelaxCost = lp_matrices.SourceRelaxCost;
 end
 
-indexer = GetIndexer(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
-
-eamod_problem = EAMoDproblemBase(spec);
+indexer = GetIndexerRealTime(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
 
 LPmatricesMatch(test_case,eamod_problem,lp_matrices,indexer);
+
 OptimizationResultsMatch(test_case,eamod_problem,cplex_out,fval,indexer);
 end
 
 function LPmatricesMatch(test_case,eamod_problem,lp_matrices,indexer)
-
 spec = eamod_problem.spec;
 
 f_cost_full_ref = lp_matrices.f_cost;
@@ -102,24 +118,13 @@ f_cost_ref = f_cost_full_ref(col_range);
 
 verifyEqual(test_case,f_cost,f_cost_ref)
 
-% PaxConservation
-[Aeq_PaxConservation, Beq_PaxConservation] = eamod_problem.CreateEqualityConstraintMatrices_PaxConservation();
-
-row_start_PaxConservation = indexer.FindEqPaxConservationtcki(1,1,1,1);
-row_end_PaxConservation = indexer.FindEqPaxConservationtcki(spec.Thor,spec.C,spec.M,spec.N);
-row_range_PaxConservation = row_start_PaxConservation:row_end_PaxConservation;
-
-[Aeq_PaxConservation_ref,Beq_PaxConservation_ref] = ExtractConstraintSubmatrix(Aeq_ref,Beq_ref,row_range_PaxConservation,col_range);
-
-verifyEqualSparse(test_case,Aeq_PaxConservation,Aeq_PaxConservation_ref)
-verifyEqual(test_case,Beq_PaxConservation,Beq_PaxConservation_ref)
-
 % RebConservation
 [Aeq_RebConservation, Beq_RebConservation] = eamod_problem.CreateEqualityConstraintMatrices_RebConservation();
 
 row_start_RebConservation = indexer.FindEqRebConservationtci(1,1,1);
 row_end_RebConservation = indexer.FindEqRebConservationtci(spec.Thor,spec.C,spec.N);
 row_range_RebConservation = row_start_RebConservation:row_end_RebConservation;
+
 [Aeq_RebConservation_ref,Beq_RebConservation_ref] = ExtractConstraintSubmatrix(Aeq_ref,Beq_ref,row_range_RebConservation,col_range);
 
 verifyEqualSparse(test_case,Aeq_RebConservation,Aeq_RebConservation_ref)
@@ -148,6 +153,18 @@ row_range_SinkConservation = row_start_SinkConservation:row_end_SinkConservation
 
 verifyEqualSparse(test_case,Aeq_SinkConservation,Aeq_SinkConservation_ref)
 verifyEqual(test_case,Beq_SinkConservation,Beq_SinkConservation_ref)
+
+% Aeq_CustomerChargeConservation
+[Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = eamod_problem.CreateEqualityConstraintMatrices_CustomerChargeConservation();
+
+row_start_CustomerChargeConservation = indexer.FindEqCustomerChargeConservationktc(1,1,1);
+row_end_CustomerChargeConservation = indexer.FindEqCustomerChargeConservationktc(spec.M,spec.Thor,spec.C);
+row_range_CustomerChargeConservation = row_start_CustomerChargeConservation:row_end_CustomerChargeConservation;
+
+[Aeq_CustomerChargeConservation_ref,Beq_CustomerChargeConservation_ref] = ExtractConstraintSubmatrix(Aeq_ref,Beq_ref,row_range_CustomerChargeConservation,col_range);
+
+verifyEqualSparse(test_case,Aeq_CustomerChargeConservation,Aeq_CustomerChargeConservation_ref)
+verifyEqual(test_case,Beq_CustomerChargeConservation,Beq_CustomerChargeConservation_ref)
 
 % RoadCongestion
 [Ain_RoadCongestion, Bin_RoadCongestion] = eamod_problem.CreateInequalityConstraintMatrices_RoadCongestion();
