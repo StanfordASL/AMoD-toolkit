@@ -40,9 +40,7 @@ classdef EAMoDproblem < EAMoDproblemBase
             decision_vector_val = value(obj.decision_variables.decision_vector);
         end
         
-        function res = FindChargerPowertl(obj,t,l)
-            res = obj.spec.NumChargers*(t - 1) + l;
-        end
+        
         
         final_vehicle_distribution = GetFinalVehicleDistribution(obj,varargin);
         

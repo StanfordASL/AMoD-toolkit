@@ -1,10 +1,10 @@
 function [time_range,label] = GetTimeRange(obj)
 % GetTimeRange Returns the range of time-steps modelled in the spec.
 %   time_range = GetDateTimeRange(obj) 
-%   time_range is of type datetime if obj.time_step_s and obj.time_step_s are set
+%   time_range is of type datetime if obj.time_step_s and obj.start_date_time are set
 %   time_range = 1:obj.Thor otherwise
 
-if isempty(obj.time_step_s) || isempty(obj.time_step_s)
+if isempty(obj.time_step_s) || isempty(obj.start_date_time)
     time_range = 1:obj.Thor;
     label = 'Time step';
 else

@@ -51,6 +51,8 @@ g_score(start)=0;
 
 f_score(start)=g_score(start)+heuristic_est(start,goal);
 
+Route = [];
+
 while ~isempty(OpenSet)
     [~,currInOpenSet]=min(f_score(OpenSet));
     currNode = OpenSet(currInOpenSet);

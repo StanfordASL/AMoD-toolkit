@@ -4,12 +4,12 @@ function [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,...
 % GetVehicleStateHistograms Returns the distribution of vehicles across states as a function of time
 %   [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,RebVehicleHist,IdleVehicleHist,AllVehicleHist] = GetVehicleStateHistograms(obj) uses the decision_vector in obj.decision_variables
 %   [...] = GetVehicleStateHistograms(obj,decision_vector_val) uses decision_vector_val
-%   ChargingVehicleHist contains the number of vehicles charging (including rebalancing and passenger-carrying), 
-%   DischargingVehicleHist contains the number of vehicles discharging (including rebalancing and passenger-carrying), 
+%   ChargingVehicleHist contains the number of vehicles charging (including rebalancing and passenger-carrying),
+%   DischargingVehicleHist contains the number of vehicles discharging (including rebalancing and passenger-carrying),
 %   PaxVehicleHist contains the number of passenger-carrying moving vehicles
 %   RebVehicleHist contains the number of rebalancing vehicles
 %   IdleVehicleHist contains the number of idle rebalancing vehicles
-%   AllVehicleHist contains the sum of all previous outputs 
+%   AllVehicleHist contains the sum of all previous outputs
 
 switch numel(varargin)
     case 0
@@ -26,10 +26,14 @@ ChargingVehicleHist = zeros(1,obj.spec.Thor);
 for tt = 1:obj.spec.Thor
     for c = 1:obj.spec.C
         for l = 1:obj.spec.NumChargers
-            for k = 1:obj.num_passenger_flows
-                ChargingVehicleHist(tt) = ChargingVehicleHist(tt) + decision_vector_val(obj.FindChargeLinkPtckl(tt,c,k,l));
+            for deltat = 0:obj.spec.ChargerTime(l) - 1
+                if tt - deltat > 0
+                    for k = 1:obj.num_passenger_flows
+                        ChargingVehicleHist(tt) = ChargingVehicleHist(tt) + decision_vector_val(obj.FindChargeLinkPtckl(tt-deltat,c,k,l));
+                    end
+                    ChargingVehicleHist(tt) = ChargingVehicleHist(tt) + decision_vector_val(obj.FindChargeLinkRtcl(tt-deltat,c,l));
+                end
             end
-            ChargingVehicleHist(tt) = ChargingVehicleHist(tt) + decision_vector_val(obj.FindChargeLinkRtcl(tt,c,l));
         end
     end
 end
@@ -39,10 +43,14 @@ DischargingVehicleHist = zeros(1,obj.spec.Thor);
 for tt = 1:obj.spec.Thor
     for c = 1:obj.spec.C
         for l = 1:obj.spec.NumChargers
-            for k = 1:obj.num_passenger_flows
-                DischargingVehicleHist(tt) = DischargingVehicleHist(tt) + decision_vector_val(obj.FindDischargeLinkPtckl(tt,c,k,l));
+            for deltat = 0:obj.spec.ChargerTime(l) - 1
+                if tt - deltat > 0
+                    for k = 1:obj.num_passenger_flows
+                        DischargingVehicleHist(tt) = DischargingVehicleHist(tt) + decision_vector_val(obj.FindDischargeLinkPtckl(tt-deltat,c,k,l));
+                    end
+                    DischargingVehicleHist(tt) = DischargingVehicleHist(tt) + decision_vector_val(obj.FindDischargeLinkRtcl(tt-deltat,c,l));
+                end
             end
-            DischargingVehicleHist(tt) = DischargingVehicleHist(tt) + decision_vector_val(obj.FindDischargeLinkRtcl(tt,c,l));
         end
     end
 end
