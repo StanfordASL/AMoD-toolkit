@@ -5,6 +5,8 @@ function [objective_value,solver_time,diagnostics] = Solve(obj)
 %   solver_time is the solver time reported by YALMIP
 %   diagnostics contains YALMIP diagnostic information
 
+obj.decision_variables = DefineDecisionVariables(obj);
+
 constraint_array = obj.GetConstraintArray();
 objective = obj.GetObjective();
 

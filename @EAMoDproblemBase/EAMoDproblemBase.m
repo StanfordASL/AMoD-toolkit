@@ -20,11 +20,6 @@ classdef EAMoDproblemBase < handle
             obj.spec = spec;
             
             [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();
-            
-            obj.state_range = 1:obj.FindEndRebLocationci(obj.spec.C,obj.spec.N);
-            obj.relax_range = (obj.FindEndRebLocationci(obj.spec.C,obj.spec.N) + 1):obj.StateSize;
-            
-            obj.decision_variables = DefineDecisionVariables(obj);
         end
         
         decision_vector_val = EvaluateDecisionVector(obj);        
@@ -188,11 +183,23 @@ classdef EAMoDproblemBase < handle
                 res = obj.spec.M;
             end
         end
+        
+        function res = get.state_range(obj)
+            res = 1:obj.FindEndRebLocationci(obj.spec.C,obj.spec.N);
+        end
+        
+        function res = get.relax_range(obj)
+            res = (obj.state_range(end) + 1):obj.StateSize;
+        end
     end
     
     properties (Dependent)
         StateSize % Number of elements in the problem's state vector
         num_passenger_flows % Number of passenger flows. Is equal to spec.M in the normal case and zero in the real-time formulation
+    
+        % TODO: add names
+        state_range(1,:) double
+        relax_range(1,:) double
     end
     
     properties
@@ -214,9 +221,7 @@ classdef EAMoDproblemBase < handle
     
     properties (Access = private)
         % TODO: rename to optimization_variables
-        decision_variables(1,1) % Struct with optimization variables
-        state_range(1,:) double
-        relax_range(1,:) double
+        decision_variables(1,1) % Struct with optimization variables        
     end
     
     methods (Access = private)

@@ -18,8 +18,8 @@ classdef EAMoDspec
         % It is sufficient to look at the initial conditions because
         % vehicles are conserved
         function n_vehicle = get.n_vehicle(obj)
-            n_vehicle_full_init = sum(obj.InitialConditions.FullVehicleInitialPos(:));
-            n_vehicle_empty_init = sum(obj.InitialConditions.EmptyVehicleInitialPos(:));
+            n_vehicle_full_init = sum(obj.FullVehicleInitialPos(:));
+            n_vehicle_empty_init = sum(obj.EmptyVehicleInitialPos(:));
             
             n_vehicle = n_vehicle_full_init + n_vehicle_empty_init;
         end
