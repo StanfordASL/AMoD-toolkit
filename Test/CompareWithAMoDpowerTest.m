@@ -26,36 +26,23 @@ addpath(genpath(mosek_path));
 amod_power_path = '../../AMoD-power/';
 addpath(amod_power_path);
 
-test_case.TestData.rel_tol_equality = 1e-6;
-test_case.TestData.rel_tol_equality_soft = 5e-5;
-test_case.TestData.abs_tol_equality = 1e-4;
-
+test_case.TestData.rel_tol_equality = 1e-9;
 
 test_case.TestData.data_path_cell = {'dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_feas'};
 end
 
 function TestCompareWithAMoDpower(test_case)
-n_data_path = numel(test_case.TestData.data_path_cell);
 
-for i_data_path = 1:n_data_path
-    data_path = test_case.TestData.data_path_cell{i_data_path};
-    
-    scenario = LoadScenario(data_path);    
-    
-    numChargers = length(scenario.RoadNetwork.ChargersList);
-    power_costs = zeros(numChargers,scenario.Thor)';
-    PowerNetwork_dummy = CreateDummyPowerNetwork(scenario.Thor,numChargers,scenario.PowerNetwork.v2g_efficiency,power_costs);
-    scenario.PowerNetwork = PowerNetwork_dummy;
-    
-    % Test with non-relaxed source constraints
-    scenario.Flags.sourcerelaxflag = false;
-    CompareWithAMoDpowerHelper(test_case,scenario);
-    
-    % Test with relaxed source constraints
-    scenario_sourcerelaxflag = scenario;
-    scenario_sourcerelaxflag.Flags.sourcerelaxflag = true;
-    CompareWithAMoDpowerHelper(test_case,scenario_sourcerelaxflag);    
-end
+scenario_feas = GetScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_feas');
+
+% Test with non-relaxed source constraints
+scenario_feas.Flags.sourcerelaxflag = false;
+CompareWithAMoDpowerHelper(test_case,scenario_feas);
+
+scenario_infeas = GetScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_infeas');
+scenario_infeas.Flags.sourcerelaxflag = true;
+CompareWithAMoDpowerHelper(test_case,scenario_infeas);
+
 end
 
 function CompareWithAMoDpowerHelper(test_case,scenario)
@@ -191,32 +178,12 @@ eamod_problem.yalmip_settings = sdpsettings('solver','linprog');
 
 [objective_value,solver_time,diagnostics] = eamod_problem.Solve();
 
-decision_vector_val = eamod_problem.EvaluateDecisionVector();
-
-state_range = indexer.FindRoadLinkPtckij(1,1,1,1,1):indexer.FindEndRebLocationci(eamod_problem.spec.C,eamod_problem.spec.N);
-
-if eamod_problem.sourcerelaxflag
-    state_range_relax = indexer.FindSourceRelaxks(1,1) + [0:(eamod_problem.spec.TotNumSources - 1)];
-    state_range = [state_range,state_range_relax];
-end
-
-decision_vector_val_ref = cplex_out_ref(state_range);
 objective_value_ref = fval_ref;
 
-% When relaxing sources, numerics get challenging. Thus, relax the
-% tolerance
-if eamod_problem.sourcerelaxflag
-    rel_tol_equality =  test_case.TestData.rel_tol_equality_soft;
-else
-    rel_tol_equality =  test_case.TestData.rel_tol_equality;
-end
+verifyEqual(test_case,objective_value,objective_value_ref,'RelTol',test_case.TestData.rel_tol_equality);
 
-verifyEqual(test_case,objective_value,objective_value_ref,'RelTol',rel_tol_equality);
 
-% This test usually fails for relaxed sources (I believe this is due to the challenging numerics).
-if ~eamod_problem.sourcerelaxflag
-    verifyEqual(test_case,decision_vector_val,decision_vector_val_ref,'RelTol',test_case.TestData.rel_tol_equality,'AbsTol',test_case.TestData.abs_tol_equality);
-end
+
 end
 
 

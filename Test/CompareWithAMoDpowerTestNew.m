@@ -28,9 +28,6 @@ addpath(amod_power_path);
 
 test_case.TestData.rel_tol_equality_hard = 1e-8;
 
-test_case.TestData.rel_tol_equality = 1e-4;
-test_case.TestData.abs_tol_equality = 5e-4;
-
 test_case.TestData.data_path_cell = {'dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_feas'};
 end
 
@@ -64,6 +61,7 @@ spec = EAMoDspec.CreateFromScenario(scenario);
 
 % Test non-real time formulation
 eamod_problem = EAMoDproblemBase(spec);
+eamod_problem.sourcerelaxflag = scenario.Flags.sourcerelaxflag;
 
 if use_real_time_formulation
     eamod_problem.use_real_time_formulation = true;
@@ -225,11 +223,6 @@ decision_vector_val_ref = cplex_out_ref(state_range);
 objective_value_ref = fval_ref;
 
 verifyEqual(test_case,objective_value,objective_value_ref,'RelTol',test_case.TestData.rel_tol_equality_hard);
-
-% This test usually fails for relaxed sources (I believe this is due to the challenging numerics).
-if ~eamod_problem.sourcerelaxflag
-    verifyEqual(test_case,decision_vector_val,decision_vector_val_ref,'RelTol',test_case.TestData.rel_tol_equality,'AbsTol',test_case.TestData.abs_tol_equality);
-end
 end
 
 

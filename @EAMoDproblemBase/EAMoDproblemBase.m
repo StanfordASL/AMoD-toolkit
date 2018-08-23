@@ -224,12 +224,12 @@ classdef EAMoDproblemBase < handle
         Routes(:,:) cell % Routes{i,j} is the route from i to j expresed as a vector of connected nodes that need to be traversed
     end
     
-    properties (Access = private)
+    properties %(Access = private)
         % TODO: rename to optimization_variables
         decision_variables(1,1) % Struct with optimization variables        
     end
     
-    methods (Access = private)
+    methods %(Access = private)
         [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj)        
         A_charger_power_w = ComputeChargerPowerMatrixNew(obj)        
         decision_variables = DefineDecisionVariables(obj)
