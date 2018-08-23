@@ -65,7 +65,7 @@ else
 end
 
 LPmatricesMatch(test_case,eamod_problem,lp_matrices,scenario);
-OptimizationResultsMatch(test_case,eamod_problem,cplex_out,fval,scenario);
+OptimizationResultsMatch(test_case,eamod_problem,fval);
 end
 
 function LPmatricesMatch(test_case,eamod_problem,lp_matrices,scenario)
@@ -193,7 +193,7 @@ verifyEqual(test_case,lb_StateVector,lb_StateVector_ref);
 verifyEqual(test_case,ub_StateVector,ub_StateVector_ref);
 end
 
-function OptimizationResultsMatch(test_case,eamod_problem,cplex_out_ref,fval_ref,scenario)
+function OptimizationResultsMatch(test_case,eamod_problem,fval_ref)
 % We use Mosek's overload of linprog as in
 % TVPowerBalancedFlow_withpower_sinkbundle.
 eamod_problem.yalmip_settings = sdpsettings('solver','linprog');
