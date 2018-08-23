@@ -22,6 +22,10 @@ classdef EAMoDproblemBase < handle
             [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();
         end
         
+        % New methods start
+        pre_routed_trip_histogram = GetPreRoutedTripHistogram(obj)
+        % New methods end
+        
         decision_vector_val = EvaluateDecisionVector(obj);        
         n_start_vehicles = ComputeNumberOfVehiclesAtStart(obj)
         n_end_vehicles = ComputeNumberOfVehiclesAtEnd(obj,varargin)        
