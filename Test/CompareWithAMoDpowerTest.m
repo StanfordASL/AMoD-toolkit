@@ -65,6 +65,7 @@ function CompareWithAMoDpowerHelper(test_case,scenario)
 spec = EAMoDspec.CreateFromScenario(scenario);
 
 eamod_problem = EAMoDproblemBase(spec);
+eamod_problem.sourcerelaxflag = scenario.Flags.sourcerelaxflag;
 
 if eamod_problem.sourcerelaxflag
     % This is hardcoded in TVPowerBalancedFlowFinder_sinkbundle
@@ -214,7 +215,7 @@ verifyEqual(test_case,objective_value,objective_value_ref,'RelTol',rel_tol_equal
 
 % This test usually fails for relaxed sources (I believe this is due to the challenging numerics).
 if ~eamod_problem.sourcerelaxflag
-    verifyEqual(test_case,decision_vector_val,decision_vector_val_ref,'RelTol',rel_tol_equality,'AbsTol',test_case.TestData.abs_tol_equality);
+    verifyEqual(test_case,decision_vector_val,decision_vector_val_ref,'RelTol',test_case.TestData.rel_tol_equality,'AbsTol',test_case.TestData.abs_tol_equality);
 end
 end
 
