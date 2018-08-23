@@ -26,30 +26,22 @@ addpath(genpath(mosek_path));
 amod_power_path = '../../AMoD-power/';
 addpath(amod_power_path);
 
-test_case.TestData.rel_tol_equality_hard = 1e-8;
+test_case.TestData.rel_tol_equality_hard = 1e-9;
 
-test_case.TestData.data_path_cell = {'dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_feas'};
 end
 
 function TestCompareWithAMoDpower(test_case)
-n_data_path = numel(test_case.TestData.data_path_cell);
+scenario_feas = GetScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_feas');
 
-for i_data_path = 1:n_data_path
-    data_path = test_case.TestData.data_path_cell{i_data_path};
-    
-    scenario = GetScenario(data_path);
-    
-    % Test with non-relaxed source constraints
-    scenario.Flags.sourcerelaxflag = false;
-    CompareWithAMoDpowerHelper(test_case,scenario,false);
-    CompareWithAMoDpowerHelper(test_case,scenario,true);
-    
-    % Test with relaxed source constraints
-    scenario_sourcerelaxflag = scenario;
-    scenario_sourcerelaxflag.Flags.sourcerelaxflag = true;
-    CompareWithAMoDpowerHelper(test_case,scenario_sourcerelaxflag,false);
-    CompareWithAMoDpowerHelper(test_case,scenario_sourcerelaxflag,true);
-end
+% Test with non-relaxed source constraints
+scenario_feas.Flags.sourcerelaxflag = false;
+CompareWithAMoDpowerHelper(test_case,scenario_feas,false);
+CompareWithAMoDpowerHelper(test_case,scenario_feas,true);
+
+scenario_infeas = GetScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_infeas');
+scenario_infeas.Flags.sourcerelaxflag = true;
+CompareWithAMoDpowerHelper(test_case,scenario_infeas,false);
+CompareWithAMoDpowerHelper(test_case,scenario_infeas,true);
 end
 
 function CompareWithAMoDpowerHelper(test_case,scenario,use_real_time_formulation)
@@ -61,7 +53,6 @@ spec = EAMoDspec.CreateFromScenario(scenario);
 
 % Test non-real time formulation
 eamod_problem = EAMoDproblemBase(spec);
-eamod_problem.sourcerelaxflag = scenario.Flags.sourcerelaxflag;
 
 if use_real_time_formulation
     eamod_problem.use_real_time_formulation = true;
@@ -203,23 +194,12 @@ verifyEqual(test_case,ub_StateVector,ub_StateVector_ref);
 end
 
 function OptimizationResultsMatch(test_case,eamod_problem,cplex_out_ref,fval_ref,scenario)
-if eamod_problem.use_real_time_formulation
-    indexer = GetIndexerRealTime(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
-else
-    indexer = GetIndexer(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
-end
-
 % We use Mosek's overload of linprog as in
 % TVPowerBalancedFlow_withpower_sinkbundle.
 eamod_problem.yalmip_settings = sdpsettings('solver','linprog');
 
 [objective_value,solver_time,diagnostics] = eamod_problem.Solve();
 
-decision_vector_val = eamod_problem.EvaluateDecisionVector();
-
-state_range = GetStateRange(eamod_problem,indexer);
-
-decision_vector_val_ref = cplex_out_ref(state_range);
 objective_value_ref = fval_ref;
 
 verifyEqual(test_case,objective_value,objective_value_ref,'RelTol',test_case.TestData.rel_tol_equality_hard);
