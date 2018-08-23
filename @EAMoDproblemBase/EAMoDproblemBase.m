@@ -20,11 +20,6 @@ classdef EAMoDproblemBase < handle
             obj.spec = spec;
             
             [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();
-            
-            obj.state_range = 1:obj.FindEndRebLocationci(obj.spec.C,obj.spec.N);
-            obj.relax_range = (obj.FindEndRebLocationci(obj.spec.C,obj.spec.N) + 1):obj.StateSize;
-            
-            obj.decision_variables = DefineDecisionVariables(obj);
         end
         
         decision_vector_val = EvaluateDecisionVector(obj);        
@@ -165,7 +160,7 @@ classdef EAMoDproblemBase < handle
         % the power network and we do not include the congestion relaxation
         function res = FindSourceRelaxks(obj,k,s)
             % FindSourceRelaxks Indexer for constraints relaxing sources
-            if obj.spec.sourcerelaxflag
+            if obj.sourcerelaxflag
                 res = obj.FindEndRebLocationci(obj.spec.C,obj.spec.N) +  obj.spec.CumNumSourcesPerSink(k) + s;
             else
                 res = nan;
@@ -174,7 +169,7 @@ classdef EAMoDproblemBase < handle
         
         % Get methods for dependent properties
         function res = get.StateSize(obj)
-            if obj.spec.sourcerelaxflag
+            if obj.sourcerelaxflag
                 res = obj.FindSourceRelaxks(obj.spec.NumSinks,obj.spec.NumSourcesPerSink(obj.spec.NumSinks));
             else
                 res = obj.FindEndRebLocationci(obj.spec.C,obj.spec.N);
@@ -188,16 +183,33 @@ classdef EAMoDproblemBase < handle
                 res = obj.spec.M;
             end
         end
+        
+        function res = get.state_range(obj)
+            res = 1:obj.FindEndRebLocationci(obj.spec.C,obj.spec.N);
+        end
+        
+        function res = get.relax_range(obj)
+            res = (obj.state_range(end) + 1):obj.StateSize;
+        end
     end
     
     properties (Dependent)
         StateSize % Number of elements in the problem's state vector
         num_passenger_flows % Number of passenger flows. Is equal to spec.M in the normal case and zero in the real-time formulation
+    
+        % TODO: add description
+        state_range(1,:) double
+        relax_range(1,:) double
     end
     
-    properties
+    properties       
         use_real_time_formulation(1,1) logical = false % Flag to use real-time formulation
+        
+        sourcerelaxflag(1,1) logical = false % Flag to allow each vehicle flow to reduce its sources and sinks for cost SourceRelaxCost        
+        SourceRelaxCost(1,1) double {mustBeNonnegative,mustBeReal} % Cost for relaxing sources and sinks (only active when sourcerelaxflag is set)
+                       
         verbose(1,1) logical = false % Flag for verbose output
+        
         yalmip_settings(1,1) = sdpsettings() % Struct with YALMIP settings
     end
     
@@ -212,14 +224,12 @@ classdef EAMoDproblemBase < handle
         Routes(:,:) cell % Routes{i,j} is the route from i to j expresed as a vector of connected nodes that need to be traversed
     end
     
-    properties (Access = private)
+    properties %(Access = private)
         % TODO: rename to optimization_variables
-        decision_variables(1,1) % Struct with optimization variables
-        state_range(1,:) double
-        relax_range(1,:) double
+        decision_variables(1,1) % Struct with optimization variables        
     end
     
-    methods (Access = private)
+    methods %(Access = private)
         [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj)        
         A_charger_power_w = ComputeChargerPowerMatrixNew(obj)        
         decision_variables = DefineDecisionVariables(obj)

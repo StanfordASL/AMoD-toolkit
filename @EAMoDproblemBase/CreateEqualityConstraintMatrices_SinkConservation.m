@@ -10,7 +10,7 @@ n_constraint = obj.spec.NumSinks;
 % removed at the end.
 n_constraint_entries = obj.spec.NumSinks*obj.spec.C*obj.spec.Thor;
 
-if obj.spec.sourcerelaxflag
+if obj.sourcerelaxflag
     n_constraint_entries = n_constraint_entries + obj.spec.TotNumSources;
 end
 
@@ -29,7 +29,7 @@ for k = 1:obj.spec.M
             Aeqentry = Aeqentry+1;
         end
     end
-    if obj.spec.sourcerelaxflag
+    if obj.sourcerelaxflag
         for ssi = 1:length(obj.spec.Sources{k})
             Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindSourceRelaxks(k,ssi),1];
             Aeqentry = Aeqentry+1;

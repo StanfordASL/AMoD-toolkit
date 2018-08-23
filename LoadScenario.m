@@ -57,8 +57,8 @@ try
 catch
     num_vehicles=1e5;
 end
-disp('OVERRIDE number of vehicles')
-num_vehicles=150000;
+% disp('OVERRIDE number of vehicles')
+% num_vehicles=150000;
 
 % Overrides
 %num_vehicles=4*1e5;
