@@ -64,14 +64,14 @@ function CompareWithAMoDpowerHelper(test_case,scenario)
 
 spec = EAMoDspec.CreateFromScenario(scenario);
 
-if spec.sourcerelaxflag
+eamod_problem = EAMoDproblemBase(spec);
+
+if eamod_problem.sourcerelaxflag
     % This is hardcoded in TVPowerBalancedFlowFinder_sinkbundle
-    spec.SourceRelaxCost = lp_matrices.SourceRelaxCost;
+    eamod_problem.SourceRelaxCost = lp_matrices.SourceRelaxCost;
 end
 
 indexer = GetIndexer(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
-
-eamod_problem = EAMoDproblemBase(spec);
 
 LPmatricesMatch(test_case,eamod_problem,lp_matrices,indexer);
 OptimizationResultsMatch(test_case,eamod_problem,cplex_out,fval,indexer);
@@ -91,7 +91,7 @@ ub_StateVector_full_ref = lp_matrices.ub;
 
 col_range = indexer.FindRoadLinkPtckij(1,1,1,1,1):indexer.FindEndRebLocationci(spec.C,spec.N);
 
-if spec.sourcerelaxflag
+if eamod_problem.sourcerelaxflag
     col_range_relax = indexer.FindSourceRelaxks(1,1) + [0:(spec.TotNumSources - 1)];
     col_range = [col_range,col_range_relax];    
 end
@@ -194,7 +194,7 @@ decision_vector_val = eamod_problem.EvaluateDecisionVector();
 
 state_range = indexer.FindRoadLinkPtckij(1,1,1,1,1):indexer.FindEndRebLocationci(eamod_problem.spec.C,eamod_problem.spec.N);
 
-if eamod_problem.spec.sourcerelaxflag
+if eamod_problem.sourcerelaxflag
     state_range_relax = indexer.FindSourceRelaxks(1,1) + [0:(eamod_problem.spec.TotNumSources - 1)];
     state_range = [state_range,state_range_relax];
 end
@@ -204,7 +204,7 @@ objective_value_ref = fval_ref;
 
 % When relaxing sources, numerics get challenging. Thus, relax the
 % tolerance
-if eamod_problem.spec.sourcerelaxflag
+if eamod_problem.sourcerelaxflag
     rel_tol_equality =  test_case.TestData.rel_tol_equality_soft;
 else
     rel_tol_equality =  test_case.TestData.rel_tol_equality;
@@ -213,7 +213,7 @@ end
 verifyEqual(test_case,objective_value,objective_value_ref,'RelTol',rel_tol_equality);
 
 % This test usually fails for relaxed sources (I believe this is due to the challenging numerics).
-if ~eamod_problem.spec.sourcerelaxflag
+if ~eamod_problem.sourcerelaxflag
     verifyEqual(test_case,decision_vector_val,decision_vector_val_ref,'RelTol',rel_tol_equality,'AbsTol',test_case.TestData.abs_tol_equality);
 end
 end

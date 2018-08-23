@@ -46,8 +46,6 @@ if Flags.congrelaxflag
     warning('congrelaxflag is set but functionality is not available yet. Ignoring.')
 end
 
-obj.sourcerelaxflag = Flags.sourcerelaxflag;
-
 % Stuff for real time algorithm
 obj.TVRoadCap = zeros(obj.Thor,obj.N,obj.N);
 for tt = 1:obj.Thor

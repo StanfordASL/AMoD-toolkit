@@ -110,12 +110,7 @@ classdef EAMoDspec
         ValueOfTime(1,1) double {mustBeNonnegative,mustBeReal} % Value in USD of one unit of time for a passenger
         VehicleCostPerM(1,1) double {mustBeNonnegative,mustBeReal} % Cost in USD of running a vehicle for 1 m, excluding electricity cost
         BatteryDepreciationPerUnitCharge(1,1) double {mustBeNonnegative,mustBeReal} = 0 % Battery depreciation cost in USD due to charging or discharging by one unit of charge
-        
-        % Problem relaxation
-        
-        sourcerelaxflag(1,1) logical = false % This flag allows each vehicle flow to reduce its sources and sinks for cost SourceRelaxCost        
-        SourceRelaxCost(1,1) double {mustBeNonnegative,mustBeReal} % Cost for relaxing sources and sinks (only active when sourcerelaxflag is set)
-        
+                
         % Others
         
         time_step_s(1,:) double {mustBeNonnegative,mustBeReal,NumelMustBeLessThanOrEqual(time_step_s,1)} % Duration in seconds of a time step

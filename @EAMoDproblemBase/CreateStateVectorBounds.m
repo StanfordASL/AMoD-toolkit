@@ -90,7 +90,7 @@ end
 % but not in TVPowerBalancedFlow_withpower_bundle.
 if obj.use_real_time_formulation    
    % Number of relaxed pax should never be negative
-    if obj.spec.sourcerelaxflag
+    if obj.sourcerelaxflag
         for k= 1:obj.spec.M
             for ssi=1:length(obj.spec.Sources{k})
                 ub_StateVector(obj.FindSourceRelaxks(k,ssi)) = obj.spec.Flows{k}(ssi);

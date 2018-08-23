@@ -9,7 +9,7 @@ n_constraint = obj.spec.TotNumSources;
 % removed at the end.
 n_constraint_entries = obj.spec.TotNumSources*obj.spec.C;
 
-if obj.spec.sourcerelaxflag
+if obj.sourcerelaxflag
     n_constraint_entries = n_constraint_entries + obj.spec.TotNumSources;
 end
 
@@ -27,7 +27,7 @@ for k = 1:obj.spec.M
             Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindPaxSourceChargecks(c,k,ssi),1];
             Aeqentry = Aeqentry + 1;
         end
-        if obj.spec.sourcerelaxflag
+        if obj.sourcerelaxflag
             Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindSourceRelaxks(k,ssi),1];
             Aeqentry = Aeqentry + 1;
         end

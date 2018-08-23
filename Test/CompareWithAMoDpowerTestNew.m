@@ -1,6 +1,6 @@
-function tests = CompareWithAMoDpowerRealTimeTest
-% CompareWithAMoDpowerRealTimeTest verifies that the results match the implementation in AMoD-power using the real-time formulation
-%   This includes checking that the matrices for the linear program are the 
+function tests = CompareWithAMoDpowerTestNew
+% CompareWithAMoDpowerTest verifies that the results match the implementation in AMoD-power
+%   This includes checking that the matrices for the linear program are the
 %   same and verifying that the optimization results are close.
 
 % This enables us to run the test by calling the functinwithout calling it from runtests
@@ -41,42 +41,56 @@ for i_data_path = 1:n_data_path
     data_path = test_case.TestData.data_path_cell{i_data_path};
     
     scenario = GetScenario(data_path);
-    scenario = AdaptScenarioForRealTime(scenario);    
     
     % Test with non-relaxed source constraints
-%     scenario.Flags.sourcerelaxflag = false;
-%     CompareWithAMoDpowerHelper(test_case,scenario);
+    scenario.Flags.sourcerelaxflag = false;
+    CompareWithAMoDpowerHelper(test_case,scenario,false);
+    CompareWithAMoDpowerHelper(test_case,scenario,true);
     
     % Test with relaxed source constraints
     scenario_sourcerelaxflag = scenario;
     scenario_sourcerelaxflag.Flags.sourcerelaxflag = true;
-    CompareWithAMoDpowerHelper(test_case,scenario_sourcerelaxflag);    
+    CompareWithAMoDpowerHelper(test_case,scenario_sourcerelaxflag,false);
+    CompareWithAMoDpowerHelper(test_case,scenario_sourcerelaxflag,true);
 end
 end
 
+function CompareWithAMoDpowerHelper(test_case,scenario,use_real_time_formulation)
+if use_real_time_formulation
+    scenario = AdaptScenarioForRealTime(scenario);
+end
 
-function CompareWithAMoDpowerHelper(test_case,scenario)
 spec = EAMoDspec.CreateFromScenario(scenario);
 
-[cplex_out,fval,exitflag,output,lambdas,dual_prices_ix,dual_charger_prices_ix,lb,solveTime,lp_matrices] =...
-    TVPowerBalancedFlow_realtime(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
-
-if spec.sourcerelaxflag
-    spec.SourceRelaxCost = lp_matrices.SourceRelaxCost;
-end
-
+% Test non-real time formulation
 eamod_problem = EAMoDproblemBase(spec);
-eamod_problem.use_real_time_formulation = true;
 
-indexer = GetIndexerRealTime(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
-
-LPmatricesMatch(test_case,eamod_problem,lp_matrices,indexer);
-
-OptimizationResultsMatch(test_case,eamod_problem,cplex_out,fval,indexer);
+if use_real_time_formulation
+    eamod_problem.use_real_time_formulation = true;
+    
+    [cplex_out,fval,~,~,~,~,~,~,~,lp_matrices] =...
+        TVPowerBalancedFlow_realtime(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
+else
+    [cplex_out,fval,~,~,~,~,~,~,lp_matrices] = ...
+        TVPowerBalancedFlow_withpower_sinkbundle(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
 end
 
+LPmatricesMatch(test_case,eamod_problem,lp_matrices,scenario);
+OptimizationResultsMatch(test_case,eamod_problem,cplex_out,fval,scenario);
+end
 
-function LPmatricesMatch(test_case,eamod_problem,lp_matrices,indexer)
+function LPmatricesMatch(test_case,eamod_problem,lp_matrices,scenario)
+if eamod_problem.use_real_time_formulation
+    indexer = GetIndexerRealTime(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
+else
+    indexer = GetIndexer(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
+end
+
+if scenario.Flags.sourcerelaxflag
+    eamod_problem.sourcerelaxflag = true;
+    eamod_problem.SourceRelaxCost = lp_matrices.SourceRelaxCost;
+end
+
 spec = eamod_problem.spec;
 
 f_cost_full_ref = lp_matrices.f_cost;
@@ -87,7 +101,7 @@ Beq_ref = lp_matrices.Beq;
 lb_StateVector_full_ref = lp_matrices.lb;
 ub_StateVector_full_ref = lp_matrices.ub;
 
-state_range = GetStateRange(spec,indexer);
+state_range = GetStateRange(eamod_problem,indexer);
 
 % Cost vector
 f_cost = eamod_problem.CreateCostVector();
@@ -95,13 +109,38 @@ f_cost_ref = f_cost_full_ref(state_range);
 
 verifyEqual(test_case,f_cost,f_cost_ref)
 
+if eamod_problem.use_real_time_formulation
+    % CustomerChargeConservation
+    [Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = eamod_problem.CreateEqualityConstraintMatrices_CustomerChargeConservation();
+    
+    row_start_CustomerChargeConservation = indexer.FindEqCustomerChargeConservationktc(1,1,1);
+    row_end_CustomerChargeConservation = indexer.FindEqCustomerChargeConservationktc(spec.M,spec.Thor,spec.C);
+    row_range_CustomerChargeConservation = row_start_CustomerChargeConservation:row_end_CustomerChargeConservation;
+    
+    [Aeq_CustomerChargeConservation_ref,Beq_CustomerChargeConservation_ref] = ExtractConstraintSubmatrix(Aeq_ref,Beq_ref,row_range_CustomerChargeConservation,state_range);
+    
+    verifyEqualSparse(test_case,Aeq_CustomerChargeConservation,Aeq_CustomerChargeConservation_ref)
+    verifyEqual(test_case,Beq_CustomerChargeConservation,Beq_CustomerChargeConservation_ref)
+    
+else
+    % PaxConservation
+    [Aeq_PaxConservation, Beq_PaxConservation] = eamod_problem.CreateEqualityConstraintMatrices_PaxConservation();
+    
+    row_start_PaxConservation = indexer.FindEqPaxConservationtcki(1,1,1,1);
+    row_end_PaxConservation = indexer.FindEqPaxConservationtcki(spec.Thor,spec.C,spec.M,spec.N);
+    row_range_PaxConservation = row_start_PaxConservation:row_end_PaxConservation;
+    
+    [Aeq_PaxConservation_ref,Beq_PaxConservation_ref] = ExtractConstraintSubmatrix(Aeq_ref,Beq_ref,row_range_PaxConservation,state_range);
+    
+    verifyEqualSparse(test_case,Aeq_PaxConservation,Aeq_PaxConservation_ref)
+    verifyEqual(test_case,Beq_PaxConservation,Beq_PaxConservation_ref)
+end
 % RebConservation
 [Aeq_RebConservation, Beq_RebConservation] = eamod_problem.CreateEqualityConstraintMatrices_RebConservation();
 
 row_start_RebConservation = indexer.FindEqRebConservationtci(1,1,1);
 row_end_RebConservation = indexer.FindEqRebConservationtci(spec.Thor,spec.C,spec.N);
 row_range_RebConservation = row_start_RebConservation:row_end_RebConservation;
-
 [Aeq_RebConservation_ref,Beq_RebConservation_ref] = ExtractConstraintSubmatrix(Aeq_ref,Beq_ref,row_range_RebConservation,state_range);
 
 verifyEqualSparse(test_case,Aeq_RebConservation,Aeq_RebConservation_ref)
@@ -130,18 +169,6 @@ row_range_SinkConservation = row_start_SinkConservation:row_end_SinkConservation
 
 verifyEqualSparse(test_case,Aeq_SinkConservation,Aeq_SinkConservation_ref)
 verifyEqual(test_case,Beq_SinkConservation,Beq_SinkConservation_ref)
-
-% CustomerChargeConservation
-[Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = eamod_problem.CreateEqualityConstraintMatrices_CustomerChargeConservation();
-
-row_start_CustomerChargeConservation = indexer.FindEqCustomerChargeConservationktc(1,1,1);
-row_end_CustomerChargeConservation = indexer.FindEqCustomerChargeConservationktc(spec.M,spec.Thor,spec.C);
-row_range_CustomerChargeConservation = row_start_CustomerChargeConservation:row_end_CustomerChargeConservation;
-
-[Aeq_CustomerChargeConservation_ref,Beq_CustomerChargeConservation_ref] = ExtractConstraintSubmatrix(Aeq_ref,Beq_ref,row_range_CustomerChargeConservation,state_range);
-
-verifyEqualSparse(test_case,Aeq_CustomerChargeConservation,Aeq_CustomerChargeConservation_ref)
-verifyEqual(test_case,Beq_CustomerChargeConservation,Beq_CustomerChargeConservation_ref)
 
 % RoadCongestion
 [Ain_RoadCongestion, Bin_RoadCongestion] = eamod_problem.CreateInequalityConstraintMatrices_RoadCongestion();
@@ -177,7 +204,13 @@ verifyEqual(test_case,lb_StateVector,lb_StateVector_ref);
 verifyEqual(test_case,ub_StateVector,ub_StateVector_ref);
 end
 
-function OptimizationResultsMatch(test_case,eamod_problem,cplex_out_ref,fval_ref,indexer)
+function OptimizationResultsMatch(test_case,eamod_problem,cplex_out_ref,fval_ref,scenario)
+if eamod_problem.use_real_time_formulation
+    indexer = GetIndexerRealTime(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
+else
+    indexer = GetIndexer(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
+end
+
 % We use Mosek's overload of linprog as in
 % TVPowerBalancedFlow_withpower_sinkbundle.
 eamod_problem.yalmip_settings = sdpsettings('solver','linprog');
@@ -186,7 +219,7 @@ eamod_problem.yalmip_settings = sdpsettings('solver','linprog');
 
 decision_vector_val = eamod_problem.EvaluateDecisionVector();
 
-state_range = GetStateRange(eamod_problem.spec,indexer);
+state_range = GetStateRange(eamod_problem,indexer);
 
 decision_vector_val_ref = cplex_out_ref(state_range);
 objective_value_ref = fval_ref;
@@ -194,35 +227,11 @@ objective_value_ref = fval_ref;
 verifyEqual(test_case,objective_value,objective_value_ref,'RelTol',test_case.TestData.rel_tol_equality_hard);
 
 % This test usually fails for relaxed sources (I believe this is due to the challenging numerics).
-if ~eamod_problem.spec.sourcerelaxflag
+if ~eamod_problem.sourcerelaxflag
     verifyEqual(test_case,decision_vector_val,decision_vector_val_ref,'RelTol',test_case.TestData.rel_tol_equality,'AbsTol',test_case.TestData.abs_tol_equality);
 end
 end
 
 
-function PowerNetworkR = CreateDummyPowerNetwork(Thor,numChargers,v2g_efficiency,power_costs)
-% CreateDummyPowerNetwork creates a dummy power network with an unbounded generator at every node with power priced according to power_costs
-%   This is for compatibility with the implementation in AMoD-power
 
-PowerGraphR = cell(1,numChargers);
-PowerLineCapR = PowerGraphR;
-PowerLineReactanceR = PowerGraphR;
-PowerGensListR = 1:numChargers;
-PowerGensMaxR = Inf*ones(numChargers,Thor);
-PowerGensMinR = -Inf*ones(numChargers,Thor);
-PowerExtLoadsR = zeros(numChargers,Thor);
-RoadToPowerMapR =  1:numChargers;
-
-PowerNetworkR.PowerGraphM = PowerGraphR;
-PowerNetworkR.PowerLineCapM = PowerLineCapR;
-PowerNetworkR.PowerLineReactanceM = PowerLineReactanceR;
-PowerNetworkR.PowerGensList = PowerGensListR;
-PowerNetworkR.PowerGensMax = PowerGensMaxR';
-PowerNetworkR.PowerGensMin = PowerGensMinR';
-PowerNetworkR.PowerCosts = power_costs;
-PowerNetworkR.PowerExtLoads = PowerExtLoadsR;
-PowerNetworkR.RoadToPowerMap = RoadToPowerMapR;
-PowerNetworkR.v2g_efficiency = v2g_efficiency;
-
-end
 

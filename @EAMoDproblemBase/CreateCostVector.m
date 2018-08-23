@@ -45,8 +45,8 @@ for t = 1:obj.spec.Thor
 end
 
 % Cost for source relaxation
-if obj.spec.sourcerelaxflag
-    f_cost_relax(obj.FindSourceRelaxks(1,1):obj.FindSourceRelaxks(obj.spec.M,length(obj.spec.Sources{obj.spec.M}))) = obj.spec.SourceRelaxCost;
+if obj.sourcerelaxflag
+    f_cost_relax(obj.FindSourceRelaxks(1,1):obj.FindSourceRelaxks(obj.spec.M,length(obj.spec.Sources{obj.spec.M}))) = obj.SourceRelaxCost;
 end
 
 f_cost = f_cost_pax + f_cost_reb + f_cost_relax;

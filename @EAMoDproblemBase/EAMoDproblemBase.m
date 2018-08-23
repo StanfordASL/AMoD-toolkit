@@ -160,7 +160,7 @@ classdef EAMoDproblemBase < handle
         % the power network and we do not include the congestion relaxation
         function res = FindSourceRelaxks(obj,k,s)
             % FindSourceRelaxks Indexer for constraints relaxing sources
-            if obj.spec.sourcerelaxflag
+            if obj.sourcerelaxflag
                 res = obj.FindEndRebLocationci(obj.spec.C,obj.spec.N) +  obj.spec.CumNumSourcesPerSink(k) + s;
             else
                 res = nan;
@@ -169,7 +169,7 @@ classdef EAMoDproblemBase < handle
         
         % Get methods for dependent properties
         function res = get.StateSize(obj)
-            if obj.spec.sourcerelaxflag
+            if obj.sourcerelaxflag
                 res = obj.FindSourceRelaxks(obj.spec.NumSinks,obj.spec.NumSourcesPerSink(obj.spec.NumSinks));
             else
                 res = obj.FindEndRebLocationci(obj.spec.C,obj.spec.N);
@@ -197,14 +197,19 @@ classdef EAMoDproblemBase < handle
         StateSize % Number of elements in the problem's state vector
         num_passenger_flows % Number of passenger flows. Is equal to spec.M in the normal case and zero in the real-time formulation
     
-        % TODO: add names
+        % TODO: add description
         state_range(1,:) double
         relax_range(1,:) double
     end
     
-    properties
+    properties       
         use_real_time_formulation(1,1) logical = false % Flag to use real-time formulation
+        
+        sourcerelaxflag(1,1) logical = false % Flag to allow each vehicle flow to reduce its sources and sinks for cost SourceRelaxCost        
+        SourceRelaxCost(1,1) double {mustBeNonnegative,mustBeReal} % Cost for relaxing sources and sinks (only active when sourcerelaxflag is set)
+                       
         verbose(1,1) logical = false % Flag for verbose output
+        
         yalmip_settings(1,1) = sdpsettings() % Struct with YALMIP settings
     end
     
