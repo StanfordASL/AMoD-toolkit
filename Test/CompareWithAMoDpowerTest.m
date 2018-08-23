@@ -1,4 +1,4 @@
-function tests = CompareWithAMoDpowerTestNew
+function tests = CompareWithAMoDpowerTest
 % CompareWithAMoDpowerTest verifies that the results match the implementation in AMoD-power
 %   This includes checking that the matrices for the linear program are the
 %   same and verifying that the optimization results are close.
