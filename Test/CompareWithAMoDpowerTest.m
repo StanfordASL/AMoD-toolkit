@@ -216,6 +216,13 @@ eamod_problem.yalmip_settings = sdpsettings('solver','linprog');
 
 [objective_value,solver_time,diagnostics] = eamod_problem.Solve();
 
+% Our real-time objective value includes cost of pre-routed customer carrying 
+% vehicles, AMoD-power implementation does not. Hence, we subtract it
+if eamod_problem.use_real_time_formulation
+    [~, pax_cost_val_usd, ~,~] = eamod_problem.EvaluateAMoDcost();
+    objective_value = objective_value - pax_cost_val_usd;
+end
+
 objective_value_ref = fval_ref;
 
 verifyEqual(test_case,objective_value,objective_value_ref,'RelTol',test_case.TestData.rel_tol_equality_hard);
