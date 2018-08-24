@@ -1,7 +1,8 @@
 classdef EAMoDproblemBase < handle
     % EAMoDproblemBase Represents an electric AMoD problem using a network flow model
     %   The model of the electric AMoD system used here is described in the
-    %   paper:
+    %   paper below. Note that this implementation does not include the power network.
+    %
     %   F. Rossi, R. Iglesias, M. Alizadeh, and M. Pavone, “On the interaction
     %   between Autonomous Mobility-on-Demand systems and the power network:
     %   models and coordination algorithms,” in Robotics: Science and Systems,
@@ -21,11 +22,7 @@ classdef EAMoDproblemBase < handle
             
             [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();
         end
-        
-        % New methods start
-        pre_routed_trip_histogram = GetPreRoutedTripHistogram(obj)
-        % New methods end
-        
+                        
         decision_vector_val = EvaluateDecisionVector(obj);        
         n_start_vehicles = ComputeNumberOfVehiclesAtStart(obj)
         n_end_vehicles = ComputeNumberOfVehiclesAtEnd(obj,varargin)        
@@ -171,6 +168,11 @@ classdef EAMoDproblemBase < handle
             end
         end
         
+        function res = FindChargerPowertl(obj,t,l)
+            % FindSourceRelaxks Indexer for row in ComputeChargerPowerMatrixNew corresponding to charger l at time step t  
+            res = obj.spec.NumChargers*(t - 1) + l;
+        end
+        
         % Get methods for dependent properties
         function res = get.StateSize(obj)
             if obj.sourcerelaxflag
@@ -234,12 +236,16 @@ classdef EAMoDproblemBase < handle
     end
     
     methods %(Access = private)
-        [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj)        
-        A_charger_power_w = ComputeChargerPowerMatrixNew(obj)        
+        [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj)          
+        charger_power_demand_w = ComputeChargerPowerDemand(obj,varargin)
+        charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,varargin)
+        A_charger_power_w = ComputeChargerPowerMatrixNew(obj)         
         decision_variables = DefineDecisionVariables(obj)
-        [total_cost, pax_cost,reb_cost, relax_cost] = GetAMoDcost(obj,varargin)
+        [amod_cost_usd, pax_cost_usd,reb_cost_usd, relax_cost_usd] = ComputeAMoDcost(obj,varargin)
+        electricity_cost_usd = ComputeElectricityCost(obj,varargin)
         constraint_array = GetConstraintArray(obj)
         objective = GetObjective(obj)
+        pre_routed_trip_histogram = GetPreRoutedTripHistogram(obj)
         
         function res = FindRoadLinkHelpertckij(obj,t,c,k,i,j)
             res = (t-1)*(obj.spec.E*(obj.num_passenger_flows + 1)*(obj.spec.C) + 2*(obj.num_passenger_flows+1)*obj.spec.NumChargers*(obj.spec.C)) + (c-1)*obj.spec.E*(obj.num_passenger_flows+1) + (k-1)*obj.spec.E + (obj.spec.cumRoadNeighbors(i) + obj.spec.RoadNeighborCounter(i,j));

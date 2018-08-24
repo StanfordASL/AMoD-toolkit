@@ -1,4 +1,5 @@
 function pre_routed_trip_histogram = GetPreRoutedTripHistogram(obj)
+% GetPreRoutedTripHistogram Returns the number of pre-routed passenger-carrying vehicles as a function of time
 
 pre_routed_trip_histogram = zeros(1,obj.spec.Thor);
 

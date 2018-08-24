@@ -84,10 +84,13 @@ classdef EAMoDspec
         
         % Charger data
         
-        ChargersList(:,1) double {mustBeNonnegative,mustBeReal,mustBeInteger} % ChargersList(i) is the location of the node in RoadGraph corresponding to the i-th charging station
-        ChargerSpeed(:,1) double {mustBeNonnegative,mustBeReal} % ChargerSpeed(i) is the amount of charge gained by a vehicle crossing charging station i
-        ChargerTime(:,1) double {mustBeNonnegative,mustBeReal} % ChargerTime(i) is the time required to charge ChargerSpeed(i) units of charge at charging station i
-        ChargerCap(:,1) double {mustBeNonnegative,mustBeReal} % ChargerCap(i) is the number of vehicles that can charge concurrently in charging station i
+        ChargersList(:,1) double {mustBeNonnegative,mustBeReal,mustBeInteger} % ChargersList(l) is the location of the node in RoadGraph corresponding to the l-th charging station
+        ChargerSpeed(:,1) double {mustBeNonnegative,mustBeReal} % ChargerSpeed(l) is the amount of charge gained by a vehicle crossing charging station l
+        ChargerTime(:,1) double {mustBeNonnegative,mustBeReal} % ChargerTime(l) is the time required to charge ChargerSpeed(l) units of charge at charging station l
+        ChargerCap(:,1) double {mustBeNonnegative,mustBeReal} % ChargerCap(l) is the number of vehicles that can charge concurrently in charging station l
+        
+        % TODO: rename to electricity price
+        charger_power_price_usd_per_j(:,:) double {mustBeReal} % charger_power_price_usd_per_j(l,t) is the price paid at time-step t for 1 Joule of energy consumed in charger l
         
         % Trip demand
         

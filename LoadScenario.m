@@ -218,4 +218,12 @@ scenario.Passengers = Passengers;
 scenario.PassengersEmpty = PassengersEmpty;
 
 scenario.Flags = Flags;
+
+% Extra data
+scenario.time_step_s = double(timeStepSize);
+scenario.charge_unit_j = ChargeUnitToPowerUnit*scenario.time_step_s*BaseMVA*1e6;
+scenario.BaseMVA = BaseMVA;
+
+% Add routes for real-time formulation
+[scenario.RoadNetwork.RouteTime,scenario.RoadNetwork.RouteCharge] = build_routes(RoadNetwork.RoadGraph,RoadNetwork.TravelTimes,RoadNetwork.ChargeToTraverse);
 end

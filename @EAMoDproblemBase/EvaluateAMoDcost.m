@@ -5,7 +5,7 @@ function [total_cost_val, pax_cost_val, reb_cost_val,relax_cost_val] = EvaluateA
 %   For the meaning of total_cost_val, pax_cost_val, reb_cost_val and relax_cost_val see EAMoDProblemBase.CreateCostVector
 %   See also EAMoDProblemBase.CreateCostVector
 
-[total_cost, pax_cost,reb_cost, relax_cost] = obj.GetAMoDcost(varargin{:});
+[total_cost, pax_cost,reb_cost, relax_cost] = obj.ComputeAMoDcost(varargin{:});
 
 total_cost_val = value(total_cost);
 pax_cost_val = value(pax_cost);
