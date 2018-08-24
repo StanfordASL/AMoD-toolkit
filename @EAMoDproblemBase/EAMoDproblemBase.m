@@ -24,6 +24,14 @@ classdef EAMoDproblemBase < handle
         
         % New methods start
         pre_routed_trip_histogram = GetPreRoutedTripHistogram(obj)
+        charger_power_demand = GetChargerPowerDemandNormalized(obj,factor,varargin)
+        charger_power_demand_w = GetChargerPowerDemand(obj,varargin)
+       
+        
+        function res = FindChargerPowertl(obj,t,l)
+            res = obj.spec.NumChargers*(t - 1) + l;
+        end
+        
         % New methods end
         
         decision_vector_val = EvaluateDecisionVector(obj);        
@@ -237,7 +245,8 @@ classdef EAMoDproblemBase < handle
         [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj)        
         A_charger_power_w = ComputeChargerPowerMatrixNew(obj)        
         decision_variables = DefineDecisionVariables(obj)
-        [total_cost, pax_cost,reb_cost, relax_cost] = GetAMoDcost(obj,varargin)
+        [amod_cost_usd, pax_cost_usd,reb_cost_usd, relax_cost_usd] = ComputeAMoDcost(obj,varargin)
+        electricity_cost_usd = ComputeElectricityCost(obj,varargin)
         constraint_array = GetConstraintArray(obj)
         objective = GetObjective(obj)
         

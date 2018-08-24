@@ -63,7 +63,7 @@ classdef EAMoDproblem < EAMoDproblemBase
     
     methods %(Access = ?DAMoDproblem)
         constraint_array = DefineConstraints(obj);
-        [total_cost, pax_cost,reb_cost, relax_cost] = GetAMoDcost(obj);
+        [total_cost, pax_cost,reb_cost, relax_cost] = ComputeAMoDcost(obj);
     end
     
     methods %(Access = protected)

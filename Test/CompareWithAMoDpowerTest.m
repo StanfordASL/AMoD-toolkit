@@ -31,14 +31,14 @@ test_case.TestData.rel_tol_equality_hard = 1e-9;
 end
 
 function TestCompareWithAMoDpower(test_case)
-scenario_feas = GetScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_feas');
+scenario_feas = LoadScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_feas');
 
 % Test with non-relaxed source constraints
 scenario_feas.Flags.sourcerelaxflag = false;
 CompareWithAMoDpowerHelper(test_case,scenario_feas,false);
 CompareWithAMoDpowerHelper(test_case,scenario_feas,true);
 
-scenario_infeas = GetScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_infeas');
+scenario_infeas = LoadScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_infeas');
 scenario_infeas.Flags.sourcerelaxflag = true;
 CompareWithAMoDpowerHelper(test_case,scenario_infeas,false);
 CompareWithAMoDpowerHelper(test_case,scenario_infeas,true);
@@ -49,7 +49,18 @@ if use_real_time_formulation
     scenario = AdaptScenarioForRealTime(scenario);
 end
 
+scenario = AddDummyPowerNetworkToScenario(scenario);
+
 spec = EAMoDspec.CreateFromScenario(scenario);
+
+% Seed for repeatability
+rng('default');
+% Add random charger electricity prices in [35,45] USD per MWh
+charger_power_price_usd_per_j = (35 + 10*rand(spec.NumChargers,spec.Thor))/(1e6*3600);
+spec.charger_power_price_usd_per_j = charger_power_price_usd_per_j;
+
+% Legacy code expects PowerCosts to be of size Thor x NumChargers and be in USD/(BaseMVA*time_step_s)
+scenario.PowerNetwork.PowerCosts = charger_power_price_usd_per_j.'*(scenario.BaseMVA*1e6*scenario.time_step_s);
 
 % Test non-real time formulation
 eamod_problem = EAMoDproblemBase(spec);
@@ -64,7 +75,12 @@ else
         TVPowerBalancedFlow_withpower_sinkbundle(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
 end
 
-LPmatricesMatch(test_case,eamod_problem,lp_matrices,scenario);
+if scenario.Flags.sourcerelaxflag
+    eamod_problem.sourcerelaxflag = true;
+    eamod_problem.SourceRelaxCost = lp_matrices.SourceRelaxCost;
+end
+
+%LPmatricesMatch(test_case,eamod_problem,lp_matrices,scenario);
 OptimizationResultsMatch(test_case,eamod_problem,fval);
 end
 

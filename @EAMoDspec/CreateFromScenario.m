@@ -58,6 +58,8 @@ obj.v2g_efficiency = scenario.PowerNetwork.v2g_efficiency;
 if isfield(scenario.RoadNetwork,'BatteryDepreciationPerUnitCharge')
     obj.BatteryDepreciationPerUnitCharge = scenario.RoadNetwork.BatteryDepreciationPerUnitCharge;
 end
-    
+ 
+obj.time_step_s = scenario.time_step_s;
+obj.charge_unit_j = scenario.charge_unit_j;
     
 end

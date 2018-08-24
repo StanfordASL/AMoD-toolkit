@@ -1,5 +1,8 @@
 function objective = GetObjective(obj)
-% GetObjective Returns the optimization objective for the electric AMoD problem (excluding electricity costs)
+% GetObjective Returns the optimization objective for the electric AMoD problem
 
-objective = obj.GetAMoDcost();
+amod_cost_usd = obj.ComputeAMoDcost();
+electricity_cost_usd = obj.ComputeElectricityCost();
+
+objective = amod_cost_usd + electricity_cost_usd;
 end
