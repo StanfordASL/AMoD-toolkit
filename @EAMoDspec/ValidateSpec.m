@@ -12,7 +12,7 @@ assert(numel(obj.ChargerSpeed) == obj.NumChargers,'ChargerSpeed must have NumCha
 assert(numel(obj.ChargerTime) == obj.NumChargers,'ChargerTime must have NumChargers elements');
 assert(numel(obj.ChargerTime) == obj.NumChargers,'ChargerCap must have NumChargers elements');
 
-assert(all(size(obj.charger_power_price_usd_per_j) == [obj.NumChargers,obj.Thor]),'charger_power_price_usd_per_j must have size NumChargers x Thor');
+assert(isempty(obj.charger_power_price_usd_per_j) || all(size(obj.charger_power_price_usd_per_j) == [obj.NumChargers,obj.Thor]),'charger_power_price_usd_per_j must have size NumChargers x Thor or be empty');
 
 
 % Properties that depend on Sinks

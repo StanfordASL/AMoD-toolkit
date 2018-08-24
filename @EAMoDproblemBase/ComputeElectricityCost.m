@@ -16,8 +16,7 @@ function electricity_cost_usd = ComputeElectricityCost(obj,varargin)
 % This leads to better numerics
 
 factor_charger_power_demand_w_to_electricity_cost_usd = obj.spec.time_step_s*obj.spec.charger_power_price_usd_per_j;
-charger_electricity_cost_usd = obj.GetChargerPowerDemandNormalized(factor_charger_power_demand_w_to_electricity_cost_usd,varargin{:});
+charger_electricity_cost_usd = obj.ComputeChargerPowerDemandNormalized(factor_charger_power_demand_w_to_electricity_cost_usd,varargin{:});
 
 electricity_cost_usd = sum(charger_electricity_cost_usd(:));
-
 end

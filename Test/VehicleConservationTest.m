@@ -22,12 +22,12 @@ end
 
 function TestVehicleConservation(test_case)
 
-scenario_feas = GetScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_feas');
+scenario_feas = LoadScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_feas');
 spec_feas = EAMoDspec.CreateFromScenario(scenario_feas); 
 
 eamod_problem_feas = EAMoDproblemBase(spec_feas); 
 
-scenario_infeas = GetScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_infeas');
+scenario_infeas = LoadScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_infeas');
 spec_infeas = EAMoDspec.CreateFromScenario(scenario_infeas); 
 
 eamod_problem_infeas = EAMoDproblemBase(spec_infeas); 
