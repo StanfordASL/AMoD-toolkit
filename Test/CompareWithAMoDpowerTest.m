@@ -26,7 +26,7 @@ addpath(genpath(mosek_path));
 amod_power_path = '../../AMoD-power/';
 addpath(amod_power_path);
 
-test_case.TestData.rel_tol_equality_hard = 1e-9;
+test_case.TestData.rel_tol_equality_hard = 1e-8;
 
 end
 

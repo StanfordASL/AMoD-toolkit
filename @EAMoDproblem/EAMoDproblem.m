@@ -19,7 +19,7 @@ classdef EAMoDproblem < EAMoDproblemBase
         A_charger_power_w = ComputeChargerPowerMatrixNew(obj);
         
         charger_power_demand_w = GetChargerPowerDemand(obj)
-        charger_power_demand = GetChargerPowerDemandNormalized(obj,factor);
+        charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor);
         
         
         charger_power_demand_w_val = EvaluateChargerPowerDemand(obj,varargin)

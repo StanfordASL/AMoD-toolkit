@@ -32,7 +32,7 @@ amod_cost = eamod_problem.ComputeAMoDcost();
 % This leads to better numerics
 
 factor_charger_power_demand_w_to_electricity_cost_usd = eamod_problem.spec.time_step_s*eamod_problem.spec.charger_power_price_usd_per_j;
-charger_electricity_cost_usd = eamod_problem.GetChargerPowerDemandNormalized(factor_charger_power_demand_w_to_electricity_cost_usd);
+charger_electricity_cost_usd = eamod_problem.ComputeChargerPowerDemandNormalized(factor_charger_power_demand_w_to_electricity_cost_usd);
 
 electricity_cost_usd = sum(charger_electricity_cost_usd(:));
 
