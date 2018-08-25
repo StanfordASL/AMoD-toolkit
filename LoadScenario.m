@@ -224,6 +224,146 @@ scenario.time_step_s = double(timeStepSize);
 scenario.charge_unit_j = ChargeUnitToPowerUnit*scenario.time_step_s*BaseMVA*1e6;
 scenario.BaseMVA = BaseMVA;
 
-% Add routes for real-time formulation
-[scenario.RoadNetwork.RouteTime,scenario.RoadNetwork.RouteCharge] = build_routes(RoadNetwork.RoadGraph,RoadNetwork.TravelTimes,RoadNetwork.ChargeToTraverse);
+scenario = AdaptScenarioForRealTime(scenario);
+
 end
+
+
+function scenario = AdaptScenarioForRealTime(scenario)
+% Unpack scenario
+InitialConditions = scenario.InitialConditions;
+Passengers = scenario.Passengers;
+RoadNetwork = scenario.RoadNetwork;
+Thor = scenario.Thor;
+
+N = numel(RoadNetwork.RoadGraph);
+
+% Neglect MinNumVehiclesAti
+InitialConditions.MinNumVehiclesAti = zeros(N,1);
+
+% Prevent outstanding customers 
+Passengers.StarterSinks = [];
+Passengers.StarterSources = [];
+Passengers.StarterFlows = [];
+
+% Real-time formulation uses RebWeight but EAMoDproblem does not.
+scenario.RebWeight = 0;
+
+% EAMoDproblem handles MinEndCharge using state vector bounds (the same way as TVPowerBalancedFlow_withpower_sinkbundle).
+% TVPowerBalancedFlow_realtime does it with a special constraint.
+% For simplicity, we neglect it here
+RoadNetwork.MinEndCharge = 0;
+
+% Add routes for real-time formulation
+[RouteTime,RouteCharge,Routes] = build_routes(RoadNetwork.RoadGraph,RoadNetwork.TravelTimes,RoadNetwork.ChargeToTraverse);
+
+RoadNetwork.RouteTime = RouteTime;
+RoadNetwork.RouteCharge = RouteCharge;
+
+TVRoadCap = RoadNetwork.TVRoadCap;
+% This was taken from Nature_MATLAB_driver_fun
+for sinkid = 1:length(Passengers.Sinks)    
+    for sourceid = 1:length(Passengers.Sources{sinkid})
+        source = Passengers.Sources{sinkid}(sourceid);
+        sink = Passengers.Sinks(sinkid);
+        starttime = Passengers.StartTimes{sinkid}(sourceid);
+        flow = Passengers.Flows{sinkid}(sourceid);
+        route = Routes{source,sink};
+        mytime = starttime;
+        for edgeid = 1:length(route)-1
+            route(edgeid:edgeid+1);
+            edge = route(edgeid:edgeid+1);
+            edgetime = RoadNetwork.TravelTimes(edge(1),edge(2));
+            assert(edgetime>0,'ERROR, is this an edge?');
+            finaledgetime = min(mytime+edgetime-1,Thor);
+            TVRoadCap(mytime:finaledgetime,edge(1),edge(2))= TVRoadCap(mytime:finaledgetime,edge(1),edge(2))-flow;
+            mytime=mytime+edgetime;
+        end
+        assert(mytime == starttime + RouteTime(source,sink),'WEIRD TIME')
+    end
+end
+
+RoadNetwork.TVRoadCap = TVRoadCap;
+RoadNetwork.RouteTime = RouteTime;
+RoadNetwork.RouteCharge = RouteCharge;
+
+% Pack scenario again
+scenario.InitialConditions = InitialConditions;
+scenario.Passengers = Passengers;
+scenario.RoadNetwork = RoadNetwork;
+
+end
+
+function [RouteTime,RouteCharge,Routes] = build_routes(RoadGraph,TravelTimes,ChargeToTraverse)
+
+N=length(RoadGraph);
+
+RouteTime=zeros(N);
+RouteCharge=zeros(N);
+Routes=cell(N,N);
+
+for i=1:N
+    for j=1:N
+        Routes{i,j} = FreeRouteAstar(i,j,RoadGraph,TravelTimes);
+        for k=1:length(Routes{i,j})-1
+            RouteTime(i,j)=RouteTime(i,j)+TravelTimes(Routes{i,j}(k),Routes{i,j}(k+1));
+            RouteCharge(i,j)=RouteCharge(i,j)+ChargeToTraverse(Routes{i,j}(k),Routes{i,j}(k+1));
+        end
+    end
+end
+
+end
+
+function [Route] = FreeRouteAstar(start,goal,RoadGraph,RoadCost,heuristic_est)
+N=length(RoadGraph);
+if nargin<=4
+    heuristic_est = zeros(N); %revert to Dijkstra
+end
+
+%forked from the AMoD-congestion implementation
+
+ClosedSet = [];
+OpenSet = [start];
+
+CameFrom=-1*ones(N);
+g_score = Inf*ones(N,1);
+f_score = Inf*ones(N,1);
+g_score(start)=0;
+
+f_score(start)=g_score(start)+heuristic_est(start,goal);
+
+Route = [];
+
+while ~isempty(OpenSet)
+    [~,currInOpenSet]=min(f_score(OpenSet));
+    currNode = OpenSet(currInOpenSet);
+    if currNode == goal
+        
+        
+        Route = goal;
+        while (Route(1)~=start)
+            Route=[CameFrom(Route(1)),Route];
+        end
+        
+        return
+    end
+    OpenSet = OpenSet(OpenSet~=currNode);       %Remove current node
+    ClosedSet = [ClosedSet, currNode];          %Add to closed set
+    for neigh = RoadGraph{currNode}
+        if ~sum(ClosedSet == neigh)             %If neighbor is not in closed set
+            tentative_g = g_score(currNode) + RoadCost(currNode,neigh);
+            if (~sum(neigh == OpenSet))         %If the neighbor is not already in OpenSet, add it
+                OpenSet = [OpenSet, neigh];
+            elseif tentative_g>=g_score(neigh)
+                continue
+            end
+            CameFrom(neigh) = currNode;
+            g_score(neigh) = tentative_g;
+            f_score(neigh) = g_score(neigh)+heuristic_est(neigh,goal);
+            
+        end
+    end
+end
+
+end
+

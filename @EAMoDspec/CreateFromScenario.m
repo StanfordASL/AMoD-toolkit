@@ -46,12 +46,6 @@ if Flags.congrelaxflag
     warning('congrelaxflag is set but functionality is not available yet. Ignoring.')
 end
 
-% Stuff for real time algorithm
-obj.TVRoadCap = zeros(obj.Thor,obj.N,obj.N);
-for tt = 1:obj.Thor
-    obj.TVRoadCap(tt,:,:) = obj.RoadCap;
-end
-
 % Extras
 obj.v2g_efficiency = scenario.PowerNetwork.v2g_efficiency;
 

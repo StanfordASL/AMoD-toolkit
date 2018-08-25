@@ -74,10 +74,8 @@ classdef EAMoDspec
         
         RoadGraph(:,1) cell % RoadGraph{i} contains the neighbors of i in the road graph
         
-        % TODO: use only TVRoadCap
-        
+           
         RoadCap(:,:) double {mustBeNonnegative,mustBeReal} % RoadCap(i,j) is the capacity of the i-j link (in vehicles per unit time)
-        TVRoadCap(:,:,:) double {mustBeNonnegative,mustBeReal} % TVRoadCap(i,j,t) is the capacity of the i-j link (in vehicles per unit time) at time t
         TravelTimes(:,:) double {mustBeNonnegative,mustBeReal,mustBeInteger} % TravelTimes(i,j) is the travel time along the i-j link
         TravelDistance(:,:) double {mustBeNonnegative,mustBeReal} % TravelDistance(i,j) is the travel distance along the i-j link.
         ChargeToTraverse(:,:) double {mustBeNonnegative,mustBeReal,mustBeInteger} % ChargeToTraverse(i,j) is the amount of units of charge required to travel from i to j
@@ -118,7 +116,9 @@ classdef EAMoDspec
         
         time_step_s(1,:) double {mustBeNonnegative,mustBeReal,NumelMustBeLessThanOrEqual(time_step_s,1)} % Duration in seconds of a time step
         charge_unit_j(1,1) double {mustBeNonnegative,mustBeReal} % Energy of a charge unit in joule, 1 kWh = 3.6e6 J
-        v2g_efficiency(1,1) double {mustBeNonnegative,mustBeReal,mustBeLessThanOrEqual(v2g_efficiency,1)} = 1 % Efficiency of sending power back to the grid (vehicle2grid). Setting it to zero dissables v2g.
+        v2g_efficiency(1,1) double {mustBeNonnegative,mustBeReal,mustBeLessThanOrEqual(v2g_efficiency,1)} = 1 % Efficiency of sending power back to the grid (vehicle2grid)
+        
+        disable_v2g(1,1) logical = false % Flag to disable v2g.
         
         start_date_time(1,:) datetime {NumelMustBeLessThanOrEqual(start_date_time,1)} % Starting time of the simulation
     end

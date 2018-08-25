@@ -86,10 +86,9 @@ for l = 1:obj.spec.NumChargers
     end
 end
 
-% If spec.v2g_efficiency is set to zero, set all discharging flows to zero to
-% avoid unnecesarily wasting charge and narrowing the number of optimal solutions.
-% lb_StateVector is already set to zero, so we only need to set ub_StateVector to zero ass well
-if obj.spec.v2g_efficiency == 0
+% If spec.disable_v2g is true, set all discharging flows to zero. 
+% lb_StateVector is already set to zero, so we only need to set ub_StateVector to zero as well
+if obj.spec.disable_v2g
     for l = 1:obj.spec.NumChargers
         for c = 1:obj.spec.C
             for t = 1:obj.spec.Thor

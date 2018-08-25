@@ -45,9 +45,6 @@ CompareWithAMoDpowerHelper(test_case,scenario_infeas,true);
 end
 
 function CompareWithAMoDpowerHelper(test_case,scenario,use_real_time_formulation)
-if use_real_time_formulation
-    scenario = AdaptScenarioForRealTime(scenario);
-end
 
 scenario = AddDummyPowerNetworkToScenario(scenario);
 
@@ -80,7 +77,7 @@ if scenario.Flags.sourcerelaxflag
     eamod_problem.SourceRelaxCost = lp_matrices.SourceRelaxCost;
 end
 
-%LPmatricesMatch(test_case,eamod_problem,lp_matrices,scenario);
+LPmatricesMatch(test_case,eamod_problem,lp_matrices,scenario);
 OptimizationResultsMatch(test_case,eamod_problem,fval);
 end
 
@@ -185,7 +182,7 @@ row_range_RoadCongestion = row_start_RoadCongestion:row_end_RoadCongestion;
 [Ain_RoadCongestion_ref,Bin_RoadCongestion_ref] = ExtractConstraintSubmatrix(Ain_ref,Bin_ref,row_range_RoadCongestion,state_range);
 
 verifyEqualSparse(test_case,Ain_RoadCongestion,Ain_RoadCongestion_ref)
-verifyEqual(test_case,Bin_RoadCongestion,Bin_RoadCongestion_ref)
+verifyEqual(test_case,Bin_RoadCongestion,Bin_RoadCongestion_ref,'RelTol',test_case.TestData.rel_tol_equality_hard)
 
 % ChargerCongestion
 [Ain_ChargerCongestion, Bin_ChargerCongestion] = eamod_problem.CreateInequalityConstraintMatrices_ChargerCongestion();
@@ -215,6 +212,13 @@ function OptimizationResultsMatch(test_case,eamod_problem,fval_ref)
 eamod_problem.yalmip_settings = sdpsettings('solver','linprog');
 
 [objective_value,solver_time,diagnostics] = eamod_problem.Solve();
+
+% Our real-time objective value includes cost of pre-routed customer carrying 
+% vehicles, AMoD-power implementation does not. Hence, we subtract it
+if eamod_problem.use_real_time_formulation
+    [~, pax_cost_val_usd, ~,relax_cost_val_usd] = eamod_problem.EvaluateAMoDcost();
+    objective_value = objective_value - pax_cost_val_usd;
+end
 
 objective_value_ref = fval_ref;
 

@@ -21,12 +21,21 @@ classdef EAMoDproblemBase < handle
             obj.spec = spec;
             
             [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();
+            obj.TVRoadCap = obj.ComputeResidualRoadCapacity();
+            
+            
         end
-                        
-        decision_vector_val = EvaluateDecisionVector(obj);        
+        
+        % New methods
+        TVRoadCap = ComputeResidualRoadCapacity(obj);
+        
+        
         n_start_vehicles = ComputeNumberOfVehiclesAtStart(obj)
-        n_end_vehicles = ComputeNumberOfVehiclesAtEnd(obj,varargin)        
-        [total_cost_val, pax_cost_val, reb_cost_val,relax_cost_val] = EvaluateAMoDcost(obj,varargin)        
+        n_end_vehicles = ComputeNumberOfVehiclesAtEnd(obj,varargin)
+        [total_cost_val, pax_cost_val, reb_cost_val,relax_cost_val] = EvaluateAMoDcost(obj,varargin)
+        charger_power_demand_val_w = EvaluateChargerPowerDemand(obj,varargin)
+        decision_vector_val = EvaluateDecisionVector(obj);    
+        electricity_cost_val_usd = EvaluateElectricityCost(obj,varargin)    
         final_vehicle_distribution = GetFinalVehicleDistribution(obj,varargin)
         [DepTimeHist, ArrivalTimeHist] = GetTravelTimesHistograms(obj,varargin);
         [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,RebVehicleHist,IdleVehicleHist,AllVehicleHist] = GetVehicleStateHistograms(obj,varargin)
@@ -227,19 +236,22 @@ classdef EAMoDproblemBase < handle
         RouteTime(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger}  % RouteTime(i,j) is the number of time-steps needed to go from i to j
         RouteCharge(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger} % RouteCharge(i,j) is the number of charge units needed to go from i to j
         RouteDistance(:,:)  double {mustBeNonnegative,mustBeReal} % RouteDistance(i,j) is the distance in meters to go from i to j
-        Routes(:,:) cell % Routes{i,j} is the route from i to j expresed as a vector of connected nodes that need to be traversed
+        Routes(:,:) cell % Routes{i,j} is the route from i to j expressed as a vector of connected nodes that need to be traversed
+        
+        TVRoadCap(:,:,:) double {mustBeReal} % TVRoadCap(i,j,t) is the residual capacity of the i-j link (in vehicles per unit time) at time t, after subtracting the flow from pre-routed vehicles     
     end
     
-    properties %(Access = private)
+    properties (Access = private)
         % TODO: rename to optimization_variables
         decision_variables(1,1) % Struct with optimization variables        
     end
     
-    methods %(Access = private)
+    methods (Access = private)
         [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj)          
         charger_power_demand_w = ComputeChargerPowerDemand(obj,varargin)
         charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,varargin)
         A_charger_power_w = ComputeChargerPowerMatrixNew(obj)         
+        pax_cost_rt = ComputePaxCostRealTimeFormulation(obj)
         decision_variables = DefineDecisionVariables(obj)
         [amod_cost_usd, pax_cost_usd,reb_cost_usd, relax_cost_usd] = ComputeAMoDcost(obj,varargin)
         electricity_cost_usd = ComputeElectricityCost(obj,varargin)
