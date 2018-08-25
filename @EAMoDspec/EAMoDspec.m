@@ -116,7 +116,9 @@ classdef EAMoDspec
         
         time_step_s(1,:) double {mustBeNonnegative,mustBeReal,NumelMustBeLessThanOrEqual(time_step_s,1)} % Duration in seconds of a time step
         charge_unit_j(1,1) double {mustBeNonnegative,mustBeReal} % Energy of a charge unit in joule, 1 kWh = 3.6e6 J
-        v2g_efficiency(1,1) double {mustBeNonnegative,mustBeReal,mustBeLessThanOrEqual(v2g_efficiency,1)} = 1 % Efficiency of sending power back to the grid (vehicle2grid). Setting it to zero dissables v2g.
+        v2g_efficiency(1,1) double {mustBeNonnegative,mustBeReal,mustBeLessThanOrEqual(v2g_efficiency,1)} = 1 % Efficiency of sending power back to the grid (vehicle2grid)
+        
+        disable_v2g(1,1) logical = false % Flag to disable v2g.
         
         start_date_time(1,:) datetime {NumelMustBeLessThanOrEqual(start_date_time,1)} % Starting time of the simulation
     end

@@ -35,7 +35,7 @@ scenario_feas = LoadScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v
 
 % Test with non-relaxed source constraints
 scenario_feas.Flags.sourcerelaxflag = false;
-%CompareWithAMoDpowerHelper(test_case,scenario_feas,false);
+CompareWithAMoDpowerHelper(test_case,scenario_feas,false);
 CompareWithAMoDpowerHelper(test_case,scenario_feas,true);
 
 scenario_infeas = LoadScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_infeas');
@@ -216,7 +216,7 @@ eamod_problem.yalmip_settings = sdpsettings('solver','linprog');
 % Our real-time objective value includes cost of pre-routed customer carrying 
 % vehicles, AMoD-power implementation does not. Hence, we subtract it
 if eamod_problem.use_real_time_formulation
-    [~, pax_cost_val_usd, ~,~] = eamod_problem.EvaluateAMoDcost();
+    [~, pax_cost_val_usd, ~,relax_cost_val_usd] = eamod_problem.EvaluateAMoDcost();
     objective_value = objective_value - pax_cost_val_usd;
 end
 
