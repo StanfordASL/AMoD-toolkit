@@ -73,8 +73,7 @@ classdef EAMoDspec
         % above the property instead of after it.
         
         RoadGraph(:,1) cell % RoadGraph{i} contains the neighbors of i in the road graph
-        
-           
+                   
         RoadCap(:,:) double {mustBeNonnegative,mustBeReal} % RoadCap(i,j) is the capacity of the i-j link (in vehicles per unit time)
         TravelTimes(:,:) double {mustBeNonnegative,mustBeReal,mustBeInteger} % TravelTimes(i,j) is the travel time along the i-j link
         TravelDistance(:,:) double {mustBeNonnegative,mustBeReal} % TravelDistance(i,j) is the travel distance along the i-j link.
@@ -163,7 +162,7 @@ classdef EAMoDspec
         end
     end
     
-    properties (Access = {?EAMoDproblem})
+    properties %(Access = {?EAMoDproblem})
         % The following properties depend on others. We do not use dependent
         % properties so that we can cache them.
         
@@ -171,10 +170,12 @@ classdef EAMoDspec
         ReverseRoadGraph(:,1) cell % Nodes in ReverseRoadGraph{i} are such that RoadGraph{ReverseRoadGraph{i}} contains i
         NumRoadEdges(:,1) double % NumRoadEdges(i) is the number of edges starting in road node i
         cumRoadNeighbors(:,1) double % Cumulative sum of NumRoadEdges
-        RoadNeighborCounter(:,:) double % Counter of road neighbors     
+        RoadNeighborCounter(:,:) double % Counter of road neighbors    
+        edge_number_matrix(:,:) double % edge_number_matrix(i,j) is the number of edge i-j, where edges are numbered as they appear in RoadGraph. It is nan if i-j is not an edge.
         
         % Dependent on Sources
         NumSourcesPerSink(:,1) double % NumSourcesPerSink(i) is the number of Sources towards Sinks(i)
         CumNumSourcesPerSink(:,1) double % Cumulative sum of NumSourcesPerSink        
     end
+    
 end

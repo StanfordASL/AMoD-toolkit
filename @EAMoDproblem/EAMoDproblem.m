@@ -153,7 +153,7 @@ classdef EAMoDproblem < handle
         
         function res = FindInRoadCongestiontij(obj,t,i,j)
             % FindInRoadCongestiontij Indexer for road congestion constraints
-            res = obj.spec.E*(t - 1) + obj.spec.cumRoadNeighbors(i) + obj.spec.RoadNeighborCounter(i,j);
+            res = obj.spec.E*(t - 1) + obj.spec.edge_number_matrix(i,j);
         end
         
         function res = FindInChargerCongestiontl(obj,t,l)
@@ -257,7 +257,7 @@ classdef EAMoDproblem < handle
         pre_routed_trip_histogram = GetPreRoutedTripHistogram(obj)
         
         function res = FindRoadLinkHelpertckij(obj,t,c,k,i,j)
-            res = (t-1)*(obj.spec.E*(obj.num_passenger_flows + 1)*(obj.spec.C) + 2*(obj.num_passenger_flows+1)*obj.spec.NumChargers*(obj.spec.C)) + (c-1)*obj.spec.E*(obj.num_passenger_flows+1) + (k-1)*obj.spec.E + (obj.spec.cumRoadNeighbors(i) + obj.spec.RoadNeighborCounter(i,j));
+            res = (t-1)*(obj.spec.E*(obj.num_passenger_flows + 1)*(obj.spec.C) + 2*(obj.num_passenger_flows+1)*obj.spec.NumChargers*(obj.spec.C)) + (c-1)*obj.spec.E*(obj.num_passenger_flows+1) + (k-1)*obj.spec.E + obj.spec.edge_number_matrix(i,j);
         end
         
         function res = FindChargeLinkHelpertckij(obj,t,c,k,i)

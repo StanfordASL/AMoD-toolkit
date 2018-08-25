@@ -40,4 +40,14 @@ for i = 1:obj.N
     end
     TempNeighVec = zeros(obj.N,1);
 end
+
+obj.edge_number_matrix = nan(obj.N,obj.N);
+
+edge_counter = 0;
+for i = 1:obj.N
+    for j = obj.RoadGraph{i}(:).'
+        edge_counter = 1 + edge_counter;
+        obj.edge_number_matrix(i,j) = edge_counter;
+    end    
+end
 end
