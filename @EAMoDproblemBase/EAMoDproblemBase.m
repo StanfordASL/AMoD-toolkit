@@ -21,7 +21,14 @@ classdef EAMoDproblemBase < handle
             obj.spec = spec;
             
             [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();
+            obj.TVRoadCap = obj.ComputeResidualRoadCapacity();
+            
+            
         end
+        
+        % New methods
+        TVRoadCap = ComputeResidualRoadCapacity(obj);
+        
         
         n_start_vehicles = ComputeNumberOfVehiclesAtStart(obj)
         n_end_vehicles = ComputeNumberOfVehiclesAtEnd(obj,varargin)
@@ -229,7 +236,9 @@ classdef EAMoDproblemBase < handle
         RouteTime(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger}  % RouteTime(i,j) is the number of time-steps needed to go from i to j
         RouteCharge(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger} % RouteCharge(i,j) is the number of charge units needed to go from i to j
         RouteDistance(:,:)  double {mustBeNonnegative,mustBeReal} % RouteDistance(i,j) is the distance in meters to go from i to j
-        Routes(:,:) cell % Routes{i,j} is the route from i to j expresed as a vector of connected nodes that need to be traversed
+        Routes(:,:) cell % Routes{i,j} is the route from i to j expressed as a vector of connected nodes that need to be traversed
+        
+        TVRoadCap(:,:,:) double {mustBeReal} % TVRoadCap(i,j,t) is the residual capacity of the i-j link (in vehicles per unit time) at time t, after subtracting the flow from pre-routed vehicles     
     end
     
     properties (Access = private)

@@ -30,7 +30,7 @@ for t = 1:obj.spec.Thor
             end
             
             if obj.use_real_time_formulation
-                Bin(Ainrow) = obj.spec.TVRoadCap(t,i,j);
+                Bin(Ainrow) = obj.TVRoadCap(i,j,t);
             else
                 Bin(Ainrow) = obj.spec.RoadCap(i,j);
             end

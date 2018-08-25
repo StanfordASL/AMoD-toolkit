@@ -3,8 +3,10 @@ clear variables;
 %% Prepare specification
 data = load('EAMoDspecDemo.mat');
 spec = data.spec;
-spec.RoadCap(spec.RoadCap > 0) = inf;
 spec.EmptyVehicleInitialPos = 0.4*spec.EmptyVehicleInitialPos;
+% Increase RoadCap so that real-time problem is feasible
+spec.RoadCap = 6*spec.RoadCap;
+
 
 % Seed for repeatability
 rng('default');

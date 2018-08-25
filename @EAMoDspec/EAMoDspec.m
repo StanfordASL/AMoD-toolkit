@@ -74,10 +74,8 @@ classdef EAMoDspec
         
         RoadGraph(:,1) cell % RoadGraph{i} contains the neighbors of i in the road graph
         
-        % TODO: use only TVRoadCap
-        
+           
         RoadCap(:,:) double {mustBeNonnegative,mustBeReal} % RoadCap(i,j) is the capacity of the i-j link (in vehicles per unit time)
-        TVRoadCap(:,:,:) double {mustBeNonnegative,mustBeReal} % TVRoadCap(i,j,t) is the capacity of the i-j link (in vehicles per unit time) at time t
         TravelTimes(:,:) double {mustBeNonnegative,mustBeReal,mustBeInteger} % TravelTimes(i,j) is the travel time along the i-j link
         TravelDistance(:,:) double {mustBeNonnegative,mustBeReal} % TravelDistance(i,j) is the travel distance along the i-j link.
         ChargeToTraverse(:,:) double {mustBeNonnegative,mustBeReal,mustBeInteger} % ChargeToTraverse(i,j) is the amount of units of charge required to travel from i to j
