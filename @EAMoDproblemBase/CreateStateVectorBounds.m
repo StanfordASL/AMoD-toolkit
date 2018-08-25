@@ -88,19 +88,19 @@ end
 
 % If spec.v2g_efficiency is set to zero, set all discharging flows to zero to
 % avoid unnecesarily wasting charge and narrowing the number of optimal solutions.
-% lb_StateVector is already set to zero, so we only need to set ub_StateVector to zero ass well
-if obj.spec.v2g_efficiency == 0
-    for l = 1:obj.spec.NumChargers
-        for c = 1:obj.spec.C
-            for t = 1:obj.spec.Thor
-                for k = 1:obj.num_passenger_flows
-                    ub_StateVector(obj.FindDischargeLinkPtckl(t,c,k,l)) = 0;
-                end
-                ub_StateVector(obj.FindDischargeLinkRtcl(t,c,l)) = 0;            
-            end
-        end    
-    end
-end
+% lb_StateVector is already set to zero, so we only need to set ub_StateVector to zero as well
+% if obj.spec.v2g_efficiency == 0
+%     for l = 1:obj.spec.NumChargers
+%         for c = 1:obj.spec.C
+%             for t = 1:obj.spec.Thor
+%                 for k = 1:obj.num_passenger_flows
+%                     ub_StateVector(obj.FindDischargeLinkPtckl(t,c,k,l)) = 0;
+%                 end
+%                 ub_StateVector(obj.FindDischargeLinkRtcl(t,c,l)) = 0;            
+%             end
+%         end    
+%     end
+% end
 
 % We check obj.use_real_time_formulation because this appears in TVPowerBalancedFlow_realtime
 % but not in TVPowerBalancedFlow_withpower_bundle.

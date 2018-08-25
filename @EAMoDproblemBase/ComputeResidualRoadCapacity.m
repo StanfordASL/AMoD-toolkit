@@ -23,9 +23,8 @@ for i_sink = 1:obj.spec.NumSinks
             edge_time = obj.spec.TravelTimes(edge_source,edge_sink);
             assert(edge_time > 0,'edge_time should be positive');
             
-            final_edge_time = min(start_time + edge_time - 1,obj.spec.Thor);
-            
-            
+            final_edge_time = min(current_time + edge_time - 1,obj.spec.Thor);
+                        
             road_utilization_matrix(edge_source,edge_sink,current_time:final_edge_time) = road_utilization_matrix(edge_source,edge_sink,current_time:final_edge_time) + flow;
             
             current_time = current_time + edge_time;
@@ -38,14 +37,4 @@ end
 ExpandedRoadCap = repmat(full(obj.spec.RoadCap),1,1,obj.spec.Thor);
 
 TVRoadCap = ExpandedRoadCap - road_utilization_matrix;
-
-residual_road_cap_relative = TVRoadCap./ExpandedRoadCap;
-
-if any(residual_road_cap_relative(:) < 0)
-    [min_residual_road_cap_relative,index] = min(residual_road_cap_relative(:));
-    [i,j,t] = ind2sub(size(TVRoadCap),index);
-    
-    warning('Residual road capacity is negative. Real-time formulation will not be feasible. Maximal excedent: %.2f %% in edge %i-%i at time-step %i.',-min_residual_road_cap_relative*100,i,j,t)   
-end
-
 end

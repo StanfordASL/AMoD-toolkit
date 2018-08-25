@@ -224,8 +224,71 @@ scenario.time_step_s = double(timeStepSize);
 scenario.charge_unit_j = ChargeUnitToPowerUnit*scenario.time_step_s*BaseMVA*1e6;
 scenario.BaseMVA = BaseMVA;
 
+scenario = AdaptScenarioForRealTime(scenario);
+
+end
+
+
+function scenario = AdaptScenarioForRealTime(scenario)
+% Unpack scenario
+Passengers = scenario.Passengers;
+RoadNetwork = scenario.RoadNetwork;
+Thor = scenario.Thor;
+
+N = numel(scenario.RoadNetwork.RoadGraph);
+
+% Neglect MinNumVehiclesAti
+scenario.InitialConditions.MinNumVehiclesAti = zeros(N,1);
+
+% Prevent outstanding customers 
+scenario.Passengers.StarterSinks = [];
+scenario.Passengers.StarterSources = [];
+scenario.Passengers.StarterFlows = [];
+
+% Real-time formulation uses RebWeight but EAMoDproblem does not.
+scenario.RebWeight = 0;
+
+% EAMoDproblem handles MinEndCharge using state vector bounds (the same way as TVPowerBalancedFlow_withpower_sinkbundle).
+% TVPowerBalancedFlow_realtime does it with a special constraint.
+% For simplicity, we neglect it here
+scenario.RoadNetwork.MinEndCharge = 0;
+
 % Add routes for real-time formulation
-[scenario.RoadNetwork.RouteTime,scenario.RoadNetwork.RouteCharge] = build_routes(RoadNetwork.RoadGraph,RoadNetwork.TravelTimes,RoadNetwork.ChargeToTraverse);
+[RouteTime,RouteCharge,Routes] = build_routes(RoadNetwork.RoadGraph,RoadNetwork.TravelTimes,RoadNetwork.ChargeToTraverse);
+
+RoadNetwork.RouteTime = RouteTime;
+RoadNetwork.RouteCharge = RouteCharge;
+
+TVRoadCap = RoadNetwork.TVRoadCap;
+% This was taken from Nature_MATLAB_driver_fun
+for sinkid = 1:length(Passengers.Sinks)    
+    for sourceid = 1:length(Passengers.Sources{sinkid})
+        source = Passengers.Sources{sinkid}(sourceid);
+        sink = Passengers.Sinks(sinkid);
+        starttime = Passengers.StartTimes{sinkid}(sourceid);
+        flow = Passengers.Flows{sinkid}(sourceid);
+        route = Routes{source,sink};
+        mytime = starttime;
+        for edgeid = 1:length(route)-1
+            route(edgeid:edgeid+1);
+            edge = route(edgeid:edgeid+1);
+            edgetime = RoadNetwork.TravelTimes(edge(1),edge(2));
+            assert(edgetime>0,'ERROR, is this an edge?');
+            finaledgetime = min(mytime+edgetime-1,Thor);
+            TVRoadCap(mytime:finaledgetime,edge(1),edge(2))= TVRoadCap(mytime:finaledgetime,edge(1),edge(2))-flow;
+            mytime=mytime+edgetime;
+        end
+        assert(mytime == starttime + RouteTime(source,sink),'WEIRD TIME')
+    end
+end
+
+RoadNetwork.TVRoadCap = TVRoadCap;
+RoadNetwork.RouteTime = RouteTime;
+RoadNetwork.RouteCharge = RouteCharge;
+
+scenario.RoadNetwork = RoadNetwork;
+
+
 end
 
 function [RouteTime,RouteCharge,Routes] = build_routes(RoadGraph,TravelTimes,ChargeToTraverse)
@@ -237,8 +300,8 @@ RouteCharge=zeros(N);
 Routes=cell(N,N);
 
 for i=1:N
-    parfor j=1:N
-        Routes{i,j} = FreeRouteAstar(i,j,RoadGraph,TravelTimes)
+    for j=1:N
+        Routes{i,j} = FreeRouteAstar(i,j,RoadGraph,TravelTimes);
         for k=1:length(Routes{i,j})-1
             RouteTime(i,j)=RouteTime(i,j)+TravelTimes(Routes{i,j}(k),Routes{i,j}(k+1));
             RouteCharge(i,j)=RouteCharge(i,j)+ChargeToTraverse(Routes{i,j}(k),Routes{i,j}(k+1));
@@ -300,3 +363,4 @@ while ~isempty(OpenSet)
 end
 
 end
+
