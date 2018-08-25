@@ -1,4 +1,5 @@
 function TVRoadCap = ComputeResidualRoadCapacity(obj)
+% ComputeResidualRoadCapacity Computes the residual road capacity after accounting for the pre-routed passenger-carrying vehicles used in the real-time formulation
 
 road_utilization_matrix = zeros(obj.spec.N,obj.spec.N,obj.spec.Thor);
 

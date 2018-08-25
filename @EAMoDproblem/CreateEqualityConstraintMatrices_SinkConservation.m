@@ -2,8 +2,6 @@ function [Aeq_SinkConservation, Beq_SinkConservation] = CreateEqualityConstraint
 % CreateEqualityConstraintMatrices_SinkConservation Creates equality constraints to accumulate vehicles arriving at different times with different charge levels (Eq. 9c)
 %   [Aeq_SinkConservation, Beq_SinkConservation] = CreateEqualityConstraintMatrices_SinkConservation(obj)
 
-
-
 n_constraint = obj.spec.NumSinks;
 
 % This is meant as an upper bound for memory allocation. Unused entries are

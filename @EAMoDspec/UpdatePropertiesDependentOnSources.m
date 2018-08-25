@@ -1,5 +1,6 @@
 function obj = UpdatePropertiesDependentOnSources(obj)
 % UpdatePropertiesDependentOnSources updates cached properties that depend on Sources
+
 obj.NumSourcesPerSink = cellfun(@numel,obj.Sources);
 
 obj.CumNumSourcesPerSink = cumsum(obj.NumSourcesPerSink);

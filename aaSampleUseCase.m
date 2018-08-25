@@ -1,3 +1,5 @@
+% aaSampleUseCase Sample use case of AMoD-toolkit that compares the standard and the real-time formulations in terms of objective value and solver time
+
 clear variables;
 
 %% Prepare specification

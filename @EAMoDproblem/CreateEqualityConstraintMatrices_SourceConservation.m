@@ -2,7 +2,6 @@ function [Aeq_SourceConservation, Beq_SourceConservation] = CreateEqualityConstr
 % CreateEqualityConstraintMatrices_SourceConservation Creates equality constraints to distribute a given trip request to vehicles with different charge levels (Eq. 9b)
 %   [Aeq_SourceConservation, Beq_SourceConservation] = CreateEqualityConstraintMatrices_SourceConservation(obj)
 
-
 n_constraint = obj.spec.TotNumSources;
 
 % This is meant as an upper bound for memory allocation. Unused entries are

@@ -25,11 +25,7 @@ classdef EAMoDproblem < handle
             
             
         end
-        
-        % New methods
-        TVRoadCap = ComputeResidualRoadCapacity(obj);
-        
-        
+                
         n_start_vehicles = ComputeNumberOfVehiclesAtStart(obj)
         n_end_vehicles = ComputeNumberOfVehiclesAtEnd(obj,varargin)
         [total_cost_val, pax_cost_val, reb_cost_val,relax_cost_val] = EvaluateAMoDcost(obj,varargin)
@@ -252,6 +248,7 @@ classdef EAMoDproblem < handle
         charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,varargin)
         A_charger_power_w = ComputeChargerPowerMatrixNew(obj)         
         pax_cost_rt = ComputePaxCostRealTimeFormulation(obj)
+        TVRoadCap = ComputeResidualRoadCapacity(obj)
         decision_variables = DefineDecisionVariables(obj)
         [amod_cost_usd, pax_cost_usd,reb_cost_usd, relax_cost_usd] = ComputeAMoDcost(obj,varargin)
         electricity_cost_usd = ComputeElectricityCost(obj,varargin)
