@@ -169,8 +169,6 @@ classdef EAMoDspec
         % Dependent on RoadGraph
         ReverseRoadGraph(:,1) cell % Nodes in ReverseRoadGraph{i} are such that RoadGraph{ReverseRoadGraph{i}} contains i
         NumRoadEdges(:,1) double % NumRoadEdges(i) is the number of edges starting in road node i
-        cumRoadNeighbors(:,1) double % Cumulative sum of NumRoadEdges
-        RoadNeighborCounter(:,:) double % Counter of road neighbors    
         edge_number_matrix(:,:) double % edge_number_matrix(i,j) is the number of edge i-j, where edges are numbered as they appear in RoadGraph. It is nan if i-j is not an edge.
         
         % Dependent on Sources

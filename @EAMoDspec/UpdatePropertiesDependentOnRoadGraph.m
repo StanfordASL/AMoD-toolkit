@@ -25,22 +25,6 @@ for i = 1:obj.N
     obj.E = obj.E + length(obj.RoadGraph{i});
 end
 
-obj.cumRoadNeighbors = cumsum(obj.NumRoadEdges);
-obj.cumRoadNeighbors=[0;obj.cumRoadNeighbors(1:end-1)];
-
-obj.RoadNeighborCounter = sparse([],[],[],obj.N,obj.N,obj.E);
-TempNeighVec = zeros(obj.N,1);
-for i = 1:obj.N
-    for j = obj.RoadGraph{i}
-        TempNeighVec(j) = 1;
-    end
-    NeighCounterLine = cumsum(TempNeighVec);
-    for j = obj.RoadGraph{i}
-        obj.RoadNeighborCounter(i,j) = NeighCounterLine(j);
-    end
-    TempNeighVec = zeros(obj.N,1);
-end
-
 obj.edge_number_matrix = nan(obj.N,obj.N);
 
 edge_counter = 0;
