@@ -5,7 +5,7 @@ scenario = LoadScenario(data_path);
 
 spec = EAMoDspec.CreateFromScenario(scenario);
 
-eamod_problem = EAMoDproblemBase(spec);
+eamod_problem = EAMoDproblem(spec);
 
 eamod_problem.Solve();
 

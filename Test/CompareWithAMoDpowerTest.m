@@ -60,7 +60,7 @@ spec.charger_power_price_usd_per_j = charger_power_price_usd_per_j;
 scenario.PowerNetwork.PowerCosts = charger_power_price_usd_per_j.'*(scenario.BaseMVA*1e6*scenario.time_step_s);
 
 % Test non-real time formulation
-eamod_problem = EAMoDproblemBase(spec);
+eamod_problem = EAMoDproblem(spec);
 
 if use_real_time_formulation
     eamod_problem.use_real_time_formulation = true;

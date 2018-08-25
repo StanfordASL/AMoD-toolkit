@@ -1,7 +1,7 @@
 function pax_cost_rt = ComputePaxCostRealTimeFormulation(obj)
 % ComputePaxCostRealTimeFormulation Computes the cost  associated with the pre-routed passenger-carrying vehicles in the real-time formulation
 %   In the real-time formulation, passenger carrying vehicles follow pre-computed routes and are not part of the optimization.
-%   See also EAModProblemBase.BuildRoutes
+%   See also EAMoDproblem.BuildRoutes
 
 if obj.use_real_time_formulation
     time_cost = 0;

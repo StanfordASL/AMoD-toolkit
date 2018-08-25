@@ -11,7 +11,7 @@ spec.time_step_s = 1800;
 % This matrix needs to be transposed
 spec.charger_power_price_usd_per_j = 43/(1e6*3600)*ones(spec.NumChargers,spec.Thor);
 
-eamod_problem = EAMoDproblemBase(spec);
+eamod_problem = EAMoDproblem(spec);
 
 res = eamod_problem.Solve();
 

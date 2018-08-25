@@ -163,7 +163,7 @@ classdef EAMoDspec
         end
     end
     
-    properties (Access = {?EAMoDproblemBase})
+    properties (Access = {?EAMoDproblem})
         % The following properties depend on others. We do not use dependent
         % properties so that we can cache them.
         

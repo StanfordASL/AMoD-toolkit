@@ -2,8 +2,8 @@ function [amod_cost_usd, pax_cost_usd,reb_cost_usd, relax_cost_usd] = ComputeAMo
 % ComputeAMoDcost Returns the cost of operating the AMoD system excluding electricity
 %   [amod_cost_usd, pax_cost_usd,reb_cost_usd, relax_cost_usd] = ComputeAMoDcost(obj) uses the decision_vector in obj.decision_variables
 %   [amod_cost_usd, pax_cost_usd,reb_cost_usd, relax_cost_usd] = ComputeAMoDcost(obj,decision_vector_val) uses decision_vector_val
-%   For the meaning of total_cost, pax_cost, reb_cost and relax_cost see EAMoDProblemBase.CreateCostVector
-%   See also EAMoDProblemBase.CreateCostVector
+%   For the meaning of total_cost, pax_cost, reb_cost and relax_cost see EAMoDproblem.CreateCostVector
+%   See also EAMoDproblem.CreateCostVector
 
 switch numel(varargin)
     case 0

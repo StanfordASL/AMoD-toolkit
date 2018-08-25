@@ -1,5 +1,5 @@
-classdef EAMoDproblemBase < handle
-    % EAMoDproblemBase Represents an electric AMoD problem using a network flow model
+classdef EAMoDproblem < handle
+    % EAMoDproblem Represents an electric AMoD problem using a network flow model
     %   The model of the electric AMoD system used here is described in the
     %   paper below. Note that this implementation does not include the power network.
     %
@@ -9,9 +9,9 @@ classdef EAMoDproblemBase < handle
     %   Pittsburgh, Pennsylvania, 2018
     
     methods
-        function obj = EAMoDproblemBase(spec)
-            % EAMoDproblemBase Constructs an EAMoDproblemBase object
-            %   obj = EAMoDproblemBase(spec) where spec is an instance of
+        function obj = EAMoDproblem(spec)
+            % EAMoDproblem Constructs an EAMoDproblem object
+            %   obj = EAMoDproblem(spec) where spec is an instance of
             %   EAMoDspec specifying the problem.
             %   See also EAMoDspec
             

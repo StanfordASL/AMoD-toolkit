@@ -15,7 +15,7 @@ charger_power_price_usd_per_j = (35 + 10*rand(spec.NumChargers,spec.Thor))/(1e6*
 spec.charger_power_price_usd_per_j = charger_power_price_usd_per_j;
 
 %% Create and solve problem
-eamod_problem = EAMoDproblemBase(spec);
+eamod_problem = EAMoDproblem(spec);
 
 [objective_value,solver_time] = eamod_problem.Solve();
 

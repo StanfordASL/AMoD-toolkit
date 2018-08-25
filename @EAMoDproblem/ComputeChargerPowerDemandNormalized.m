@@ -10,7 +10,7 @@ function charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,v
 %   where decision_vector is an sdpvar and A_charger_power_w typically has 
 %   very large entries (flow of 1 car corresponds to several kW load). This
 %   often leads to numerical problems. Often, we do not care about Watts, 
-%   but about per-unit power, energy, etc. For example, see EAMoDproblemBase.ComputeElectricityCost
+%   but about per-unit power, energy, etc. For example, see EAMoDproblem.ComputeElectricityCost
 %   In these cases we would do
 %   charger_power_demand_w = ComputeChargerPowerDemand();
 %   something_we_care_about = factor*charger_power_demand_w;
@@ -18,7 +18,7 @@ function charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,v
 %   something_we_care_about = ComputeChargerPowerDemandNormalized(factor)
 %   and get better numerical behavior.
 %
-%   See also EAMoDproblemBase.ComputeElectricityCost
+%   See also EAMoDproblem.ComputeElectricityCost
 
 if ~isscalar(factor)
    assert(all(size(factor) == [obj.spec.NumChargers,obj.spec.Thor]),'factor must be a scalar or a matrix of size spec.NumChargers x spec.Thor.') 
