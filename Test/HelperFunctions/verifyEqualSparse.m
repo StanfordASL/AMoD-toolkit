@@ -1,9 +1,7 @@
 function verifyEqualSparse(test_case,S,S_ref,varargin)
-% verifyEqualSparse Verifies the equality of a value to a reference exploiting sparsity
-%   verifyEqual often fails for large arrays
+% verifyEqualSparse Analog to verifyEqual but exploits sparsity (verifyEqual fails for large arrays).
 %
-%   See also verifyEqual
-
+% See also verifyEqual
 
 S_delta = S - S_ref;
 

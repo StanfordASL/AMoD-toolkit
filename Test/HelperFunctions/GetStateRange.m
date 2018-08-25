@@ -1,4 +1,8 @@
 function state_range = GetStateRange(eamod_problem,indexer)
+% GetStateRange Returns the range of columns in legacy implementation that corresponds to the state in EAMoDproblem
+%
+%   See also GetIndexer, GetIndexerRealTime
+
 spec = eamod_problem.spec;
 
 if eamod_problem.use_real_time_formulation

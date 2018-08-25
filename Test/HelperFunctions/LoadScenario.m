@@ -74,7 +74,7 @@ end
 %PowerToRoadMap=zeros(size(PowerToRoadMap));
 
 
-%%
+
 % Road data
 RoadNetwork.C=C;
 RoadNetwork.RoadGraph=RoadGraph;
