@@ -1,18 +1,18 @@
 function figure_handle = PlotDeparturesAndArrivals(obj,varargin)
 % PlotDeparturesAndArrivals Creates a plot showing the amount of trips departing and arriving across time.
 %   figure_handle = PlotDeparturesAndArrivals(obj) uses the state_vector in obj.optimization_variables
-%   figure_handle = PlotDeparturesAndArrivals(obj,decision_vector_val) uses decision_vector_val
+%   figure_handle = PlotDeparturesAndArrivals(obj,state_vector_val) uses state_vector_val
 
 switch numel(varargin)
     case 0
-        decision_vector_val = obj.EvaluateDecisionVector();
+        state_vector_val = obj.EvaluateStateVector();
     case 1
-        decision_vector_val = varargin{1};
+        state_vector_val = varargin{1};
     otherwise
         error('Too many arguments.')
 end
 
-[DepTimeHist, ArrivalTimeHist] = obj.GetTravelTimesHistograms(decision_vector_val);
+[DepTimeHist, ArrivalTimeHist] = obj.GetTravelTimesHistograms(state_vector_val);
 
 [time_range,x_label] = obj.spec.GetTimeRange();
 

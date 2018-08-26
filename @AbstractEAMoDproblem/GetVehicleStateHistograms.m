@@ -3,7 +3,7 @@ function [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,...
     = GetVehicleStateHistograms(obj,varargin)
 % GetVehicleStateHistograms Returns the distribution of vehicles across states as a function of time
 %   [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,RebVehicleHist,IdleVehicleHist,AllVehicleHist] = GetVehicleStateHistograms(obj) uses the state_vector in obj.optimization_variables
-%   [...] = GetVehicleStateHistograms(obj,decision_vector_val) uses decision_vector_val
+%   [...] = GetVehicleStateHistograms(obj,state_vector_val) uses state_vector_val
 %   ChargingVehicleHist contains the number of vehicles charging (including rebalancing and passenger-carrying),
 %   DischargingVehicleHist contains the number of vehicles discharging (including rebalancing and passenger-carrying),
 %   PaxVehicleHist contains the number of passenger-carrying moving vehicles
@@ -13,9 +13,9 @@ function [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,...
 
 switch numel(varargin)
     case 0
-        decision_vector_val = obj.EvaluateDecisionVector();
+        state_vector_val = obj.EvaluateStateVector();
     case 1
-        decision_vector_val = varargin{1};
+        state_vector_val = varargin{1};
     otherwise
         error('Too many arguments.')
 end
@@ -28,9 +28,9 @@ for tt = 1:obj.spec.n_time_step
             for deltat = 0:obj.spec.charger_time(l) - 1
                 if tt - deltat > 0
                     for k = 1:obj.n_passenger_flow_in_optimization
-                        ChargingVehicleHist(tt) = ChargingVehicleHist(tt) + decision_vector_val(obj.FindChargeLinkPtckl(tt-deltat,c,k,l));
+                        ChargingVehicleHist(tt) = ChargingVehicleHist(tt) + state_vector_val(obj.FindChargeLinkPtckl(tt-deltat,c,k,l));
                     end
-                    ChargingVehicleHist(tt) = ChargingVehicleHist(tt) + decision_vector_val(obj.FindChargeLinkRtcl(tt-deltat,c,l));
+                    ChargingVehicleHist(tt) = ChargingVehicleHist(tt) + state_vector_val(obj.FindChargeLinkRtcl(tt-deltat,c,l));
                 end
             end
         end
@@ -45,9 +45,9 @@ for tt = 1:obj.spec.n_time_step
             for deltat = 0:obj.spec.charger_time(l) - 1
                 if tt - deltat > 0
                     for k = 1:obj.n_passenger_flow_in_optimization
-                        DischargingVehicleHist(tt) = DischargingVehicleHist(tt) + decision_vector_val(obj.FindDischargeLinkPtckl(tt-deltat,c,k,l));
+                        DischargingVehicleHist(tt) = DischargingVehicleHist(tt) + state_vector_val(obj.FindDischargeLinkPtckl(tt-deltat,c,k,l));
                     end
-                    DischargingVehicleHist(tt) = DischargingVehicleHist(tt) + decision_vector_val(obj.FindDischargeLinkRtcl(tt-deltat,c,l));
+                    DischargingVehicleHist(tt) = DischargingVehicleHist(tt) + state_vector_val(obj.FindDischargeLinkRtcl(tt-deltat,c,l));
                 end
             end
         end
@@ -67,14 +67,14 @@ for tt = 1:obj.spec.n_time_step
                     for deltat = 0:obj.spec.road_travel_time_matrix(i,j)-1
                         if tt - deltat > 0
                             for k = 1:obj.n_passenger_flow_in_optimization
-                                PaxVehicleHist(tt) = PaxVehicleHist(tt) + decision_vector_val(obj.FindRoadLinkPtckij(tt-deltat,c,k,i,j));
+                                PaxVehicleHist(tt) = PaxVehicleHist(tt) + state_vector_val(obj.FindRoadLinkPtckij(tt-deltat,c,k,i,j));
                             end
                             if i == j
                                 % Idle vehicles are those that are
                                 % rebalancing in the same node
-                                IdleVehicleHist(tt) = IdleVehicleHist(tt) + decision_vector_val(obj.FindRoadLinkRtcij(tt-deltat,c,i,j));
+                                IdleVehicleHist(tt) = IdleVehicleHist(tt) + state_vector_val(obj.FindRoadLinkRtcij(tt-deltat,c,i,j));
                             else
-                                RebVehicleHist(tt) = RebVehicleHist(tt) + decision_vector_val(obj.FindRoadLinkRtcij(tt-deltat,c,i,j));
+                                RebVehicleHist(tt) = RebVehicleHist(tt) + state_vector_val(obj.FindRoadLinkRtcij(tt-deltat,c,i,j));
                             end
                         end
                     end

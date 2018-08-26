@@ -1,7 +1,7 @@
 function charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,varargin)
 % ComputeChargerPowerDemandNormalized Computes charger power demand normalized with a matrix factor
 %   charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor) uses the state_vector in obj.optimization_variables
-%   charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,decision_vector_val) uses decision_vector_val
+%   charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,state_vector_val) uses state_vector_val
 %   factor can be a scalar or a matrix of size spec.n_charger x obj.spec.n_time_step
 %   charger_power_demand(l,t) is the normalized power demand in charger l at time step t
 %
@@ -18,7 +18,7 @@ function charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,v
 %   something_we_care_about = ComputeChargerPowerDemandNormalized(factor)
 %   and get better numerical behavior.
 %
-%   See also EAMoDproblem.ComputeElectricityCost
+%   See also AbstractEAMoDproblem.ComputeElectricityCost
 
 if ~isscalar(factor)
    assert(all(size(factor) == [obj.spec.n_charger,obj.spec.n_time_step]),'factor must be a scalar or a matrix of size spec.n_charger x spec.n_time_step.') 

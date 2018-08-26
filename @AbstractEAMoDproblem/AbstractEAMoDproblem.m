@@ -34,14 +34,14 @@ classdef (Abstract) AbstractEAMoDproblem < handle
         n_end_vehicles = ComputeNumberOfVehiclesAtEnd(obj,varargin)
         [total_cost_val, pax_cost_val, reb_cost_val,relax_cost_val] = EvaluateAMoDcost(obj,varargin)
         charger_power_demand_val_w = EvaluateChargerPowerDemand(obj,varargin)
-        decision_vector_val = EvaluateDecisionVector(obj);    
+        state_vector_val = EvaluateStateVector(obj)   
         electricity_cost_val_usd = EvaluateElectricityCost(obj,varargin)    
         final_vehicle_distribution = GetFinalVehicleDistribution(obj,varargin)
         [DepTimeHist, ArrivalTimeHist] = GetTravelTimesHistograms(obj,varargin);
         [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,RebVehicleHist,IdleVehicleHist,AllVehicleHist] = GetVehicleStateHistograms(obj,varargin)
         [objective_value,solver_time,diagnostics] = Solve(obj)
                 
-        % Ploting methods
+        % Plotting methods
         figure_handle = PlotRoadGraph(obj)
         figure_handle = PlotDeparturesAndArrivals(obj,varargin)
         figure_handle = PlotVehicleState(obj,params_plot,varargin)
@@ -172,7 +172,7 @@ classdef (Abstract) AbstractEAMoDproblem < handle
         end
         
         function res = FindChargerPowertl(obj,t,l)
-            % FindSourceRelaxks Indexer for row in ComputeChargerPowerMatrix corresponding to charger l at time step t  
+            % FindChargerPowertl Indexer for row in ComputeChargerPowerMatrix corresponding to charger l at time step t  
             
             res = obj.spec.n_charger*(t - 1) + l;
         end
@@ -197,10 +197,18 @@ classdef (Abstract) AbstractEAMoDproblem < handle
         constraint_array = GetCommonConstraintArray(obj)
         
         function res = FindRoadLinkHelpertckij(obj,t,c,k,i,j)
+            % FindRoadLinkHelpertckij Helper for FindRoadLinkPtckij and FindRoadLinkRtcij
+            % 
+            % See also EAMoDproblem.FindRoadLinkPtckij, AbstractEAMoDproblem.FindRoadLinkRtcij
+            
             res = (t-1)*(obj.spec.n_road_edge*(obj.n_passenger_flow_in_optimization + 1)*(obj.spec.n_charge_step) + 2*(obj.n_passenger_flow_in_optimization+1)*obj.spec.n_charger*(obj.spec.n_charge_step)) + (c-1)*obj.spec.n_road_edge*(obj.n_passenger_flow_in_optimization+1) + (k-1)*obj.spec.n_road_edge + obj.spec.edge_number_matrix(i,j);
         end
         
         function res = FindChargeLinkHelpertckij(obj,t,c,k,i)
+            % FindChargeLinkHelpertckij Helper for FindChargeLinkPtckl and FindChargeLinkRtcl
+            % 
+            % See also EAMoDproblem.FindChargeLinkPtckl, AbstractEAMoDproblem.FindChargeLinkRtcl
+            
             % Original definition
             % res = obj.FindRoadLinkRtcij(t,obj.spec.n_charge_step,obj.spec.n_road_node,obj.spec.road_adjacency_list{end}(end)) + obj.spec.n_charger*(obj.n_passenger_flow_in_optimization + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;  %Here we index the charger directly (as opposed to the node hosting the charger)
             % We cache the calls to obj.FindRoadLinkRtcij for better performance
@@ -208,6 +216,11 @@ classdef (Abstract) AbstractEAMoDproblem < handle
         end
         
         function res = FindDischargeLinkHelpertckl(obj,t,c,k,i)
+            % FindDischargeLinkHelpertckl Helper for FindDischargeLinkPtckl and FindDischargeLinkRtcl
+            % 
+            % See also EAMoDproblem.FindDischargeLinkPtckl, AbstractEAMoDproblem.FindDischargeLinkRtcl
+            
+            
             % Original definition
             % res = obj.FindChargeLinkRtcl(t,obj.spec.n_charge_step,obj.spec.n_charger) + obj.spec.n_charger*(obj.n_passenger_flow_in_optimization + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;
             % We cache the calls to obj.FindChargeLinkRtcl for better performance

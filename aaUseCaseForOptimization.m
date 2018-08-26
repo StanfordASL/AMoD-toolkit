@@ -18,13 +18,13 @@ eamod_problem = EAMoDproblem(spec);
 electricity_cost_usd = eamod_problem.EvaluateElectricityCost();
 
 % Compare with real-time formulation
-eamod_problem.use_real_time_formulation = true;
+eamod_problem_rt = EAMoDproblemRT(spec);
 
-[objective_value_rt,solver_time_rt] = eamod_problem.Solve();
+[objective_value_rt,solver_time_rt] = eamod_problem_rt.Solve();
 
-[amod_cost_usd_rt,pax_cost_usd_rt,reb_cost_usd_rt] = eamod_problem.EvaluateAMoDcost();
+[amod_cost_usd_rt,pax_cost_usd_rt,reb_cost_usd_rt] = eamod_problem_rt.EvaluateAMoDcost();
 
-electricity_cost_usd_rt = eamod_problem.EvaluateElectricityCost();
+electricity_cost_usd_rt = eamod_problem_rt.EvaluateElectricityCost();
 
 amod_cost_rel_difference = (amod_cost_usd_rt - amod_cost_usd)/amod_cost_usd
 solver_time_rel_difference = (solver_time_rt - solver_time)/solver_time

@@ -1,7 +1,7 @@
 function constraint_array = GetConstraintArray(obj)
-% GetConstraintArray Returns the constraints for the electric AMoD problem for use in YALMIP
+% GetConstraintArray Returns the constraints for the electric AMoD problem using the real-time formulation for use in YALMIP
 %
-% See also AbstractEAMoDproblem.GetConstraintArray
+% See also AbstractEAMoDproblem.GetCommonConstraintArray
 
 state_vector = obj.optimization_variables.state_vector;
 [Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = obj.CreateEqualityConstraintMatrices_CustomerChargeConservation();

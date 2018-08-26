@@ -1,10 +1,9 @@
 function [lb_StateVector,ub_StateVector] = CreateStateVectorBounds(obj)
-% CreateStateVectorBounds Creates upper and lower bounds for the state vector in the LP
-%   [lb_StateVector,ub_StateVector] = CreateStateVectorBounds(obj)
+% CreateStateVectorBounds Overrides AbstractEAMoDproblem.CreateStateVectorBounds to include additional bounds for the real-time formulation
 %
 %   See also AbstractEAMoDproblem.CreateStateVectorBounds 
 
-% We overide because, in AMoD-power, this appears in TVPowerBalancedFlow_realtime
+% We override because, in AMoD-power, this appears in TVPowerBalancedFlow_realtime
 % but not in TVPowerBalancedFlow_withpower_bundle.
 
 [lb_StateVector,ub_StateVector] = CreateStateVectorBounds@AbstractEAMoDproblem(obj);

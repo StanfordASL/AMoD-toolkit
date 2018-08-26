@@ -4,7 +4,7 @@ function [route_travel_time_matrix,route_charge_to_traverse_matrix,route_travel_
 %   route_travel_time_matrix(i,j) is the number of time-steps needed to go from i to j,
 %   route_charge_to_traverse_matrix(i,j) is the number of charge units needed to go from i to j,
 %   route_travel_distance_matrix_m(i,j) is the distance in meters to go from i to j,
-%   route_path_cell{i,j} is the route from i to j expresed as a vector of connected 
+%   route_path_cell{i,j} is the route from i to j expressed as a vector of connected 
 %   nodes that need to be traversed
 
 route_travel_time_matrix = zeros(obj.spec.n_road_node);

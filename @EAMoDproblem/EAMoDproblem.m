@@ -1,8 +1,14 @@
-classdef EAMoDproblem < AbstractEAMoDproblem
-    
-    
+classdef EAMoDproblem < AbstractEAMoDproblem 
+% EAMoDproblem Extends AbstractEAMoDproblem to implement the electric AMoD problem
+        
     methods
         function obj = EAMoDproblem(spec)
+            % EAMoDproblem Constructs an EAMoDproblem object to represent the electric AMoD problem
+            %   obj = EAMoDproblem(spec) where spec is an instance of
+            %   EAMoDspec specifying the problem.
+            %
+            %   See also EAMoDspec
+
             n_passenger_flow_in_optimization = spec.n_passenger_flow;
             obj@AbstractEAMoDproblem(spec,n_passenger_flow_in_optimization);           
         end
@@ -41,15 +47,12 @@ classdef EAMoDproblem < AbstractEAMoDproblem
             
             res = obj.spec.n_road_node*obj.spec.n_passenger_flow*obj.spec.n_charge_step*(t - 1) + obj.spec.n_road_node*obj.spec.n_passenger_flow*(c - 1) + obj.spec.n_road_node*(k - 1) + i;
         end
-        
-        
     end
     
     methods (Access = protected)        
         % Abstract methods in AbstractEAMoDproblem
         road_residual_capacity_matrix = ComputeResidualRoadCapacity(obj)
         constraint_array = GetConstraintArray(obj)
-    end
-    
-    
+    end   
+
 end

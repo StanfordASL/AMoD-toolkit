@@ -1,7 +1,16 @@
 classdef EAMoDproblemRT < AbstractEAMoDproblem
-    
+% EAMoDproblemRT Extends AbstractEAMoDproblem to implement the electric AMoD problem in the real-time formulation.
+%   The real-time formulation assumes that the passenger-carrying vehicles follow pre-computed routes and only optimizes the flows of the 
+%   rebalancing vehicles. This leads to a substantial reduction in the size of the problem and, thus, faster solving times.
+
     methods
         function obj = EAMoDproblemRT(spec)
+            % EAMoDproblemRT Constructs an EAMoDproblemRT object to represent the electric AMoD problem in the real-time formulation
+            %   obj = EAMoDproblemRT(spec) where spec is an instance of
+            %   EAMoDspec specifying the problem.
+            %
+            %   See also EAMoDspec
+
             n_passenger_flow_in_optimization = 0;
             obj@AbstractEAMoDproblem(spec,n_passenger_flow_in_optimization);            
         end
@@ -11,7 +20,6 @@ classdef EAMoDproblemRT < AbstractEAMoDproblem
         [Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = CreateEqualityConstraintMatrices_CustomerChargeConservation(obj)
         
         [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,RebVehicleHist,IdleVehicleHist,AllVehicleHist] = GetVehicleStateHistograms(obj,varargin)
-       
     end
     
     properties (SetAccess = private, GetAccess = public)
@@ -20,9 +28,7 @@ classdef EAMoDproblemRT < AbstractEAMoDproblem
         route_travel_distance_matrix_m(:,:)  double {mustBeNonnegative,mustBeReal} % route_travel_distance_matrix_m(i,j) is the distance in meters to go from i to j
         route_path_cell(:,:) cell % route_path_cell{i,j} is the route from i to j expressed as a vector of connected nodes that need to be traversed
     end
-    
-    
-    
+      
     methods (Access = private)
         [route_travel_time_matrix,route_charge_to_traverse_matrix,route_travel_distance_matrix_m,route_path_cell] = BuildRoutes(obj)
         pax_cost_rt = ComputePaxCostRealTimeFormulation(obj)   

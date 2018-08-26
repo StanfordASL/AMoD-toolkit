@@ -1,7 +1,7 @@
 function electricity_cost_usd = ComputeElectricityCost(obj,varargin)
 % ComputeElectricityCost Returns the cost of the electricity consumed by the electric AMoD system
 %   electricity_cost_usd = ComputeElectricityCost(obj) uses the state_vector in obj.optimization_variables
-%   electricity_cost_usd = ComputeElectricityCost(obj,decision_vector_val) uses decision_vector_val
+%   electricity_cost_usd = ComputeElectricityCost(obj,state_vector_val) uses state_vector_val
 
 % The natural way of doing this is as follows:
 % charger_power_demand_w = obj.GetChargerPowerDemand();
