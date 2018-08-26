@@ -25,6 +25,7 @@ classdef EAMoDproblem < handle
             
             [obj.route_travel_time_matrix,obj.route_charge_to_traverse_matrix,obj.route_travel_distance_matrix_m,obj.route_path_cell] = obj.BuildRoutes();
             obj.road_residual_capacity_matrix = obj.ComputeResidualRoadCapacity();
+            obj.SetOffsetsForIndexingFunctions();
         end
                 
         n_start_vehicles = ComputeNumberOfVehiclesAtStart(obj)
@@ -149,17 +150,29 @@ classdef EAMoDproblem < handle
         
         function res = FindPaxSourceChargecks(obj,c,k,s)
             % FindPaxSourceChargecks Indexer for sources at a given charge c going from source s to sink k
-            res = obj.FindDischargeLinkRtcl(obj.spec.n_time_step,obj.spec.n_charge_step,obj.spec.n_charger) + obj.spec.n_passenger_source*(c-1) + obj.spec.n_sources_to_sink_cumsum(k) + s;
+            
+            % Original defintion
+            % res = obj.FindDischargeLinkRtcl(obj.spec.n_time_step,obj.spec.n_charge_step,obj.spec.n_charger) + obj.spec.n_passenger_source*(c-1) + obj.spec.n_sources_to_sink_cumsum(k) + s;
+            % We cache the call to FindDischargeLinkRtcl
+            res = obj.offset_FindPaxSourceChargecks + obj.spec.n_passenger_source*(c-1) + obj.spec.n_sources_to_sink_cumsum(k) + s;        
         end
         
         function res = FindPaxSinkChargetck(obj,t,c,k)
             % FindPaxSinkChargetck Indexer for sinks k at a given charge c arriving at time t
-            res = obj.FindPaxSourceChargecks(obj.spec.n_charge_step,obj.spec.n_passenger_flow,obj.spec.n_sources_to_sink(end)) + obj.spec.n_charge_step*obj.spec.n_passenger_flow*(t-1) + obj.spec.n_passenger_flow*(c-1) + k;
+            
+            % Original defintion
+            % res = obj.FindPaxSourceChargecks(obj.spec.n_charge_step,obj.spec.n_passenger_flow,obj.spec.n_sources_to_sink(end)) + obj.spec.n_charge_step*obj.spec.n_passenger_flow*(t-1) + obj.spec.n_passenger_flow*(c-1) + k;
+            % We cache the call to FindPaxSourceChargecks
+            res = obj.offset_FindPaxSinkChargetck + obj.spec.n_charge_step*obj.spec.n_passenger_flow*(t-1) + obj.spec.n_passenger_flow*(c-1) + k;      
         end
         
         function res = FindEndRebLocationci(obj,c,i)
             % FindEndRebLocationci Indexer for final position of rebalancing vehicles
-            res = obj.FindPaxSinkChargetck(obj.spec.n_time_step,obj.spec.n_charge_step,obj.spec.n_passenger_flow) + obj.spec.n_road_node*(c-1) + i;
+            
+            % Original defintion
+            % res = obj.FindPaxSinkChargetck(obj.spec.n_time_step,obj.spec.n_charge_step,obj.spec.n_passenger_flow) + obj.spec.n_road_node*(c-1) + i;
+            % We cache the call to FindPaxSinkChargetck
+            res = obj.offset_FindEndRebLocationci + obj.spec.n_road_node*(c-1) + i;        
         end
         
         % Constraint Indexers
@@ -230,7 +243,16 @@ classdef EAMoDproblem < handle
     end
        
     properties (Access = private)
-        optimization_variables(1,1) % Struct with optimization variables        
+        optimization_variables(1,1) % Struct with optimization variables 
+        
+        % Cached offsets for indexing functions. See SetOffsetsForIndexingFunctions
+        
+        offset_FindChargeLinkHelpertckij_t % offset_FindChargeLinkHelpertckij_t(t ) is the offset for FindChargeLinkHelpertckij at t
+        offset_FindDischargeLinkHelpertckl_t % offset_FindDischargeLinkHelpertckl_t(t) is the offset for FindDischargeLinkHelpertckl at t
+    
+        offset_FindPaxSourceChargecks % Offset for FindPaxSourceChargecks
+        offset_FindPaxSinkChargetck % Offset for FindPaxSinkChargetck
+        offset_FindEndRebLocationci % Offset for FindEndRebLocationci
     end
     
     methods (Access = private)
@@ -246,17 +268,43 @@ classdef EAMoDproblem < handle
         constraint_array = GetConstraintArray(obj)
         objective = GetObjective(obj)
         pre_routed_trip_histogram = GetPreRoutedTripHistogram(obj)
+        SetOffsetsForIndexingFunctions(obj)
         
         function res = FindRoadLinkHelpertckij(obj,t,c,k,i,j)
             res = (t-1)*(obj.spec.n_road_edge*(obj.n_passenger_flow_in_optimization + 1)*(obj.spec.n_charge_step) + 2*(obj.n_passenger_flow_in_optimization+1)*obj.spec.n_charger*(obj.spec.n_charge_step)) + (c-1)*obj.spec.n_road_edge*(obj.n_passenger_flow_in_optimization+1) + (k-1)*obj.spec.n_road_edge + obj.spec.edge_number_matrix(i,j);
         end
         
         function res = FindChargeLinkHelpertckij(obj,t,c,k,i)
-            res = obj.FindRoadLinkRtcij(t,obj.spec.n_charge_step,obj.spec.n_road_node,obj.spec.road_adjacency_list{end}(end)) + obj.spec.n_charger*(obj.n_passenger_flow_in_optimization + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;  %Here we index the charger directly (as opposed to the node hosting the charger)
+            % Original definition
+            % res = obj.FindRoadLinkRtcij(t,obj.spec.n_charge_step,obj.spec.n_road_node,obj.spec.road_adjacency_list{end}(end)) + obj.spec.n_charger*(obj.n_passenger_flow_in_optimization + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;  %Here we index the charger directly (as opposed to the node hosting the charger)
+            % We cache the calls to obj.FindRoadLinkRtcij for better performance
+            res = obj.offset_FindChargeLinkHelpertckij_t(t) + obj.spec.n_charger*(obj.n_passenger_flow_in_optimization + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;  %Here we index the charger directly (as opposed to the node hosting the charger)
         end
         
         function res = FindDischargeLinkHelpertckl(obj,t,c,k,i)
-            res = obj.FindChargeLinkRtcl(t,obj.spec.n_charge_step,obj.spec.n_charger) + obj.spec.n_charger*(obj.n_passenger_flow_in_optimization + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;
+            % Original definition
+            % res = obj.FindChargeLinkRtcl(t,obj.spec.n_charge_step,obj.spec.n_charger) + obj.spec.n_charger*(obj.n_passenger_flow_in_optimization + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;
+            % We cache the calls to obj.FindChargeLinkRtcl for better performance
+            res = obj.offset_FindDischargeLinkHelpertckl_t(t) + obj.spec.n_charger*(obj.n_passenger_flow_in_optimization + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;
         end
     end
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
