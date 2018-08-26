@@ -3,7 +3,7 @@ classdef EAMoDproblem < handle
     %   The model of the electric AMoD system used here is described in the
     %   paper below. Note that this implementation does not include the power network.
     %
-    %   F. Rossi, R. Iglesias, M. Alizadeh, and M. Pavone, “On the interaction
+    %   F. Rossi, R. Iglesias, n_passenger_flow. Alizadeh, and n_passenger_flow. Pavone, “On the interaction
     %   between Autonomous Mobility-on-Demand systems and the power network:
     %   models and coordination algorithms,” in Robotics: Science and Systems,
     %   Pittsburgh, Pennsylvania, 2018
@@ -75,7 +75,7 @@ classdef EAMoDproblem < handle
             if obj.use_real_time_formulation
                 res = obj.FindRoadLinkHelpertckij(t,c,1,i,j);
             else
-                res = obj.FindRoadLinkPtckij(t,c,obj.spec.M + 1,i,j);
+                res = obj.FindRoadLinkPtckij(t,c,obj.spec.n_passenger_flow + 1,i,j);
             end
         end
         
@@ -93,7 +93,7 @@ classdef EAMoDproblem < handle
             if obj.use_real_time_formulation
                 res = obj.FindChargeLinkHelpertckij(t,c,1,i);
             else
-                res = obj.FindChargeLinkPtckl(t,c,obj.spec.M+1,i);
+                res = obj.FindChargeLinkPtckl(t,c,obj.spec.n_passenger_flow+1,i);
             end
         end
         
@@ -111,39 +111,39 @@ classdef EAMoDproblem < handle
             if obj.use_real_time_formulation
                 res = obj.FindDischargeLinkHelpertckl(t,c,1,i);
             else
-                res = obj.FindDischargeLinkPtckl(t,c,obj.spec.M + 1,i);
+                res = obj.FindDischargeLinkPtckl(t,c,obj.spec.n_passenger_flow + 1,i);
             end
         end
         
         function res = FindPaxSourceChargecks(obj,c,k,s)
             % FindPaxSourceChargecks Indexer for sources at a given charge c going from source s to sink k
-            res = obj.FindDischargeLinkRtcl(obj.spec.Thor,obj.spec.C,obj.spec.NumChargers) + obj.spec.TotNumSources*(c-1) + obj.spec.CumNumSourcesPerSink(k) + s;
+            res = obj.FindDischargeLinkRtcl(obj.spec.n_time_step,obj.spec.n_charge_step,obj.spec.n_charger) + obj.spec.n_passenger_source*(c-1) + obj.spec.n_sources_to_sink_cumsum(k) + s;
         end
         
         function res = FindPaxSinkChargetck(obj,t,c,k)
             % FindPaxSinkChargetck Indexer for sinks k at a given charge c arriving at time t
-            res = obj.FindPaxSourceChargecks(obj.spec.C,obj.spec.M,obj.spec.NumSourcesPerSink(end)) + obj.spec.C*obj.spec.M*(t-1) + obj.spec.M*(c-1) + k;
+            res = obj.FindPaxSourceChargecks(obj.spec.n_charge_step,obj.spec.n_passenger_flow,obj.spec.n_sources_to_sink(end)) + obj.spec.n_charge_step*obj.spec.n_passenger_flow*(t-1) + obj.spec.n_passenger_flow*(c-1) + k;
         end
         
         function res = FindEndRebLocationci(obj,c,i)
             % FindEndRebLocationci Indexer for final position of rebalancing vehicles
-            res = obj.FindPaxSinkChargetck(obj.spec.Thor,obj.spec.C,obj.spec.M) + obj.spec.N*(c-1) + i;
+            res = obj.FindPaxSinkChargetck(obj.spec.n_time_step,obj.spec.n_charge_step,obj.spec.n_passenger_flow) + obj.spec.n_road_node*(c-1) + i;
         end
         
         % Constraint Indexers
         function res = FindEqPaxConservationtcki(obj,t,c,k,i)
             % FindEqPaxConservationtcki Indexer for customer flow conservation constraints
-            res = obj.spec.N*obj.spec.M*obj.spec.C*(t - 1) + obj.spec.N*obj.spec.M*(c - 1) + obj.spec.N*(k - 1) + i;
+            res = obj.spec.n_road_node*obj.spec.n_passenger_flow*obj.spec.n_charge_step*(t - 1) + obj.spec.n_road_node*obj.spec.n_passenger_flow*(c - 1) + obj.spec.n_road_node*(k - 1) + i;
         end
         
         function res = FindEqRebConservationtci(obj,t,c,i)
             % FindEqRebConservationtci Indexer for rebalancing flow conservation constraints
-            res = obj.spec.N*obj.spec.C*(t - 1) + obj.spec.N*(c - 1) + i;
+            res = obj.spec.n_road_node*obj.spec.n_charge_step*(t - 1) + obj.spec.n_road_node*(c - 1) + i;
         end
         
         function res = FindEqSourceConservationks(obj,k,s)
             % FindEqSourceConservationks Indexer for source conservation constraints
-            res = obj.spec.CumNumSourcesPerSink(k) + s;
+            res = obj.spec.n_sources_to_sink_cumsum(k) + s;
         end
         
         function res = FindEqSinkConservationk(obj,k)
@@ -153,12 +153,12 @@ classdef EAMoDproblem < handle
         
         function res = FindInRoadCongestiontij(obj,t,i,j)
             % FindInRoadCongestiontij Indexer for road congestion constraints
-            res = obj.spec.E*(t - 1) + obj.spec.edge_number_matrix(i,j);
+            res = obj.spec.n_road_edge*(t - 1) + obj.spec.edge_number_matrix(i,j);
         end
         
         function res = FindInChargerCongestiontl(obj,t,l)
             % FindInChargerCongestiontl Indexer for charger congestion constraints
-            res = obj.spec.NumChargers*(t-1) + l;
+            res = obj.spec.n_charger*(t-1) + l;
         end
         
         % The indexing for FindSourceRelaxks is different from
@@ -167,7 +167,7 @@ classdef EAMoDproblem < handle
         function res = FindSourceRelaxks(obj,k,s)
             % FindSourceRelaxks Indexer for constraints relaxing sources
             if obj.sourcerelaxflag
-                res = obj.FindEndRebLocationci(obj.spec.C,obj.spec.N) +  obj.spec.CumNumSourcesPerSink(k) + s;
+                res = obj.FindEndRebLocationci(obj.spec.n_charge_step,obj.spec.n_road_node) +  obj.spec.n_sources_to_sink_cumsum(k) + s;
             else
                 res = nan;
             end
@@ -175,15 +175,15 @@ classdef EAMoDproblem < handle
         
         function res = FindChargerPowertl(obj,t,l)
             % FindSourceRelaxks Indexer for row in ComputeChargerPowerMatrixNew corresponding to charger l at time step t  
-            res = obj.spec.NumChargers*(t - 1) + l;
+            res = obj.spec.n_charger*(t - 1) + l;
         end
         
         % Get methods for dependent properties
         function res = get.StateSize(obj)
             if obj.sourcerelaxflag
-                res = obj.FindSourceRelaxks(obj.spec.NumSinks,obj.spec.NumSourcesPerSink(obj.spec.NumSinks));
+                res = obj.FindSourceRelaxks(obj.spec.n_passenger_sink,obj.spec.n_sources_to_sink(obj.spec.n_passenger_sink));
             else
-                res = obj.FindEndRebLocationci(obj.spec.C,obj.spec.N);
+                res = obj.FindEndRebLocationci(obj.spec.n_charge_step,obj.spec.n_road_node);
             end
         end
         
@@ -191,12 +191,12 @@ classdef EAMoDproblem < handle
             if obj.use_real_time_formulation
                 res = 0;
             else
-                res = obj.spec.M;
+                res = obj.spec.n_passenger_flow;
             end
         end
         
         function res = get.state_range(obj)
-            res = 1:obj.FindEndRebLocationci(obj.spec.C,obj.spec.N);
+            res = 1:obj.FindEndRebLocationci(obj.spec.n_charge_step,obj.spec.n_road_node);
         end
         
         function res = get.relax_range(obj)
@@ -206,7 +206,7 @@ classdef EAMoDproblem < handle
     
     properties (Dependent)
         StateSize % Number of elements in the problem's state vector
-        num_passenger_flows % Number of passenger flows. Is equal to spec.M in the normal case and zero in the real-time formulation
+        num_passenger_flows % Number of passenger flows. Is equal to spec.n_passenger_flow in the normal case and zero in the real-time formulation
     
         % TODO: add description
         state_range(1,:) double
@@ -257,15 +257,15 @@ classdef EAMoDproblem < handle
         pre_routed_trip_histogram = GetPreRoutedTripHistogram(obj)
         
         function res = FindRoadLinkHelpertckij(obj,t,c,k,i,j)
-            res = (t-1)*(obj.spec.E*(obj.num_passenger_flows + 1)*(obj.spec.C) + 2*(obj.num_passenger_flows+1)*obj.spec.NumChargers*(obj.spec.C)) + (c-1)*obj.spec.E*(obj.num_passenger_flows+1) + (k-1)*obj.spec.E + obj.spec.edge_number_matrix(i,j);
+            res = (t-1)*(obj.spec.n_road_edge*(obj.num_passenger_flows + 1)*(obj.spec.n_charge_step) + 2*(obj.num_passenger_flows+1)*obj.spec.n_charger*(obj.spec.n_charge_step)) + (c-1)*obj.spec.n_road_edge*(obj.num_passenger_flows+1) + (k-1)*obj.spec.n_road_edge + obj.spec.edge_number_matrix(i,j);
         end
         
         function res = FindChargeLinkHelpertckij(obj,t,c,k,i)
-            res = obj.FindRoadLinkRtcij(t,obj.spec.C,obj.spec.N,obj.spec.RoadGraph{end}(end)) + obj.spec.NumChargers*(obj.num_passenger_flows + 1)*(c-1) + obj.spec.NumChargers*(k-1) + i;  %Here we index the charger directly (as opposed to the node hosting the charger)
+            res = obj.FindRoadLinkRtcij(t,obj.spec.n_charge_step,obj.spec.n_road_node,obj.spec.road_adjacency_list{end}(end)) + obj.spec.n_charger*(obj.num_passenger_flows + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;  %Here we index the charger directly (as opposed to the node hosting the charger)
         end
         
         function res = FindDischargeLinkHelpertckl(obj,t,c,k,i)
-            res = obj.FindChargeLinkRtcl(t,obj.spec.C,obj.spec.NumChargers) + obj.spec.NumChargers*(obj.num_passenger_flows + 1)*(c-1) + obj.spec.NumChargers*(k-1) + i;
+            res = obj.FindChargeLinkRtcl(t,obj.spec.n_charge_step,obj.spec.n_charger) + obj.spec.n_charger*(obj.num_passenger_flows + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;
         end
     end
 end

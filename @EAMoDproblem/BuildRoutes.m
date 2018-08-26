@@ -7,24 +7,24 @@ function [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj)
 %   Routes{i,j} is the route from i to j expresed as a vector of connected 
 %   nodes that need to be traversed
 
-RouteTime = zeros(obj.spec.N);
-RouteCharge = zeros(obj.spec.N);
-RouteDistance = zeros(obj.spec.N);
-Routes = cell(obj.spec.N,obj.spec.N);
+RouteTime = zeros(obj.spec.n_road_node);
+RouteCharge = zeros(obj.spec.n_road_node);
+RouteDistance = zeros(obj.spec.n_road_node);
+Routes = cell(obj.spec.n_road_node,obj.spec.n_road_node);
 
-for i = 1:obj.spec.N
-    for j = 1:obj.spec.N
-        Routes{i,j} = FreeRouteAstar(i,j,obj.spec.RoadGraph,obj.spec.TravelTimes);
+for i = 1:obj.spec.n_road_node
+    for j = 1:obj.spec.n_road_node
+        Routes{i,j} = FreeRouteAstar(i,j,obj.spec.road_adjacency_list,obj.spec.road_travel_time_matrix);
         
         % Account for self-loops
         if i == j
-            RouteTime(i,j) = obj.spec.TravelTimes(i,j);
-            RouteCharge(i,j) = obj.spec.ChargeToTraverse(i,j);
+            RouteTime(i,j) = obj.spec.road_travel_time_matrix(i,j);
+            RouteCharge(i,j) = obj.spec.road_charge_to_traverse_matrix(i,j);
         else
             for k = 1:(numel(Routes{i,j}) - 1)
-                RouteTime(i,j) = RouteTime(i,j) + obj.spec.TravelTimes(Routes{i,j}(k),Routes{i,j}(k+1));
-                RouteCharge(i,j) = RouteCharge(i,j) + obj.spec.ChargeToTraverse(Routes{i,j}(k),Routes{i,j}(k+1));
-                RouteDistance(i,j) = RouteDistance(i,j) + obj.spec.TravelDistance(Routes{i,j}(k),Routes{i,j}(k+1));
+                RouteTime(i,j) = RouteTime(i,j) + obj.spec.road_travel_time_matrix(Routes{i,j}(k),Routes{i,j}(k+1));
+                RouteCharge(i,j) = RouteCharge(i,j) + obj.spec.road_charge_to_traverse_matrix(Routes{i,j}(k),Routes{i,j}(k+1));
+                RouteDistance(i,j) = RouteDistance(i,j) + obj.spec.road_travel_distance_matrix_m(Routes{i,j}(k),Routes{i,j}(k+1));
             end
         end
     end
@@ -33,10 +33,10 @@ end
 end
 
 
-function [Route] = FreeRouteAstar(start,goal,RoadGraph,RoadCost,heuristic_est)
-N=length(RoadGraph);
+function [Route] = FreeRouteAstar(start,goal,road_adjacency_list,RoadCost,heuristic_est)
+n_road_node=length(road_adjacency_list);
 if nargin<=4
-    heuristic_est = zeros(N); %revert to Dijkstra
+    heuristic_est = zeros(n_road_node); %revert to Dijkstra
 end
 
 %forked from the AMoD-congestion implementation
@@ -44,9 +44,9 @@ end
 ClosedSet = [];
 OpenSet = [start];
 
-CameFrom=-1*ones(N);
-g_score = Inf*ones(N,1);
-f_score = Inf*ones(N,1);
+CameFrom=-1*ones(n_road_node);
+g_score = Inf*ones(n_road_node,1);
+f_score = Inf*ones(n_road_node,1);
 g_score(start)=0;
 
 f_score(start)=g_score(start)+heuristic_est(start,goal);
@@ -68,7 +68,7 @@ while ~isempty(OpenSet)
     end
     OpenSet = OpenSet(OpenSet~=currNode);       %Remove current node
     ClosedSet = [ClosedSet, currNode];          %Add to closed set
-    for neigh = RoadGraph{currNode}
+    for neigh = road_adjacency_list{currNode}
         if ~sum(ClosedSet == neigh)             %If neighbor is not in closed set
             tentative_g = g_score(currNode) + RoadCost(currNode,neigh);
             if (~sum(neigh == OpenSet))         %If the neighbor is not already in OpenSet, add it

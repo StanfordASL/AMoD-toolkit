@@ -2,11 +2,11 @@ function [Ain_ChargerCongestion, Bin_ChargerCongestion] = CreateInequalityConstr
 % CreateInequalityConstraintMatrices_ChargerCongestion Creates inequality constraints to limit the number of vehicles that can use a charging station concurrently (Eq. 4)
 %   [Ain_ChargerCongestion, Bin_ChargerCongestion] = CreateInequalityConstraintMatrices_ChargerCongestion(obj)
 
-n_constraint = obj.spec.NumChargers*obj.spec.Thor;
+n_constraint = obj.spec.n_charger*obj.spec.n_time_step;
 
 % This is meant as an upper bound for memory allocation. Unused entries are
 % removed at the end.
-n_constraint_entries = obj.spec.NumChargers*obj.spec.Thor*2*(obj.num_passenger_flows + 1)*obj.spec.C;
+n_constraint_entries = obj.spec.n_charger*obj.spec.n_time_step*2*(obj.num_passenger_flows + 1)*obj.spec.n_charge_step;
 
 Ainsparse = zeros(n_constraint_entries,3);
 Bin = zeros(n_constraint,1);
@@ -15,9 +15,9 @@ Ainrow = 1;
 Ainentry = 1;
 
 % Chargers: congestion
-for t = 1:obj.spec.Thor
-    for l = 1:obj.spec.NumChargers
-        for c = 1:obj.spec.C
+for t = 1:obj.spec.n_time_step
+    for l = 1:obj.spec.n_charger
+        for c = 1:obj.spec.n_charge_step
             % Note that if obj.num_passenger_flows = 0, this loop does not
             % run
             for k = 1:obj.num_passenger_flows
@@ -31,7 +31,7 @@ for t = 1:obj.spec.Thor
             Ainsparse(Ainentry,:) = [Ainrow,obj.FindDischargeLinkRtcl(t,c,l),1];
             Ainentry = Ainentry + 1;
         end
-        Bin(Ainrow) = obj.spec.ChargerCap(l);
+        Bin(Ainrow) = obj.spec.charger_capacity(l);
         
         Ainrow=Ainrow+1;
     end

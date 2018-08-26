@@ -3,18 +3,22 @@
 clear variables;
 
 %% Prepare specification
-data = load('EAMoDspecDemo.mat');
-spec = data.spec;
-spec.EmptyVehicleInitialPos = 0.4*spec.EmptyVehicleInitialPos;
-% Increase RoadCap so that real-time problem is feasible
-spec.RoadCap = 6*spec.RoadCap;
+% data = load('EAMoDspecDemo.mat');
+% spec = data.spec;
+data_path = 'Test/dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_feas';
+scenario = LoadScenario(data_path);
+spec = EAMoDspec.CreateFromScenario(scenario);
+
+spec.initial_state_empty_vehicles = 0.4*spec.initial_state_empty_vehicles;
+% Increase road_capacity_matrix so that real-time problem is feasible
+spec.road_capacity_matrix = 6*spec.road_capacity_matrix;
 
 
 % Seed for repeatability
 rng('default');
 % Add random charger electricity prices in [35,45] USD per MWh
-charger_power_price_usd_per_j = (35 + 10*rand(spec.NumChargers,spec.Thor))/(1e6*3600);
-spec.charger_power_price_usd_per_j = charger_power_price_usd_per_j;
+charger_electricity_price_usd_per_j = (35 + 10*rand(spec.n_charger,spec.n_time_step))/(1e6*3600);
+spec.charger_electricity_price_usd_per_j = charger_electricity_price_usd_per_j;
 
 %% Create and solve problem
 eamod_problem = EAMoDproblem(spec);

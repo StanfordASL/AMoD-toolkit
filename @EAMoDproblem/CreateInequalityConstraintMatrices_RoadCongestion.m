@@ -3,7 +3,7 @@ function [Ain_RoadCongestion, Bin_RoadCongestion] = CreateInequalityConstraintMa
 %   [Ain_RoadCongestion, Bin_RoadCongestion] = CreateInequalityConstraintMatrices_RoadCongestion(obj)
 
 if obj.use_real_time_formulation
-   ExpandedRoadCap = repmat(full(obj.spec.RoadCap),1,1,obj.spec.Thor);
+   ExpandedRoadCap = repmat(full(obj.spec.road_capacity_matrix),1,1,obj.spec.n_time_step);
    residual_road_cap_relative = obj.TVRoadCap./ExpandedRoadCap;
 
     if any(residual_road_cap_relative(:) < 0)
@@ -15,11 +15,11 @@ if obj.use_real_time_formulation
     
 end
 
-n_constraint = obj.spec.E*obj.spec.Thor;
+n_constraint = obj.spec.n_road_edge*obj.spec.n_time_step;
 
 % This is meant as an upper bound for memory allocation. Unused entries are
 % removed at the end.
-n_constraint_entries = obj.spec.E*obj.spec.Thor*(obj.num_passenger_flows + 1)*obj.spec.C;
+n_constraint_entries = obj.spec.n_road_edge*obj.spec.n_time_step*(obj.num_passenger_flows + 1)*obj.spec.n_charge_step;
 
 Ainsparse = zeros(n_constraint_entries,3);
 Bin = zeros(n_constraint,1);
@@ -28,10 +28,10 @@ Ainrow = 1;
 Ainentry = 1;
 
 % Roads: congestion
-for t = 1:obj.spec.Thor
-    for i = 1:obj.spec.N
-        for j = obj.spec.RoadGraph{i}
-            for c = 1:obj.spec.C
+for t = 1:obj.spec.n_time_step
+    for i = 1:obj.spec.n_road_node
+        for j = obj.spec.road_adjacency_list{i}
+            for c = 1:obj.spec.n_charge_step
                 % Note that if obj.num_passenger_flows = 0, this loop does not
                 % run
                 for k = 1:obj.num_passenger_flows
@@ -45,7 +45,7 @@ for t = 1:obj.spec.Thor
             if obj.use_real_time_formulation
                 Bin(Ainrow) = obj.TVRoadCap(i,j,t);
             else
-                Bin(Ainrow) = obj.spec.RoadCap(i,j);
+                Bin(Ainrow) = obj.spec.road_capacity_matrix(i,j);
             end
             
             Ainrow = Ainrow + 1;

@@ -2,14 +2,14 @@ function [Aeq_SourceConservation, Beq_SourceConservation] = CreateEqualityConstr
 % CreateEqualityConstraintMatrices_SourceConservation Creates equality constraints to distribute a given trip request to vehicles with different charge levels (Eq. 9b)
 %   [Aeq_SourceConservation, Beq_SourceConservation] = CreateEqualityConstraintMatrices_SourceConservation(obj)
 
-n_constraint = obj.spec.TotNumSources;
+n_constraint = obj.spec.n_passenger_source;
 
 % This is meant as an upper bound for memory allocation. Unused entries are
 % removed at the end.
-n_constraint_entries = obj.spec.TotNumSources*obj.spec.C;
+n_constraint_entries = obj.spec.n_passenger_source*obj.spec.n_charge_step;
 
 if obj.sourcerelaxflag
-    n_constraint_entries = n_constraint_entries + obj.spec.TotNumSources;
+    n_constraint_entries = n_constraint_entries + obj.spec.n_passenger_source;
 end
 
 Aeqsparse = zeros(n_constraint_entries,3);
@@ -20,9 +20,9 @@ Aeqentry = 1;
 
 
 % Sum of all FindPaxSourceChargeck = Pax. source
-for k = 1:obj.spec.M
-    for ssi = 1:length(obj.spec.Sources{k})
-        for c = 1:obj.spec.C
+for k = 1:obj.spec.n_passenger_flow
+    for ssi = 1:length(obj.spec.passenger_source_list_cell{k})
+        for c = 1:obj.spec.n_charge_step
             Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindPaxSourceChargecks(c,k,ssi),1];
             Aeqentry = Aeqentry + 1;
         end
@@ -31,7 +31,7 @@ for k = 1:obj.spec.M
             Aeqentry = Aeqentry + 1;
         end
         
-        Beq(Aeqrow) = obj.spec.Flows{k}(ssi);
+        Beq(Aeqrow) = obj.spec.passenger_flow_list_cell{k}(ssi);
         Aeqrow = Aeqrow+1;
     end
 end

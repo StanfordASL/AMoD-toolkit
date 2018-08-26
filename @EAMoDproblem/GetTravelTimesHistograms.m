@@ -14,23 +14,23 @@ switch numel(varargin)
         error('Too many arguments.')
 end
 
-DepTimeHist = zeros(1,obj.spec.Thor);
+DepTimeHist = zeros(1,obj.spec.n_time_step);
 
-for tt = 1:obj.spec.Thor
-    for ll = 1:length(obj.spec.Flows)
-        for ssi = 1:length(obj.spec.Flows{ll})
-            if obj.spec.StartTimes{ll}(ssi) == tt
-                DepTimeHist(tt) = DepTimeHist(tt) + obj.spec.Flows{ll}(ssi);
+for tt = 1:obj.spec.n_time_step
+    for ll = 1:length(obj.spec.passenger_flow_list_cell)
+        for ssi = 1:length(obj.spec.passenger_flow_list_cell{ll})
+            if obj.spec.passenger_start_time_list_cell{ll}(ssi) == tt
+                DepTimeHist(tt) = DepTimeHist(tt) + obj.spec.passenger_flow_list_cell{ll}(ssi);
             end
         end
     end
 end
 
 % Arrival times
-ArrivalTimeHist = zeros(1,obj.spec.Thor);
-for tt = 1:obj.spec.Thor
-    for c = 1:obj.spec.C
-        for k = 1:length(obj.spec.Sinks)
+ArrivalTimeHist = zeros(1,obj.spec.n_time_step);
+for tt = 1:obj.spec.n_time_step
+    for c = 1:obj.spec.n_charge_step
+        for k = 1:length(obj.spec.passenger_sink_list)
             ArrivalTimeHist(tt) = ArrivalTimeHist(tt) + decision_vector_val(obj.FindPaxSinkChargetck(tt,c,k));
         end
     end

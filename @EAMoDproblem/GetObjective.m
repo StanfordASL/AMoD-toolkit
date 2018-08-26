@@ -3,7 +3,7 @@ function objective = GetObjective(obj)
 
 amod_cost_usd = obj.ComputeAMoDcost();
 
-if ~isempty(obj.spec.charger_power_price_usd_per_j)
+if ~isempty(obj.spec.charger_electricity_price_usd_per_j)
     electricity_cost_usd = obj.ComputeElectricityCost();
 else
     electricity_cost_usd = 0;

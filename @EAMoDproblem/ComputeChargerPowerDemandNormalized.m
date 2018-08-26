@@ -2,7 +2,7 @@ function charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,v
 % ComputeChargerPowerDemandNormalized Computes charger power demand normalized with a matrix factor
 %   charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor) uses the decision_vector in obj.decision_variables
 %   charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,decision_vector_val) uses decision_vector_val
-%   factor can be a scalar or a matrix of size spec.NumChargers x obj.spec.Thor
+%   factor can be a scalar or a matrix of size spec.n_charger x obj.spec.n_time_step
 %   charger_power_demand(l,t) is the normalized power demand in charger l at time step t
 %
 %   The reason for normalization is as follows. Without normalization
@@ -21,7 +21,7 @@ function charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,v
 %   See also EAMoDproblem.ComputeElectricityCost
 
 if ~isscalar(factor)
-   assert(all(size(factor) == [obj.spec.NumChargers,obj.spec.Thor]),'factor must be a scalar or a matrix of size spec.NumChargers x spec.Thor.') 
+   assert(all(size(factor) == [obj.spec.n_charger,obj.spec.n_time_step]),'factor must be a scalar or a matrix of size spec.n_charger x spec.n_time_step.') 
 end
 
 switch numel(varargin)
@@ -39,5 +39,5 @@ A_charger_power_normalized = spdiag(factor(:))*A_charger_power_w;
 
 charger_power_demand_vec = A_charger_power_normalized*decision_vector;
 
-charger_power_demand = reshape(charger_power_demand_vec,obj.spec.NumChargers,obj.spec.Thor);
+charger_power_demand = reshape(charger_power_demand_vec,obj.spec.n_charger,obj.spec.n_time_step);
 end

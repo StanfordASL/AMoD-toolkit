@@ -6,8 +6,8 @@ function electricity_cost_usd = ComputeElectricityCost(obj,varargin)
 % The natural way of doing this is as follows:
 % charger_power_demand_w = obj.GetChargerPowerDemand();
 % charger_electricity_demand_j = obj.spec.time_step_s*charger_power_demand_w;
-% charger_power_price_usd_per_j = obj.spec.charger_power_price_usd_per_j;
-% charger_electricity_cost_usd_x = charger_electricity_demand_j.*charger_power_price_usd_per_j;
+% charger_electricity_price_usd_per_j = obj.spec.charger_electricity_price_usd_per_j;
+% charger_electricity_cost_usd_x = charger_electricity_demand_j.*charger_electricity_price_usd_per_j;
 
 % This has complicated numerics. We have that charger_power_demand_w = A_charger_power_normalized*obj.decision_variables.decision_vector 
 % followed by a reshaping step, but A_charger_power_normalized has large values. Instead, we do as follows:
@@ -15,7 +15,7 @@ function electricity_cost_usd = ComputeElectricityCost(obj,varargin)
 % The matrix (factor_charger_power_demand_w_to_electricity_cost_usd*A_charger_power_normalized) has entries which are much closer to 1.
 % This leads to better numerics
 
-factor_charger_power_demand_w_to_electricity_cost_usd = obj.spec.time_step_s*obj.spec.charger_power_price_usd_per_j;
+factor_charger_power_demand_w_to_electricity_cost_usd = obj.spec.time_step_s*obj.spec.charger_electricity_price_usd_per_j;
 charger_electricity_cost_usd = obj.ComputeChargerPowerDemandNormalized(factor_charger_power_demand_w_to_electricity_cost_usd,varargin{:});
 
 electricity_cost_usd = sum(charger_electricity_cost_usd(:));

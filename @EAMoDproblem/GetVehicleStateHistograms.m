@@ -22,11 +22,11 @@ end
 
 
 % Charging vehicles
-ChargingVehicleHist = zeros(1,obj.spec.Thor);
-for tt = 1:obj.spec.Thor
-    for c = 1:obj.spec.C
-        for l = 1:obj.spec.NumChargers
-            for deltat = 0:obj.spec.ChargerTime(l) - 1
+ChargingVehicleHist = zeros(1,obj.spec.n_time_step);
+for tt = 1:obj.spec.n_time_step
+    for c = 1:obj.spec.n_charge_step
+        for l = 1:obj.spec.n_charger
+            for deltat = 0:obj.spec.charger_time(l) - 1
                 if tt - deltat > 0
                     for k = 1:obj.num_passenger_flows
                         ChargingVehicleHist(tt) = ChargingVehicleHist(tt) + decision_vector_val(obj.FindChargeLinkPtckl(tt-deltat,c,k,l));
@@ -39,11 +39,11 @@ for tt = 1:obj.spec.Thor
 end
 
 % Discharging vehicles
-DischargingVehicleHist = zeros(1,obj.spec.Thor);
-for tt = 1:obj.spec.Thor
-    for c = 1:obj.spec.C
-        for l = 1:obj.spec.NumChargers
-            for deltat = 0:obj.spec.ChargerTime(l) - 1
+DischargingVehicleHist = zeros(1,obj.spec.n_time_step);
+for tt = 1:obj.spec.n_time_step
+    for c = 1:obj.spec.n_charge_step
+        for l = 1:obj.spec.n_charger
+            for deltat = 0:obj.spec.charger_time(l) - 1
                 if tt - deltat > 0
                     for k = 1:obj.num_passenger_flows
                         DischargingVehicleHist(tt) = DischargingVehicleHist(tt) + decision_vector_val(obj.FindDischargeLinkPtckl(tt-deltat,c,k,l));
@@ -56,16 +56,16 @@ for tt = 1:obj.spec.Thor
 end
 
 % Moving vehicles
-PaxVehicleHist = zeros(1,obj.spec.Thor);
-RebVehicleHist = zeros(1,obj.spec.Thor);
-IdleVehicleHist = zeros(1,obj.spec.Thor);
+PaxVehicleHist = zeros(1,obj.spec.n_time_step);
+RebVehicleHist = zeros(1,obj.spec.n_time_step);
+IdleVehicleHist = zeros(1,obj.spec.n_time_step);
 
-for tt = 1:obj.spec.Thor
-    for c = 1:obj.spec.C
-        for i = 1:obj.spec.N
-            if ~isempty(obj.spec.RoadGraph{i})
-                for j = obj.spec.RoadGraph{i}
-                    for deltat = 0:obj.spec.TravelTimes(i,j)-1
+for tt = 1:obj.spec.n_time_step
+    for c = 1:obj.spec.n_charge_step
+        for i = 1:obj.spec.n_road_node
+            if ~isempty(obj.spec.road_adjacency_list{i})
+                for j = obj.spec.road_adjacency_list{i}
+                    for deltat = 0:obj.spec.road_travel_time_matrix(i,j)-1
                         if tt - deltat > 0
                             for k = 1:obj.num_passenger_flows
                                 PaxVehicleHist(tt) = PaxVehicleHist(tt) + decision_vector_val(obj.FindRoadLinkPtckij(tt-deltat,c,k,i,j));
@@ -90,12 +90,12 @@ if obj.use_real_time_formulation
     PaxVehicleHist = obj.GetPreRoutedTripHistogram();
 end
 
-% Note RebVehicleHist at Thor is meaningless. Since it is unconstrained and
+% Note RebVehicleHist at n_time_step is meaningless. Since it is unconstrained and
 % there are self-loops with distance zero it can take any value.
 % Thus, we set it to zero.
-RebVehicleHist(obj.spec.Thor) = 0;
+RebVehicleHist(obj.spec.n_time_step) = 0;
 
-% IdleVehicleHist takes the final distribution of vehicles at Thor
+% IdleVehicleHist takes the final distribution of vehicles at n_time_step
 n_end_vehicles = obj.ComputeNumberOfVehiclesAtEnd(varargin{:});
 assert(IdleVehicleHist(end) == 0);
 IdleVehicleHist(end) = n_end_vehicles;
