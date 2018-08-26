@@ -1,4 +1,4 @@
-function TVRoadCap = ComputeResidualRoadCapacity(obj)
+function road_residual_capacity_matrix = ComputeResidualRoadCapacity(obj)
 % ComputeResidualRoadCapacity Computes the residual road capacity after accounting for the pre-routed passenger-carrying vehicles used in the real-time formulation
 
 road_utilization_matrix = zeros(obj.spec.n_road_node,obj.spec.n_road_node,obj.spec.n_time_step);
@@ -15,7 +15,7 @@ for i_sink = 1:obj.spec.n_passenger_sink
         start_time = obj.spec.passenger_start_time_list_cell{i_sink}(i_source);
         current_time = start_time;
         
-        route = obj.Routes{source,sink};
+        route = obj.route_path_cell{source,sink};
         
         for i_route = 1:(numel(route) - 1)
             edge_source = route(i_route);
@@ -31,11 +31,11 @@ for i_sink = 1:obj.spec.n_passenger_sink
             current_time = current_time + edge_time;
         end
         
-        assert(current_time == start_time + obj.RouteTime(source,sink),'current_time should be consistent with RouteTime')
+        assert(current_time == start_time + obj.route_travel_time_matrix(source,sink),'current_time should be consistent with route_travel_time_matrix')
     end
 end
 
 ExpandedRoadCap = repmat(full(obj.spec.road_capacity_matrix),1,1,obj.spec.n_time_step);
 
-TVRoadCap = ExpandedRoadCap - road_utilization_matrix;
+road_residual_capacity_matrix = ExpandedRoadCap - road_utilization_matrix;
 end

@@ -6,7 +6,7 @@ n_constraint = obj.spec.n_charger*obj.spec.n_time_step;
 
 % This is meant as an upper bound for memory allocation. Unused entries are
 % removed at the end.
-n_constraint_entries = obj.spec.n_charger*obj.spec.n_time_step*2*(obj.num_passenger_flows + 1)*obj.spec.n_charge_step;
+n_constraint_entries = obj.spec.n_charger*obj.spec.n_time_step*2*(obj.n_passenger_flow_in_optimization + 1)*obj.spec.n_charge_step;
 
 Ainsparse = zeros(n_constraint_entries,3);
 Bin = zeros(n_constraint,1);
@@ -18,9 +18,9 @@ Ainentry = 1;
 for t = 1:obj.spec.n_time_step
     for l = 1:obj.spec.n_charger
         for c = 1:obj.spec.n_charge_step
-            % Note that if obj.num_passenger_flows = 0, this loop does not
+            % Note that if obj.n_passenger_flow_in_optimization = 0, this loop does not
             % run
-            for k = 1:obj.num_passenger_flows
+            for k = 1:obj.n_passenger_flow_in_optimization
                 Ainsparse(Ainentry,:) = [Ainrow,obj.FindChargeLinkPtckl(t,c,k,l),1];
                 Ainentry = Ainentry + 1;
                 Ainsparse(Ainentry,:) = [Ainrow,obj.FindDischargeLinkPtckl(t,c,k,l),1];
@@ -47,6 +47,6 @@ end
 % Remove extra rows in Ainsparse
 Ainsparse = Ainsparse(1:(Ainentry - 1),:);
 
-Ain_ChargerCongestion = sparse(Ainsparse(:,1),Ainsparse(:,2),Ainsparse(:,3),n_constraint,obj.StateSize);
+Ain_ChargerCongestion = sparse(Ainsparse(:,1),Ainsparse(:,2),Ainsparse(:,3),n_constraint,obj.n_state_vector);
 Bin_ChargerCongestion = Bin;
 end

@@ -2,7 +2,7 @@ function [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,...
     RebVehicleHist,IdleVehicleHist,AllVehicleHist] ...
     = GetVehicleStateHistograms(obj,varargin)
 % GetVehicleStateHistograms Returns the distribution of vehicles across states as a function of time
-%   [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,RebVehicleHist,IdleVehicleHist,AllVehicleHist] = GetVehicleStateHistograms(obj) uses the decision_vector in obj.decision_variables
+%   [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,RebVehicleHist,IdleVehicleHist,AllVehicleHist] = GetVehicleStateHistograms(obj) uses the state_vector in obj.optimization_variables
 %   [...] = GetVehicleStateHistograms(obj,decision_vector_val) uses decision_vector_val
 %   ChargingVehicleHist contains the number of vehicles charging (including rebalancing and passenger-carrying),
 %   DischargingVehicleHist contains the number of vehicles discharging (including rebalancing and passenger-carrying),
@@ -20,6 +20,9 @@ switch numel(varargin)
         error('Too many arguments.')
 end
 
+if obj.use_real_time_formulation && obj.source_relax_flag
+   warning('Using the real-time formulation with source_relax_flag set is not recommended: vehicles are not necessarily conserved in the sense of VehicleConservationTest.') 
+end
 
 % Charging vehicles
 ChargingVehicleHist = zeros(1,obj.spec.n_time_step);
@@ -28,7 +31,7 @@ for tt = 1:obj.spec.n_time_step
         for l = 1:obj.spec.n_charger
             for deltat = 0:obj.spec.charger_time(l) - 1
                 if tt - deltat > 0
-                    for k = 1:obj.num_passenger_flows
+                    for k = 1:obj.n_passenger_flow_in_optimization
                         ChargingVehicleHist(tt) = ChargingVehicleHist(tt) + decision_vector_val(obj.FindChargeLinkPtckl(tt-deltat,c,k,l));
                     end
                     ChargingVehicleHist(tt) = ChargingVehicleHist(tt) + decision_vector_val(obj.FindChargeLinkRtcl(tt-deltat,c,l));
@@ -45,7 +48,7 @@ for tt = 1:obj.spec.n_time_step
         for l = 1:obj.spec.n_charger
             for deltat = 0:obj.spec.charger_time(l) - 1
                 if tt - deltat > 0
-                    for k = 1:obj.num_passenger_flows
+                    for k = 1:obj.n_passenger_flow_in_optimization
                         DischargingVehicleHist(tt) = DischargingVehicleHist(tt) + decision_vector_val(obj.FindDischargeLinkPtckl(tt-deltat,c,k,l));
                     end
                     DischargingVehicleHist(tt) = DischargingVehicleHist(tt) + decision_vector_val(obj.FindDischargeLinkRtcl(tt-deltat,c,l));
@@ -67,7 +70,7 @@ for tt = 1:obj.spec.n_time_step
                 for j = obj.spec.road_adjacency_list{i}
                     for deltat = 0:obj.spec.road_travel_time_matrix(i,j)-1
                         if tt - deltat > 0
-                            for k = 1:obj.num_passenger_flows
+                            for k = 1:obj.n_passenger_flow_in_optimization
                                 PaxVehicleHist(tt) = PaxVehicleHist(tt) + decision_vector_val(obj.FindRoadLinkPtckij(tt-deltat,c,k,i,j));
                             end
                             if i == j

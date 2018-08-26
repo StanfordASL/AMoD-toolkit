@@ -103,6 +103,6 @@ end
 % Remove extra rows in Aeqsparse
 Aeqsparse = Aeqsparse(1:(Aeqentry - 1),:);
 
-Aeq_RebConservation = sparse(Aeqsparse(:,1),Aeqsparse(:,2),Aeqsparse(:,3),n_constraint,obj.StateSize);
+Aeq_RebConservation = sparse(Aeqsparse(:,1),Aeqsparse(:,2),Aeqsparse(:,3),n_constraint,obj.n_state_vector);
 Beq_RebConservation = Beq;
 end

@@ -13,7 +13,7 @@ for i_sink = 1:obj.spec.n_passenger_sink
         start_time = obj.spec.passenger_start_time_list_cell{i_sink}(i_source);
         flow = obj.spec.passenger_flow_list_cell{i_sink}(i_source);
         
-        route_time = obj.RouteTime(source,sink);
+        route_time = obj.route_travel_time_matrix(source,sink);
         
         end_time = start_time + route_time - 1;
         

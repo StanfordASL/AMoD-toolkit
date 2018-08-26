@@ -73,8 +73,8 @@ else
 end
 
 if scenario.Flags.sourcerelaxflag
-    eamod_problem.sourcerelaxflag = true;
-    eamod_problem.SourceRelaxCost = lp_matrices.SourceRelaxCost;
+    eamod_problem.source_relax_flag = true;
+    eamod_problem.source_relax_cost = lp_matrices.SourceRelaxCost;
 end
 
 LPmatricesMatch(test_case,eamod_problem,lp_matrices,scenario);
@@ -86,11 +86,6 @@ if eamod_problem.use_real_time_formulation
     indexer = GetIndexerRealTime(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
 else
     indexer = GetIndexer(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
-end
-
-if scenario.Flags.sourcerelaxflag
-    eamod_problem.sourcerelaxflag = true;
-    eamod_problem.SourceRelaxCost = lp_matrices.SourceRelaxCost;
 end
 
 spec = eamod_problem.spec;

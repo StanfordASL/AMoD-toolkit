@@ -1,6 +1,6 @@
 function figure_handle = PlotDeparturesAndArrivals(obj,varargin)
 % PlotDeparturesAndArrivals Creates a plot showing the amount of trips departing and arriving across time.
-%   figure_handle = PlotDeparturesAndArrivals(obj) uses the decision_vector in obj.decision_variables
+%   figure_handle = PlotDeparturesAndArrivals(obj) uses the state_vector in obj.optimization_variables
 %   figure_handle = PlotDeparturesAndArrivals(obj,decision_vector_val) uses decision_vector_val
 
 switch numel(varargin)

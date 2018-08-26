@@ -1,6 +1,6 @@
 function [DepTimeHist, ArrivalTimeHist] = GetTravelTimesHistograms(obj,varargin)
 % GetTravelTimesHistograms Returns the number of departing and arriving trips as a function of time
-%   [DepTimeHist, ArrivalTimeHist] = GetTravelTimesHistograms(obj) uses the decision_vector in obj.decision_variables
+%   [DepTimeHist, ArrivalTimeHist] = GetTravelTimesHistograms(obj) uses the state_vector in obj.optimization_variables
 %   [DepTimeHist, ArrivalTimeHist] = GetTravelTimesHistograms(obj,decision_vector_val) uses decision_vector_val
 %   DepTimeHist contains the number of departing trips
 %   ArrivalTimeHist contains the number of arriving trips

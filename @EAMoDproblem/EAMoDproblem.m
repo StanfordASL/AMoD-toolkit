@@ -23,8 +23,8 @@ classdef EAMoDproblem < handle
             spec.ValidateSpec();
             obj.spec = spec;
             
-            [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();
-            obj.TVRoadCap = obj.ComputeResidualRoadCapacity();
+            [obj.route_travel_time_matrix,obj.route_charge_to_traverse_matrix,obj.route_travel_distance_matrix_m,obj.route_path_cell] = obj.BuildRoutes();
+            obj.road_residual_capacity_matrix = obj.ComputeResidualRoadCapacity();
         end
                 
         n_start_vehicles = ComputeNumberOfVehiclesAtStart(obj)
@@ -167,7 +167,7 @@ classdef EAMoDproblem < handle
         % the power network and we do not include the congestion relaxation
         function res = FindSourceRelaxks(obj,k,s)
             % FindSourceRelaxks Indexer for constraints relaxing sources
-            if obj.sourcerelaxflag
+            if obj.source_relax_flag
                 res = obj.FindEndRebLocationci(obj.spec.n_charge_step,obj.spec.n_road_node) +  obj.spec.n_sources_to_sink_cumsum(k) + s;
             else
                 res = nan;
@@ -180,15 +180,15 @@ classdef EAMoDproblem < handle
         end
         
         % Get methods for dependent properties
-        function res = get.StateSize(obj)
-            if obj.sourcerelaxflag
+        function res = get.n_state_vector(obj)
+            if obj.source_relax_flag
                 res = obj.FindSourceRelaxks(obj.spec.n_passenger_sink,obj.spec.n_sources_to_sink(obj.spec.n_passenger_sink));
             else
                 res = obj.FindEndRebLocationci(obj.spec.n_charge_step,obj.spec.n_road_node);
             end
         end
         
-        function res = get.num_passenger_flows(obj)
+        function res = get.n_passenger_flow_in_optimization(obj)
             if obj.use_real_time_formulation
                 res = 0;
             else
@@ -199,15 +199,15 @@ classdef EAMoDproblem < handle
     end
     
     properties (Dependent)
-        StateSize % Number of elements in the problem's state vector
-        num_passenger_flows % Number of passenger flows. Is equal to spec.n_passenger_flow in the normal case and zero in the real-time formulation
+        n_state_vector % Number of elements in the problem's state vector
+        n_passenger_flow_in_optimization % Number of passenger flows. Is equal to spec.n_passenger_flow in the normal case and zero in the real-time formulation
     end
     
     properties       
         use_real_time_formulation(1,1) logical = false % Flag to use real-time formulation
         
-        sourcerelaxflag(1,1) logical = false % Flag to allow each vehicle flow to reduce its sources and sinks for cost SourceRelaxCost        
-        SourceRelaxCost(1,1) double {mustBeNonnegative,mustBeReal} % Cost for relaxing sources and sinks (only active when sourcerelaxflag is set)
+        source_relax_flag(1,1) logical = false % Flag to allow each vehicle flow to reduce its sources and sinks for cost source_relax_cost        
+        source_relax_cost(1,1) double {mustBeNonnegative,mustBeReal} % Cost for relaxing sources and sinks (only active when source_relax_flag is set)
                        
         verbose(1,1) logical = false % Flag for verbose output
         
@@ -219,27 +219,27 @@ classdef EAMoDproblem < handle
                 
         % For real-time formulation
         
-        RouteTime(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger}  % RouteTime(i,j) is the number of time-steps needed to go from i to j
-        RouteCharge(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger} % RouteCharge(i,j) is the number of charge units needed to go from i to j
-        RouteDistance(:,:)  double {mustBeNonnegative,mustBeReal} % RouteDistance(i,j) is the distance in meters to go from i to j
-        Routes(:,:) cell % Routes{i,j} is the route from i to j expressed as a vector of connected nodes that need to be traversed
+        route_travel_time_matrix(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger}  % route_travel_time_matrix(i,j) is the number of time-steps needed to go from i to j
+        route_charge_to_traverse_matrix(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger} % route_charge_to_traverse_matrix(i,j) is the number of charge units needed to go from i to j
+        route_travel_distance_matrix_m(:,:)  double {mustBeNonnegative,mustBeReal} % route_travel_distance_matrix_m(i,j) is the distance in meters to go from i to j
+        route_path_cell(:,:) cell % route_path_cell{i,j} is the route from i to j expressed as a vector of connected nodes that need to be traversed
         
-        TVRoadCap(:,:,:) double {mustBeReal} % TVRoadCap(i,j,t) is the residual capacity of the i-j link (in vehicles per unit time) at time t, after subtracting the flow from pre-routed vehicles     
+        road_residual_capacity_matrix(:,:,:) double {mustBeReal} % road_residual_capacity_matrix(i,j,t) is the residual capacity of the i-j link (in vehicles per unit time) at time t, after subtracting the flow from pre-routed vehicles     
     end
     
     properties (Access = private)
         % TODO: rename to optimization_variables
-        decision_variables(1,1) % Struct with optimization variables        
+        optimization_variables(1,1) % Struct with optimization variables        
     end
     
     methods (Access = private)
-        [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj)          
+        [route_travel_time_matrix,route_charge_to_traverse_matrix,route_travel_distance_matrix_m,route_path_cell] = BuildRoutes(obj)          
         charger_power_demand_w = ComputeChargerPowerDemand(obj,varargin)
         charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,varargin)
         A_charger_power_w = ComputeChargerPowerMatrixNew(obj)         
         pax_cost_rt = ComputePaxCostRealTimeFormulation(obj)
-        TVRoadCap = ComputeResidualRoadCapacity(obj)
-        decision_variables = DefineDecisionVariables(obj)
+        road_residual_capacity_matrix = ComputeResidualRoadCapacity(obj)
+        optimization_variables = DefineDecisionVariables(obj)
         [amod_cost_usd, pax_cost_usd,reb_cost_usd, relax_cost_usd] = ComputeAMoDcost(obj,varargin)
         electricity_cost_usd = ComputeElectricityCost(obj,varargin)
         constraint_array = GetConstraintArray(obj)
@@ -247,15 +247,15 @@ classdef EAMoDproblem < handle
         pre_routed_trip_histogram = GetPreRoutedTripHistogram(obj)
         
         function res = FindRoadLinkHelpertckij(obj,t,c,k,i,j)
-            res = (t-1)*(obj.spec.n_road_edge*(obj.num_passenger_flows + 1)*(obj.spec.n_charge_step) + 2*(obj.num_passenger_flows+1)*obj.spec.n_charger*(obj.spec.n_charge_step)) + (c-1)*obj.spec.n_road_edge*(obj.num_passenger_flows+1) + (k-1)*obj.spec.n_road_edge + obj.spec.edge_number_matrix(i,j);
+            res = (t-1)*(obj.spec.n_road_edge*(obj.n_passenger_flow_in_optimization + 1)*(obj.spec.n_charge_step) + 2*(obj.n_passenger_flow_in_optimization+1)*obj.spec.n_charger*(obj.spec.n_charge_step)) + (c-1)*obj.spec.n_road_edge*(obj.n_passenger_flow_in_optimization+1) + (k-1)*obj.spec.n_road_edge + obj.spec.edge_number_matrix(i,j);
         end
         
         function res = FindChargeLinkHelpertckij(obj,t,c,k,i)
-            res = obj.FindRoadLinkRtcij(t,obj.spec.n_charge_step,obj.spec.n_road_node,obj.spec.road_adjacency_list{end}(end)) + obj.spec.n_charger*(obj.num_passenger_flows + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;  %Here we index the charger directly (as opposed to the node hosting the charger)
+            res = obj.FindRoadLinkRtcij(t,obj.spec.n_charge_step,obj.spec.n_road_node,obj.spec.road_adjacency_list{end}(end)) + obj.spec.n_charger*(obj.n_passenger_flow_in_optimization + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;  %Here we index the charger directly (as opposed to the node hosting the charger)
         end
         
         function res = FindDischargeLinkHelpertckl(obj,t,c,k,i)
-            res = obj.FindChargeLinkRtcl(t,obj.spec.n_charge_step,obj.spec.n_charger) + obj.spec.n_charger*(obj.num_passenger_flows + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;
+            res = obj.FindChargeLinkRtcl(t,obj.spec.n_charge_step,obj.spec.n_charger) + obj.spec.n_charger*(obj.n_passenger_flow_in_optimization + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;
         end
     end
 end

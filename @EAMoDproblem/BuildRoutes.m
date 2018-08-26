@@ -1,30 +1,30 @@
-function [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj)
+function [route_travel_time_matrix,route_charge_to_traverse_matrix,route_travel_distance_matrix_m,route_path_cell] = BuildRoutes(obj)
 % BuildRoutes Precomputes routes for passenger carrying vehicles in real-time implementation
-%   [RouteTime,RouteCharge,RouteDistance,Routes] = BuildRoutes(obj) where 
-%   RouteTime(i,j) is the number of time-steps needed to go from i to j,
-%   RouteCharge(i,j) is the number of charge units needed to go from i to j,
-%   RouteDistance(i,j) is the distance in meters to go from i to j,
-%   Routes{i,j} is the route from i to j expresed as a vector of connected 
+%   [route_travel_time_matrix,route_charge_to_traverse_matrix,route_travel_distance_matrix_m,route_path_cell] = BuildRoutes(obj) where 
+%   route_travel_time_matrix(i,j) is the number of time-steps needed to go from i to j,
+%   route_charge_to_traverse_matrix(i,j) is the number of charge units needed to go from i to j,
+%   route_travel_distance_matrix_m(i,j) is the distance in meters to go from i to j,
+%   route_path_cell{i,j} is the route from i to j expresed as a vector of connected 
 %   nodes that need to be traversed
 
-RouteTime = zeros(obj.spec.n_road_node);
-RouteCharge = zeros(obj.spec.n_road_node);
-RouteDistance = zeros(obj.spec.n_road_node);
-Routes = cell(obj.spec.n_road_node,obj.spec.n_road_node);
+route_travel_time_matrix = zeros(obj.spec.n_road_node);
+route_charge_to_traverse_matrix = zeros(obj.spec.n_road_node);
+route_travel_distance_matrix_m = zeros(obj.spec.n_road_node);
+route_path_cell = cell(obj.spec.n_road_node,obj.spec.n_road_node);
 
 for i = 1:obj.spec.n_road_node
     for j = 1:obj.spec.n_road_node
-        Routes{i,j} = FreeRouteAstar(i,j,obj.spec.road_adjacency_list,obj.spec.road_travel_time_matrix);
+        route_path_cell{i,j} = FreeRouteAstar(i,j,obj.spec.road_adjacency_list,obj.spec.road_travel_time_matrix);
         
         % Account for self-loops
         if i == j
-            RouteTime(i,j) = obj.spec.road_travel_time_matrix(i,j);
-            RouteCharge(i,j) = obj.spec.road_charge_to_traverse_matrix(i,j);
+            route_travel_time_matrix(i,j) = obj.spec.road_travel_time_matrix(i,j);
+            route_charge_to_traverse_matrix(i,j) = obj.spec.road_charge_to_traverse_matrix(i,j);
         else
-            for k = 1:(numel(Routes{i,j}) - 1)
-                RouteTime(i,j) = RouteTime(i,j) + obj.spec.road_travel_time_matrix(Routes{i,j}(k),Routes{i,j}(k+1));
-                RouteCharge(i,j) = RouteCharge(i,j) + obj.spec.road_charge_to_traverse_matrix(Routes{i,j}(k),Routes{i,j}(k+1));
-                RouteDistance(i,j) = RouteDistance(i,j) + obj.spec.road_travel_distance_matrix_m(Routes{i,j}(k),Routes{i,j}(k+1));
+            for k = 1:(numel(route_path_cell{i,j}) - 1)
+                route_travel_time_matrix(i,j) = route_travel_time_matrix(i,j) + obj.spec.road_travel_time_matrix(route_path_cell{i,j}(k),route_path_cell{i,j}(k+1));
+                route_charge_to_traverse_matrix(i,j) = route_charge_to_traverse_matrix(i,j) + obj.spec.road_charge_to_traverse_matrix(route_path_cell{i,j}(k),route_path_cell{i,j}(k+1));
+                route_travel_distance_matrix_m(i,j) = route_travel_distance_matrix_m(i,j) + obj.spec.road_travel_distance_matrix_m(route_path_cell{i,j}(k),route_path_cell{i,j}(k+1));
             end
         end
     end

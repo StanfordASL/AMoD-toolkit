@@ -11,7 +11,7 @@ else
     state_range = indexer.FindRoadLinkPtckij(1,1,1,1,1):indexer.FindEndRebLocationci(spec.n_charge_step,spec.n_road_node);
 end
 
-if eamod_problem.sourcerelaxflag
+if eamod_problem.source_relax_flag
     col_range_relax = indexer.FindSourceRelaxks(1,1) + [0:(spec.n_passenger_source - 1)];
     state_range = [state_range,col_range_relax];
 end

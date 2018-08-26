@@ -28,9 +28,9 @@ for k = 1:obj.spec.n_passenger_flow
             Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindPaxSinkChargetck(t,c,k),-1];
             Aeqentry = Aeqentry + 1;
             for ssi = 1 :length(obj.spec.passenger_source_list_cell{k})
-                if obj.spec.passenger_start_time_list_cell{k}(ssi) == t - obj.RouteTime(obj.spec.passenger_source_list_cell{k}(ssi),obj.spec.passenger_sink_list(k))
-                    if c + obj.RouteCharge(obj.spec.passenger_source_list_cell{k}(ssi),obj.spec.passenger_sink_list(k)) <= obj.spec.n_charge_step && c + obj.RouteCharge(obj.spec.passenger_source_list_cell{k}(ssi),obj.spec.passenger_sink_list(k)) > 0
-                        Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindPaxSourceChargecks(c + obj.RouteCharge(obj.spec.passenger_source_list_cell{k}(ssi),obj.spec.passenger_sink_list(k)),k,ssi),1];
+                if obj.spec.passenger_start_time_list_cell{k}(ssi) == t - obj.route_travel_time_matrix(obj.spec.passenger_source_list_cell{k}(ssi),obj.spec.passenger_sink_list(k))
+                    if c + obj.route_charge_to_traverse_matrix(obj.spec.passenger_source_list_cell{k}(ssi),obj.spec.passenger_sink_list(k)) <= obj.spec.n_charge_step && c + obj.route_charge_to_traverse_matrix(obj.spec.passenger_source_list_cell{k}(ssi),obj.spec.passenger_sink_list(k)) > 0
+                        Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindPaxSourceChargecks(c + obj.route_charge_to_traverse_matrix(obj.spec.passenger_source_list_cell{k}(ssi),obj.spec.passenger_sink_list(k)),k,ssi),1];
                         Aeqentry=Aeqentry+1;
                     end
                 end
@@ -51,6 +51,6 @@ end
 % Remove extra rows in Aeqsparse
 Aeqsparse = Aeqsparse(1:(Aeqentry - 1),:);
 
-Aeq_CustomerChargeConservation = sparse(Aeqsparse(:,1),Aeqsparse(:,2),Aeqsparse(:,3),n_constraint,obj.StateSize);
+Aeq_CustomerChargeConservation = sparse(Aeqsparse(:,1),Aeqsparse(:,2),Aeqsparse(:,3),n_constraint,obj.n_state_vector);
 Beq_CustomerChargeConservation = Beq;
 end

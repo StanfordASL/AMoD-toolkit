@@ -5,11 +5,7 @@ function [objective_value,solver_time,diagnostics] = Solve(obj)
 %   solver_time is the solver time reported by YALMIP
 %   diagnostics contains YALMIP diagnostic information
 
-if obj.use_real_time_formulation && obj.sourcerelaxflag
-   warning('Using the real-time formulation with sourcerelaxflag set is not recommended: vehicles are not necessarily conserved in the sense of VehicleConservationTest.') 
-end
-
-obj.decision_variables = obj.DefineDecisionVariables();
+obj.optimization_variables = obj.DefineDecisionVariables();
 
 constraint_array = obj.GetConstraintArray();
 objective = obj.GetObjective();

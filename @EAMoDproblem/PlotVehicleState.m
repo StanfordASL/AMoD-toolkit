@@ -1,6 +1,6 @@
 function figure_handle = PlotVehicleState(obj,params_plot,varargin)
 % PlotVehicleState Creates a plot showing the amount of vehicles in the different states (charging, discharging, rebalancing, carrying passengers or idling) across time.
-%   figure_handle = PlotVehicleState(obj) uses the decision_vector in obj.decision_variables
+%   figure_handle = PlotVehicleState(obj) uses the state_vector in obj.optimization_variables
 %   figure_handle = PlotVehicleState(obj,decision_vector_val) uses decision_vector_val
 %   figure_handle = PlotVehicleState(...,'color_map',color_map) uses color_map for the graph's colors
 

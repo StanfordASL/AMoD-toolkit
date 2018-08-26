@@ -8,7 +8,7 @@ n_constraint = obj.spec.n_passenger_sink;
 % removed at the end.
 n_constraint_entries = obj.spec.n_passenger_sink*obj.spec.n_charge_step*obj.spec.n_time_step;
 
-if obj.sourcerelaxflag
+if obj.source_relax_flag
     n_constraint_entries = n_constraint_entries + obj.spec.n_passenger_source;
 end
 
@@ -27,7 +27,7 @@ for k = 1:obj.spec.n_passenger_flow
             Aeqentry = Aeqentry+1;
         end
     end
-    if obj.sourcerelaxflag
+    if obj.source_relax_flag
         for ssi = 1:length(obj.spec.passenger_source_list_cell{k})
             Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindSourceRelaxks(k,ssi),1];
             Aeqentry = Aeqentry+1;
@@ -48,7 +48,7 @@ end
 % Remove extra rows in Aeqsparse
 Aeqsparse = Aeqsparse(1:(Aeqentry - 1),:);
 
-Aeq_SinkConservation = sparse(Aeqsparse(:,1),Aeqsparse(:,2),Aeqsparse(:,3),n_constraint,obj.StateSize);
+Aeq_SinkConservation = sparse(Aeqsparse(:,1),Aeqsparse(:,2),Aeqsparse(:,3),n_constraint,obj.n_state_vector);
 Beq_SinkConservation = Beq;
 
 end

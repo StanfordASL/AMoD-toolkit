@@ -4,11 +4,11 @@ function [Ain_RoadCongestion, Bin_RoadCongestion] = CreateInequalityConstraintMa
 
 if obj.use_real_time_formulation
    ExpandedRoadCap = repmat(full(obj.spec.road_capacity_matrix),1,1,obj.spec.n_time_step);
-   residual_road_cap_relative = obj.TVRoadCap./ExpandedRoadCap;
+   residual_road_cap_relative = obj.road_residual_capacity_matrix./ExpandedRoadCap;
 
     if any(residual_road_cap_relative(:) < 0)
         [min_residual_road_cap_relative,index] = min(residual_road_cap_relative(:));
-        [i,j,t] = ind2sub(size(obj.TVRoadCap),index);
+        [i,j,t] = ind2sub(size(obj.road_residual_capacity_matrix),index);
 
         warning('Residual road capacity is negative. Real-time formulation will not be feasible. Maximal excedent: %.2f %% in edge %i-%i at time-step %i.',-min_residual_road_cap_relative*100,i,j,t)   
     end 
@@ -19,7 +19,7 @@ n_constraint = obj.spec.n_road_edge*obj.spec.n_time_step;
 
 % This is meant as an upper bound for memory allocation. Unused entries are
 % removed at the end.
-n_constraint_entries = obj.spec.n_road_edge*obj.spec.n_time_step*(obj.num_passenger_flows + 1)*obj.spec.n_charge_step;
+n_constraint_entries = obj.spec.n_road_edge*obj.spec.n_time_step*(obj.n_passenger_flow_in_optimization + 1)*obj.spec.n_charge_step;
 
 Ainsparse = zeros(n_constraint_entries,3);
 Bin = zeros(n_constraint,1);
@@ -32,9 +32,9 @@ for t = 1:obj.spec.n_time_step
     for i = 1:obj.spec.n_road_node
         for j = obj.spec.road_adjacency_list{i}
             for c = 1:obj.spec.n_charge_step
-                % Note that if obj.num_passenger_flows = 0, this loop does not
+                % Note that if obj.n_passenger_flow_in_optimization = 0, this loop does not
                 % run
-                for k = 1:obj.num_passenger_flows
+                for k = 1:obj.n_passenger_flow_in_optimization
                     Ainsparse(Ainentry,:) = [Ainrow,obj.FindRoadLinkPtckij(t,c,k,i,j),1];
                     Ainentry = Ainentry+1;
                 end
@@ -43,7 +43,7 @@ for t = 1:obj.spec.n_time_step
             end
             
             if obj.use_real_time_formulation
-                Bin(Ainrow) = obj.TVRoadCap(i,j,t);
+                Bin(Ainrow) = obj.road_residual_capacity_matrix(i,j,t);
             else
                 Bin(Ainrow) = obj.spec.road_capacity_matrix(i,j);
             end
@@ -63,7 +63,7 @@ end
 % Remove extra rows in Ainsparse
 Ainsparse = Ainsparse(1:(Ainentry - 1),:);
 
-Ain_RoadCongestion = sparse(Ainsparse(:,1),Ainsparse(:,2),Ainsparse(:,3),n_constraint,obj.StateSize);
+Ain_RoadCongestion = sparse(Ainsparse(:,1),Ainsparse(:,2),Ainsparse(:,3),n_constraint,obj.n_state_vector);
 Bin_RoadCongestion = Bin;
 
 end

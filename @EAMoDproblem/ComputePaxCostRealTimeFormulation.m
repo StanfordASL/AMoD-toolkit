@@ -17,13 +17,13 @@ if obj.use_real_time_formulation
             source = source_array(i_source);
             flow = obj.spec.passenger_flow_list_cell{i_sink}(i_source);
             
-            route_time = obj.RouteTime(source,sink);
+            route_time = obj.route_travel_time_matrix(source,sink);
             time_cost = time_cost + flow*route_time*obj.spec.value_of_time_usd_per_time_step;
             
-            route_distance = obj.RouteDistance(source,sink);            
+            route_distance = obj.route_travel_distance_matrix_m(source,sink);            
             distance_cost = distance_cost + flow*route_distance*obj.spec.vehicle_cost_usd_per_m;
             
-            route_charge = obj.RouteCharge(source,sink);
+            route_charge = obj.route_charge_to_traverse_matrix(source,sink);
             battery_depreciation_cost = battery_depreciation_cost + flow*abs(route_charge)*obj.spec.battery_depreciation_usd_per_charge_step;
         end
     end

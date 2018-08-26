@@ -32,8 +32,8 @@ spec_infeas = EAMoDspec.CreateFromScenario(scenario_infeas);
 
 eamod_problem_infeas = EAMoDproblem(spec_infeas); 
 
-eamod_problem_infeas.sourcerelaxflag = true;
-eamod_problem_infeas.SourceRelaxCost = 1e8;
+eamod_problem_infeas.source_relax_flag = true;
+eamod_problem_infeas.source_relax_cost = 1e8;
 
 HelperVerifyVehicleConservation_1(test_case,eamod_problem_feas)
 HelperVerifyVehicleConservation_1(test_case,eamod_problem_infeas)
@@ -44,8 +44,8 @@ eamod_problem.Solve();
 HelperVerifyVehicleConservation_2(test_case,eamod_problem);
 
 % The way we verify vehicle conservation fails when using the real-time formulation
-% with sourcerelaxflag set. Thus, we avoid it.
-if ~eamod_problem.sourcerelaxflag
+% with source_relax_flag set. Thus, we avoid it.
+if ~eamod_problem.source_relax_flag
     eamod_problem.use_real_time_formulation = true;
     eamod_problem.Solve();
     HelperVerifyVehicleConservation_2(test_case,eamod_problem);
