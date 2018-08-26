@@ -1,5 +1,5 @@
-function A_charger_power_w = ComputeChargerPowerMatrixNew(obj)
-% ComputeChargerPowerMatrixNew Computes A_charger_power_w such that charger_power_w = A_charger_power_w*obj.optimization_variables.state_vector
+function A_charger_power_w = ComputeChargerPowerMatrix(obj)
+% ComputeChargerPowerMatrix Computes A_charger_power_w such that charger_power_w = A_charger_power_w*obj.optimization_variables.state_vector
 
 n_row = obj.spec.n_charger*obj.spec.n_time_step;
 

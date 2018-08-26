@@ -11,7 +11,7 @@ classdef (Abstract) AbstractEAMoDproblem < handle
     %   See also EAMoDspec
     
     methods
-        function obj = EAMoDproblem(spec)
+        function obj = AbstractEAMoDproblem(spec,n_passenger_flow_in_optimization)
             % EAMoDproblem Constructs an EAMoDproblem object
             %   obj = EAMoDproblem(spec) where spec is an instance of
             %   EAMoDspec specifying the problem.
@@ -23,8 +23,10 @@ classdef (Abstract) AbstractEAMoDproblem < handle
             spec.ValidateSpec();
             obj.spec = spec;
             
-            [obj.route_travel_time_matrix,obj.route_charge_to_traverse_matrix,obj.route_travel_distance_matrix_m,obj.route_path_cell] = obj.BuildRoutes();
+            obj.n_passenger_flow_in_optimization = n_passenger_flow_in_optimization;
+                        
             obj.road_residual_capacity_matrix = obj.ComputeResidualRoadCapacity();
+            
             obj.SetOffsetsForIndexingFunctions();
         end
                 
@@ -47,14 +49,10 @@ classdef (Abstract) AbstractEAMoDproblem < handle
         % Determine matrices for the linear program
         [f_cost,f_cost_pax,f_cost_reb,f_cost_relax] = CreateCostVector(obj)
         
-        % Equality constraints for standard formulation
-        [Aeq_PaxConservation, Beq_PaxConservation] = CreateEqualityConstraintMatrices_PaxConservation(obj)
+        % Equality constraints
         [Aeq_RebConservation, Beq_RebConservation] = CreateEqualityConstraintMatrices_RebConservation(obj)
         [Aeq_SourceConservation, Beq_SourceConservation] = CreateEqualityConstraintMatrices_SourceConservation(obj)
         [Aeq_SinkConservation, Beq_SinkConservation] = CreateEqualityConstraintMatrices_SinkConservation(obj)
-        
-        % Equality constraints for real-time formulation
-        [Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = CreateEqualityConstraintMatrices_CustomerChargeConservation(obj)
         
         % Inequality constraints
         [Ain_RoadCongestion, Bin_RoadCongestion] = CreateInequalityConstraintMatrices_RoadCongestion(obj)
@@ -63,11 +61,9 @@ classdef (Abstract) AbstractEAMoDproblem < handle
         [lb_StateVector,ub_StateVector] = CreateStateVectorBounds(obj)
     end
     
-    properties
-        use_real_time_formulation(1,1) logical = false % Flag to use real-time formulation
-        
+    properties        
         source_relax_flag(1,1) logical = false % Flag to allow each vehicle flow to reduce its sources and sinks for cost source_relax_cost        
-        source_relax_cost(1,1) double {mustBeNonnegative,mustBeReal} % Cost for relaxing sources and sinks (only active when source_relax_flag is set)
+        source_relax_cost(1,1) double {mustBeNonnegative,mustBeReal} % Cost for relaxing sources and sinks (only relevant when source_relax_flag is set)
                        
         verbose(1,1) logical = false % Flag for verbose output
         
@@ -75,77 +71,32 @@ classdef (Abstract) AbstractEAMoDproblem < handle
     end
     
     properties (SetAccess = private, GetAccess = public)
-        spec(1,1) EAMoDspec % Object of class EAMoDspec specifying the problem
-                
-        % For real-time formulation
-        
-        route_travel_time_matrix(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger}  % route_travel_time_matrix(i,j) is the number of time-steps needed to go from i to j
-        route_charge_to_traverse_matrix(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger} % route_charge_to_traverse_matrix(i,j) is the number of charge units needed to go from i to j
-        route_travel_distance_matrix_m(:,:)  double {mustBeNonnegative,mustBeReal} % route_travel_distance_matrix_m(i,j) is the distance in meters to go from i to j
-        route_path_cell(:,:) cell % route_path_cell{i,j} is the route from i to j expressed as a vector of connected nodes that need to be traversed
-        
-        road_residual_capacity_matrix(:,:,:) double {mustBeReal} % road_residual_capacity_matrix(i,j,t) is the residual capacity of the i-j link (in vehicles per unit time) at time t, after subtracting the flow from pre-routed vehicles     
+        spec(1,1) EAMoDspec % Object of class EAMoDspec specifying the problem        
     end
     
     properties (Dependent)
         n_state_vector % Number of elements in the problem's state vector
-        n_passenger_flow_in_optimization % Number of passenger flows. Is equal to spec.n_passenger_flow in the normal case and zero in the real-time formulation
     end
     
     methods                            
-        % State vector indexing functions
-        function res = FindRoadLinkPtckij(obj,t,c,k,i,j)
-            % FindRoadLinkPtckij Indexer for customer flow in road edges in the extended network
-            if obj.use_real_time_formulation
-                error('FindRoadLinkPtckij is undefined for real time formulation.');
-            else
-                res = obj.FindRoadLinkHelpertckij(t,c,k,i,j);
-            end
-        end
+        % State vector indexing functions     
         
         function res = FindRoadLinkRtcij(obj,t,c,i,j)
-            % FindRoadLinkRtcij Indexer for rebalancing flow in road edges in the extended network
-            if obj.use_real_time_formulation
-                res = obj.FindRoadLinkHelpertckij(t,c,1,i,j);
-            else
-                res = obj.FindRoadLinkPtckij(t,c,obj.spec.n_passenger_flow + 1,i,j);
-            end
-        end
-        
-        function res = FindChargeLinkPtckl(obj,t,c,k,i)
-            % FindChargeLinkPtckl Indexer for customer flow in charging edges in the extended network
-            if obj.use_real_time_formulation
-                error('FindChargeLinkPtckl is undefined for real time formulation.');
-            else
-                res = obj.FindChargeLinkHelpertckij(t,c,k,i);
-            end
+            % FindRoadLinkRtcij Indexer for rebalancing flow in road edges in the extended network 
+            
+            res = obj.FindRoadLinkHelpertckij(t,c,obj.n_passenger_flow_in_optimization + 1,i,j);
         end
         
         function res = FindChargeLinkRtcl(obj,t,c,i)
             % FindChargeLinkRtcl Indexer for rebalancing flow in charging edges in the extended network
-            if obj.use_real_time_formulation
-                res = obj.FindChargeLinkHelpertckij(t,c,1,i);
-            else
-                res = obj.FindChargeLinkPtckl(t,c,obj.spec.n_passenger_flow+1,i);
-            end
+            
+            res = obj.FindChargeLinkHelpertckij(t,c,obj.n_passenger_flow_in_optimization + 1,i);
         end
-        
-        function res = FindDischargeLinkPtckl(obj,t,c,k,i)
-            % FindDischargeLinkPtckl Indexer for customer flow in discharging edges in the extended network
-            if obj.use_real_time_formulation
-                error('FindDischargeLinkPtckl is undefined for real time formulation.');
-            else
-                res = obj.FindDischargeLinkHelpertckl(t,c,k,i);
-            end
-        end
-        
+              
         function res = FindDischargeLinkRtcl(obj,t,c,i)
             % FindDischargeLinkRtcl Indexer for rebalancing flow in discharging edges in the extended network
-            if obj.use_real_time_formulation
-                res = obj.FindDischargeLinkHelpertckl(t,c,1,i);
-            else
-                res = obj.FindDischargeLinkPtckl(t,c,obj.spec.n_passenger_flow + 1,i);
-            end
+            
+            res = obj.FindDischargeLinkHelpertckl(t,c,obj.n_passenger_flow_in_optimization + 1,i);
         end
         
         function res = FindPaxSourceChargecks(obj,c,k,s)
@@ -171,46 +122,48 @@ classdef (Abstract) AbstractEAMoDproblem < handle
             
             % Original defintion
             % res = obj.FindPaxSinkChargetck(obj.spec.n_time_step,obj.spec.n_charge_step,obj.spec.n_passenger_flow) + obj.spec.n_road_node*(c-1) + i;
-            % We cache the call to FindPaxSinkChargetck
+            % We cache the call to FindPaxSinkChargetck            
             res = obj.offset_FindEndRebLocationci + obj.spec.n_road_node*(c-1) + i;        
         end
         
         % Constraint Indexers
-        function res = FindEqPaxConservationtcki(obj,t,c,k,i)
-            % FindEqPaxConservationtcki Indexer for customer flow conservation constraints
-            res = obj.spec.n_road_node*obj.spec.n_passenger_flow*obj.spec.n_charge_step*(t - 1) + obj.spec.n_road_node*obj.spec.n_passenger_flow*(c - 1) + obj.spec.n_road_node*(k - 1) + i;
-        end
         
         function res = FindEqRebConservationtci(obj,t,c,i)
             % FindEqRebConservationtci Indexer for rebalancing flow conservation constraints
+            
             res = obj.spec.n_road_node*obj.spec.n_charge_step*(t - 1) + obj.spec.n_road_node*(c - 1) + i;
         end
         
         function res = FindEqSourceConservationks(obj,k,s)
             % FindEqSourceConservationks Indexer for source conservation constraints
+            
             res = obj.spec.n_sources_to_sink_cumsum(k) + s;
         end
         
         function res = FindEqSinkConservationk(obj,k)
             % FindEqSinkConservationk Indexer for sink conservation constraints
+            
             res = k;
         end
         
         function res = FindInRoadCongestiontij(obj,t,i,j)
             % FindInRoadCongestiontij Indexer for road congestion constraints
+            
             res = obj.spec.n_road_edge*(t - 1) + obj.spec.edge_number_matrix(i,j);
         end
         
         function res = FindInChargerCongestiontl(obj,t,l)
             % FindInChargerCongestiontl Indexer for charger congestion constraints
+            
             res = obj.spec.n_charger*(t-1) + l;
         end
-        
-        % The indexing for FindSourceRelaxks is different from
-        % TVPowerBalancedFlowFinder_sinkbundle because we do not include
-        % the power network and we do not include the congestion relaxation
+                
         function res = FindSourceRelaxks(obj,k,s)
             % FindSourceRelaxks Indexer for constraints relaxing sources
+            %   The indexing for FindSourceRelaxks is different from
+            %   TVPowerBalancedFlowFinder_sinkbundle because we do not include
+            %   the power network and we do not include the congestion relaxation
+            
             if obj.source_relax_flag
                 res = obj.FindEndRebLocationci(obj.spec.n_charge_step,obj.spec.n_road_node) +  obj.spec.n_sources_to_sink_cumsum(k) + s;
             else
@@ -219,7 +172,8 @@ classdef (Abstract) AbstractEAMoDproblem < handle
         end
         
         function res = FindChargerPowertl(obj,t,l)
-            % FindSourceRelaxks Indexer for row in ComputeChargerPowerMatrixNew corresponding to charger l at time step t  
+            % FindSourceRelaxks Indexer for row in ComputeChargerPowerMatrix corresponding to charger l at time step t  
+            
             res = obj.spec.n_charger*(t - 1) + l;
         end
         
@@ -231,44 +185,16 @@ classdef (Abstract) AbstractEAMoDproblem < handle
                 res = obj.FindEndRebLocationci(obj.spec.n_charge_step,obj.spec.n_road_node);
             end
         end
-        
-        function res = get.n_passenger_flow_in_optimization(obj)
-            if obj.use_real_time_formulation
-                res = 0;
-            else
-                res = obj.spec.n_passenger_flow;
-            end
-        end       
-
-    end
-       
-    properties (Access = private)
-        optimization_variables(1,1) % Struct with optimization variables 
-        
-        % Cached offsets for indexing functions. See SetOffsetsForIndexingFunctions
-        
-        offset_FindChargeLinkHelpertckij_t % offset_FindChargeLinkHelpertckij_t(t ) is the offset for FindChargeLinkHelpertckij at t
-        offset_FindDischargeLinkHelpertckl_t % offset_FindDischargeLinkHelpertckl_t(t) is the offset for FindDischargeLinkHelpertckl at t
-    
-        offset_FindPaxSourceChargecks % Offset for FindPaxSourceChargecks
-        offset_FindPaxSinkChargetck % Offset for FindPaxSinkChargetck
-        offset_FindEndRebLocationci % Offset for FindEndRebLocationci
     end
     
-    methods (Access = private)
-        [route_travel_time_matrix,route_charge_to_traverse_matrix,route_travel_distance_matrix_m,route_path_cell] = BuildRoutes(obj)          
-        charger_power_demand_w = ComputeChargerPowerDemand(obj,varargin)
-        charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,varargin)
-        A_charger_power_w = ComputeChargerPowerMatrixNew(obj)         
-        pax_cost_rt = ComputePaxCostRealTimeFormulation(obj)
+    methods (Abstract, Access = protected)
         road_residual_capacity_matrix = ComputeResidualRoadCapacity(obj)
-        optimization_variables = DefineDecisionVariables(obj)
-        [amod_cost_usd, pax_cost_usd,reb_cost_usd, relax_cost_usd] = ComputeAMoDcost(obj,varargin)
-        electricity_cost_usd = ComputeElectricityCost(obj,varargin)
         constraint_array = GetConstraintArray(obj)
-        objective = GetObjective(obj)
-        pre_routed_trip_histogram = GetPreRoutedTripHistogram(obj)
-        SetOffsetsForIndexingFunctions(obj)
+    end
+    
+    methods (Access = protected)
+        [amod_cost_usd, pax_cost_usd,reb_cost_usd, relax_cost_usd] = ComputeAMoDcost(obj,varargin)
+        constraint_array = GetCommonConstraintArray(obj)
         
         function res = FindRoadLinkHelpertckij(obj,t,c,k,i,j)
             res = (t-1)*(obj.spec.n_road_edge*(obj.n_passenger_flow_in_optimization + 1)*(obj.spec.n_charge_step) + 2*(obj.n_passenger_flow_in_optimization+1)*obj.spec.n_charger*(obj.spec.n_charge_step)) + (c-1)*obj.spec.n_road_edge*(obj.n_passenger_flow_in_optimization+1) + (k-1)*obj.spec.n_road_edge + obj.spec.edge_number_matrix(i,j);
@@ -286,7 +212,34 @@ classdef (Abstract) AbstractEAMoDproblem < handle
             % res = obj.FindChargeLinkRtcl(t,obj.spec.n_charge_step,obj.spec.n_charger) + obj.spec.n_charger*(obj.n_passenger_flow_in_optimization + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;
             % We cache the calls to obj.FindChargeLinkRtcl for better performance
             res = obj.offset_FindDischargeLinkHelpertckl_t(t) + obj.spec.n_charger*(obj.n_passenger_flow_in_optimization + 1)*(c-1) + obj.spec.n_charger*(k-1) + i;
-        end
+        end    
+    end
+    
+    properties (Access = protected)
+        n_passenger_flow_in_optimization(1,1) double  % Number of passenger flows that are present in the optimization. Is equal to spec.n_passenger_flow in the normal case and zero in the real-time formulation  
+        optimization_variables(1,1) % Struct with optimization variables 
+        road_residual_capacity_matrix(:,:,:) double % road_residual_capacity_matrix(i,j,t) is the residual capacity of the i-j link (in vehicles per unit time) at time t, after subtracting the flow from pre-routed vehicles      
+    end
+    
+    methods (Access = private)
+        charger_power_demand_w = ComputeChargerPowerDemand(obj,varargin)
+        charger_power_demand = ComputeChargerPowerDemandNormalized(obj,factor,varargin)
+        A_charger_power_w = ComputeChargerPowerMatrix(obj)        
+        electricity_cost_usd = ComputeElectricityCost(obj,varargin)
+        optimization_variables = DefineDecisionVariables(obj)        
+        objective = GetObjective(obj)
+        SetOffsetsForIndexingFunctions(obj) 
+    end
+       
+    properties (Access = private)        
+        % Cached offsets for indexing functions. See SetOffsetsForIndexingFunctions
+        
+        offset_FindChargeLinkHelpertckij_t(:,1) double % offset_FindChargeLinkHelpertckij_t(t ) is the offset for FindChargeLinkHelpertckij at t
+        offset_FindDischargeLinkHelpertckl_t(:,1) double % offset_FindDischargeLinkHelpertckl_t(t) is the offset for FindDischargeLinkHelpertckl at t
+    
+        offset_FindPaxSourceChargecks(1,1) double % Offset for FindPaxSourceChargecks
+        offset_FindPaxSinkChargetck(1,1) double % Offset for FindPaxSinkChargetck
+        offset_FindEndRebLocationci(1,1) double % Offset for FindEndRebLocationci
     end
 end
 

@@ -1,6 +1,8 @@
 function road_residual_capacity_matrix = ComputeResidualRoadCapacity(obj)
 % ComputeResidualRoadCapacity Computes the residual road capacity after accounting for the pre-routed passenger-carrying vehicles used in the real-time formulation
 
+[obj.route_travel_time_matrix,obj.route_charge_to_traverse_matrix,obj.route_travel_distance_matrix_m,obj.route_path_cell] = obj.BuildRoutes();
+
 road_utilization_matrix = zeros(obj.spec.n_road_node,obj.spec.n_road_node,obj.spec.n_time_step);
 
 for i_sink = 1:obj.spec.n_passenger_sink
@@ -38,4 +40,15 @@ end
 ExpandedRoadCap = repmat(full(obj.spec.road_capacity_matrix),1,1,obj.spec.n_time_step);
 
 road_residual_capacity_matrix = ExpandedRoadCap - road_utilization_matrix;
+
+% Issue a warning if residual_road_cap_relative is negative
+residual_road_cap_relative = road_residual_capacity_matrix./ExpandedRoadCap;
+
+if any(residual_road_cap_relative(:) < 0)
+    [min_residual_road_cap_relative,index] = min(residual_road_cap_relative(:));
+    [i,j,t] = ind2sub(size(road_residual_capacity_matrix),index);
+
+    warning('Residual road capacity is negative. Real-time formulation will not be feasible. Maximal excedent: %.2f %% in edge %i-%i at time-step %i.',-min_residual_road_cap_relative*100,i,j,t)   
+end     
+
 end

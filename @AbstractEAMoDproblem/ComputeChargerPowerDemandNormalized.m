@@ -33,7 +33,7 @@ switch numel(varargin)
         error('Too many arguments.')
 end
 
-A_charger_power_w = obj.ComputeChargerPowerMatrixNew();
+A_charger_power_w = obj.ComputeChargerPowerMatrix();
 
 A_charger_power_normalized = spdiag(factor(:))*A_charger_power_w;
 

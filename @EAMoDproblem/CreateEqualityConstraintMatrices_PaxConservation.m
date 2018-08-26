@@ -2,13 +2,6 @@ function [Aeq_PaxConservation, Beq_PaxConservation] = CreateEqualityConstraintMa
 % CreateEqualityConstraintMatrices_PaxConservation Creates equality constraints for customer flow conservation (Eq. 9a)
 %   [Aeq_PaxConservation, Beq_PaxConservation] = CreateEqualityConstraintMatrices_PaxConservation(obj)
 
-if obj.use_real_time_formulation
-    warning('CreateEqualityConstraintMatrices_PaxConservation does not apply for real-time formulation.')
-    Aeq_PaxConservation = [];
-    Beq_PaxConservation = [];
-    return;
-end
-
 n_constraint = obj.spec.n_road_node*obj.spec.n_passenger_flow*obj.spec.n_charge_step*obj.spec.n_time_step;
 
 % This is meant as an upper bound for memory allocation. Unused entries are

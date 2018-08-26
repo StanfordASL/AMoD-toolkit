@@ -2,14 +2,6 @@ function [Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = Crea
 % CreateEqualityConstraintMatrices_CustomerChargeConservation Creates equality constraints for conservation of charge in customer-carrying vehicles in the real-time formulation (Eq. 11)
 %   [Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = CreateEqualityConstraintMatrices_CustomerChargeConservation
 
-
-if ~obj.use_real_time_formulation
-    warning('CreateEqualityConstraintMatrices_CustomerChargeConservation applies only for real-time formulation.')
-    Aeq_CustomerChargeConservation = [];
-    Beq_CustomerChargeConservation = [];
-    return;
-end
-
 n_constraint = obj.spec.n_passenger_flow*obj.spec.n_time_step*obj.spec.n_charge_step;
 
 % This is meant as an upper bound for memory allocation. Unused entries are

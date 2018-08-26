@@ -59,15 +59,15 @@ spec.charger_electricity_price_usd_per_j = charger_electricity_price_usd_per_j;
 % Legacy code expects PowerCosts to be of size n_time_step x n_charger and be in USD/(BaseMVA*time_step_s)
 scenario.PowerNetwork.PowerCosts = charger_electricity_price_usd_per_j.'*(scenario.BaseMVA*1e6*scenario.time_step_s);
 
-% Test non-real time formulation
-eamod_problem = EAMoDproblem(spec);
 
 if use_real_time_formulation
-    eamod_problem.use_real_time_formulation = true;
+    eamod_problem = EAMoDproblemRT(spec);
     
     [cplex_out,fval,~,~,~,~,~,~,~,lp_matrices] =...
         TVPowerBalancedFlow_realtime(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
 else
+    eamod_problem = EAMoDproblem(spec);
+    
     [cplex_out,fval,~,~,~,~,~,~,lp_matrices] = ...
         TVPowerBalancedFlow_withpower_sinkbundle(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
 end
@@ -82,7 +82,7 @@ OptimizationResultsMatch(test_case,eamod_problem,fval);
 end
 
 function LPmatricesMatch(test_case,eamod_problem,lp_matrices,scenario)
-if eamod_problem.use_real_time_formulation
+if isa(eamod_problem,'EAMoDproblemRT')
     indexer = GetIndexerRealTime(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
 else
     indexer = GetIndexer(scenario.Thor,scenario.RoadNetwork,scenario.PowerNetwork,scenario.InitialConditions,scenario.RebWeight,scenario.Passengers,scenario.Flags);
@@ -106,7 +106,7 @@ f_cost_ref = f_cost_full_ref(state_range);
 
 verifyEqual(test_case,f_cost,f_cost_ref)
 
-if eamod_problem.use_real_time_formulation
+if isa(eamod_problem,'EAMoDproblemRT')
     % CustomerChargeConservation
     [Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = eamod_problem.CreateEqualityConstraintMatrices_CustomerChargeConservation();
     
@@ -210,7 +210,7 @@ eamod_problem.yalmip_settings = sdpsettings('solver','linprog');
 
 % Our real-time objective value includes cost of pre-routed customer carrying 
 % vehicles, AMoD-power implementation does not. Hence, we subtract it
-if eamod_problem.use_real_time_formulation
+if isa(eamod_problem,'EAMoDproblemRT')
     [~, pax_cost_val_usd, ~,relax_cost_val_usd] = eamod_problem.EvaluateAMoDcost();
     objective_value = objective_value - pax_cost_val_usd;
 end

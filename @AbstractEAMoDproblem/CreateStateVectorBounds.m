@@ -101,21 +101,6 @@ if obj.spec.disable_v2g
     end
 end
 
-% We check obj.use_real_time_formulation because this appears in TVPowerBalancedFlow_realtime
-% but not in TVPowerBalancedFlow_withpower_bundle.
-if obj.use_real_time_formulation
-    % Number of relaxed pax should never be negative
-    if obj.source_relax_flag
-        for k= 1:obj.spec.n_passenger_flow
-            for ssi=1:length(obj.spec.passenger_source_list_cell{k})
-                ub_StateVector(obj.FindSourceRelaxks(k,ssi)) = obj.spec.passenger_flow_list_cell{k}(ssi);
-                lb_StateVector(obj.FindSourceRelaxks(k,ssi)) = 0;
-            end
-        end
-    end
-end
-
-
 end
 
 

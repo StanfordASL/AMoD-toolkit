@@ -20,10 +20,6 @@ switch numel(varargin)
         error('Too many arguments.')
 end
 
-if obj.use_real_time_formulation && obj.source_relax_flag
-   warning('Using the real-time formulation with source_relax_flag set is not recommended: vehicles are not necessarily conserved in the sense of VehicleConservationTest.') 
-end
-
 % Charging vehicles
 ChargingVehicleHist = zeros(1,obj.spec.n_time_step);
 for tt = 1:obj.spec.n_time_step
@@ -86,11 +82,6 @@ for tt = 1:obj.spec.n_time_step
             end
         end
     end
-end
-
-% Account for PaxVehicle in real time formulation
-if obj.use_real_time_formulation
-    PaxVehicleHist = obj.GetPreRoutedTripHistogram();
 end
 
 % Note RebVehicleHist at n_time_step is meaningless. Since it is unconstrained and

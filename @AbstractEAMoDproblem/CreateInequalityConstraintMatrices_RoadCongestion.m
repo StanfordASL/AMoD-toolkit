@@ -2,19 +2,6 @@ function [Ain_RoadCongestion, Bin_RoadCongestion] = CreateInequalityConstraintMa
 % CreateInequalityConstraintMatrices_RoadCongestion Creates inequality constraints to limit the flow along the road edges to be less than their capacity (Eq. 3) 
 %   [Ain_RoadCongestion, Bin_RoadCongestion] = CreateInequalityConstraintMatrices_RoadCongestion(obj)
 
-if obj.use_real_time_formulation
-   ExpandedRoadCap = repmat(full(obj.spec.road_capacity_matrix),1,1,obj.spec.n_time_step);
-   residual_road_cap_relative = obj.road_residual_capacity_matrix./ExpandedRoadCap;
-
-    if any(residual_road_cap_relative(:) < 0)
-        [min_residual_road_cap_relative,index] = min(residual_road_cap_relative(:));
-        [i,j,t] = ind2sub(size(obj.road_residual_capacity_matrix),index);
-
-        warning('Residual road capacity is negative. Real-time formulation will not be feasible. Maximal excedent: %.2f %% in edge %i-%i at time-step %i.',-min_residual_road_cap_relative*100,i,j,t)   
-    end 
-    
-end
-
 n_constraint = obj.spec.n_road_edge*obj.spec.n_time_step;
 
 % This is meant as an upper bound for memory allocation. Unused entries are
@@ -42,11 +29,7 @@ for t = 1:obj.spec.n_time_step
                 Ainentry = Ainentry + 1;
             end
             
-            if obj.use_real_time_formulation
-                Bin(Ainrow) = obj.road_residual_capacity_matrix(i,j,t);
-            else
-                Bin(Ainrow) = obj.spec.road_capacity_matrix(i,j);
-            end
+            Bin(Ainrow) = obj.road_residual_capacity_matrix(i,j,t);
             
             Ainrow = Ainrow + 1;
         end

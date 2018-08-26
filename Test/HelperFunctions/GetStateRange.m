@@ -5,7 +5,7 @@ function state_range = GetStateRange(eamod_problem,indexer)
 
 spec = eamod_problem.spec;
 
-if eamod_problem.use_real_time_formulation
+if isa(eamod_problem,'EAMoDproblemRT')
     state_range = indexer.FindRoadLinkRtcij(1,1,1,1):indexer.FindEndRebLocationci(spec.n_charge_step,spec.n_road_node);
 else
     state_range = indexer.FindRoadLinkPtckij(1,1,1,1,1):indexer.FindEndRebLocationci(spec.n_charge_step,spec.n_road_node);

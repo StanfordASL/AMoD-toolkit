@@ -1,23 +1,11 @@
-function constraint_array = GetConstraintArray(obj)
-% GetConstraintArray Returns the constraints for the electric AMoD problem for use in YALMIP
+function constraint_array = GetCommonConstraintArray(obj)
+% GetCommonConstraintArray Returns the constraints for the electric AMoD problem for use in YALMIP that appear in both the standard and real-time formulations
 
 if obj.verbose
     DispWithTimeStamp('Starting GetConstraintArray of eamod_problem.');
 end
 
 state_vector = obj.optimization_variables.state_vector;
-
-if obj.use_real_time_formulation
-    [Aeq_CustomerChargeConservation, Beq_CustomerChargeConservation] = obj.CreateEqualityConstraintMatrices_CustomerChargeConservation();
-    
-    customer_conservation = Aeq_CustomerChargeConservation*state_vector == Beq_CustomerChargeConservation;
-    customer_conservation = TagConstraintIfNonEmpty(customer_conservation,'CustomerChargeConservation');
-else
-    [Aeq_PaxConservation, Beq_PaxConservation] = obj.CreateEqualityConstraintMatrices_PaxConservation();
-    
-    customer_conservation = Aeq_PaxConservation*state_vector == Beq_PaxConservation;
-    customer_conservation = TagConstraintIfNonEmpty(customer_conservation,'PaxConservation');
-end
 
 [Aeq_RebConservation, Beq_RebConservation] = obj.CreateEqualityConstraintMatrices_RebConservation();
 
@@ -63,8 +51,7 @@ decision_vector_upper_bound_indices = isfinite(ub_StateVector);
 decision_vector_upper_bound =  state_vector(decision_vector_upper_bound_indices) <= ub_StateVector(decision_vector_upper_bound_indices);
 decision_vector_upper_bound = TagConstraintIfNonEmpty(decision_vector_upper_bound,'StateVectorUpperBound');
 
-constraint_array = [
-    customer_conservation;
+constraint_array = [    
     reb_conservation;
     source_conservation;
     sink_conservation;

@@ -26,34 +26,26 @@ scenario_feas = LoadScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v
 spec_feas = EAMoDspec.CreateFromScenario(scenario_feas); 
 
 eamod_problem_feas = EAMoDproblem(spec_feas); 
+eamod_problem_feas_rt = EAMoDproblemRT(spec_feas); 
+
+HelperVerifyVehicleConservation(test_case,eamod_problem_feas)
+HelperVerifyVehicleConservation(test_case,eamod_problem_feas_rt)
 
 scenario_infeas = LoadScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_infeas');
 spec_infeas = EAMoDspec.CreateFromScenario(scenario_infeas); 
 
+% NOTE: we do not test vehicle conservation for source-relaxed real-time formulation. 
+% It does not conserve vehicles in the sense of this test.
 eamod_problem_infeas = EAMoDproblem(spec_infeas); 
 
 eamod_problem_infeas.source_relax_flag = true;
 eamod_problem_infeas.source_relax_cost = 1e8;
-
-HelperVerifyVehicleConservation_1(test_case,eamod_problem_feas)
-HelperVerifyVehicleConservation_1(test_case,eamod_problem_infeas)
+HelperVerifyVehicleConservation(test_case,eamod_problem_infeas)
 end
 
-function HelperVerifyVehicleConservation_1(test_case,eamod_problem)
+function HelperVerifyVehicleConservation(test_case,eamod_problem)
 eamod_problem.Solve();
-HelperVerifyVehicleConservation_2(test_case,eamod_problem);
 
-% The way we verify vehicle conservation fails when using the real-time formulation
-% with source_relax_flag set. Thus, we avoid it.
-if ~eamod_problem.source_relax_flag
-    eamod_problem.use_real_time_formulation = true;
-    eamod_problem.Solve();
-    HelperVerifyVehicleConservation_2(test_case,eamod_problem);
-end
-end
-
-
-function HelperVerifyVehicleConservation_2(test_case,eamod_problem)
 n_start_vehicles = eamod_problem.ComputeNumberOfVehiclesAtStart();
 n_end_vehicles = eamod_problem.ComputeNumberOfVehiclesAtEnd();
 

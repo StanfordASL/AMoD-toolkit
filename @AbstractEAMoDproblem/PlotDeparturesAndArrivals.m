@@ -14,7 +14,6 @@ end
 
 [DepTimeHist, ArrivalTimeHist] = obj.GetTravelTimesHistograms(decision_vector_val);
 
-
 [time_range,x_label] = obj.spec.GetTimeRange();
 
 PassengerCarsDeltaHist = DepTimeHist - ArrivalTimeHist;
