@@ -39,7 +39,7 @@ classdef (Abstract) AbstractEAMoDproblem < handle
         final_vehicle_distribution = GetFinalVehicleDistribution(obj,varargin)
         [DepTimeHist, ArrivalTimeHist] = GetTravelTimesHistograms(obj,varargin);
         [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,RebVehicleHist,IdleVehicleHist,AllVehicleHist] = GetVehicleStateHistograms(obj,varargin)
-        [objective_value,solver_time,diagnostics] = Solve(obj)
+        [objective_value,solver_time_s,diagnostics] = Solve(obj)
                 
         % Plotting methods
         figure_handle = PlotRoadGraph(obj)

@@ -206,7 +206,7 @@ function OptimizationResultsMatch(test_case,eamod_problem,fval_ref)
 % TVPowerBalancedFlow_withpower_sinkbundle.
 eamod_problem.yalmip_settings = sdpsettings('solver','linprog');
 
-[objective_value,solver_time,diagnostics] = eamod_problem.Solve();
+[objective_value,solver_time_s,diagnostics] = eamod_problem.Solve();
 
 % Our real-time objective value includes cost of pre-routed customer carrying 
 % vehicles, AMoD-power implementation does not. Hence, we subtract it
