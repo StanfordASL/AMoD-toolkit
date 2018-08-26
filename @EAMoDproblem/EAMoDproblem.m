@@ -7,12 +7,15 @@ classdef EAMoDproblem < handle
     %   between Autonomous Mobility-on-Demand systems and the power network:
     %   models and coordination algorithms,” in Robotics: Science and Systems,
     %   Pittsburgh, Pennsylvania, 2018
+    %
+    %   See also EAMoDspec
     
     methods
         function obj = EAMoDproblem(spec)
             % EAMoDproblem Constructs an EAMoDproblem object
             %   obj = EAMoDproblem(spec) where spec is an instance of
             %   EAMoDspec specifying the problem.
+            %
             %   See also EAMoDspec
             
             validateattributes(spec,{'EAMoDspec'},{'scalar'},mfilename,'spec',1);
@@ -22,8 +25,6 @@ classdef EAMoDproblem < handle
             
             [obj.RouteTime,obj.RouteCharge,obj.RouteDistance,obj.Routes] = obj.BuildRoutes();
             obj.TVRoadCap = obj.ComputeResidualRoadCapacity();
-            
-            
         end
                 
         n_start_vehicles = ComputeNumberOfVehiclesAtStart(obj)
@@ -193,24 +194,13 @@ classdef EAMoDproblem < handle
             else
                 res = obj.spec.n_passenger_flow;
             end
-        end
-        
-        function res = get.state_range(obj)
-            res = 1:obj.FindEndRebLocationci(obj.spec.n_charge_step,obj.spec.n_road_node);
-        end
-        
-        function res = get.relax_range(obj)
-            res = (obj.state_range(end) + 1):obj.StateSize;
-        end
+        end       
+
     end
     
     properties (Dependent)
         StateSize % Number of elements in the problem's state vector
         num_passenger_flows % Number of passenger flows. Is equal to spec.n_passenger_flow in the normal case and zero in the real-time formulation
-    
-        % TODO: add description
-        state_range(1,:) double
-        relax_range(1,:) double
     end
     
     properties       

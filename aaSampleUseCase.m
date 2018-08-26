@@ -3,11 +3,8 @@
 clear variables;
 
 %% Prepare specification
-% data = load('EAMoDspecDemo.mat');
-% spec = data.spec;
-data_path = 'Test/dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_feas';
-scenario = LoadScenario(data_path);
-spec = EAMoDspec.CreateFromScenario(scenario);
+data = load('EAMoDspecDemo.mat');
+spec = data.spec;
 
 spec.initial_state_empty_vehicles = 0.4*spec.initial_state_empty_vehicles;
 % Increase road_capacity_matrix so that real-time problem is feasible
