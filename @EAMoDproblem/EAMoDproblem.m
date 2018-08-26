@@ -60,7 +60,38 @@ classdef EAMoDproblem < handle
         [Ain_ChargerCongestion, Bin_ChargerCongestion] = CreateInequalityConstraintMatrices_ChargerCongestion(obj)
         
         [lb_StateVector,ub_StateVector] = CreateStateVectorBounds(obj)
-                            
+    end
+    
+    properties
+        use_real_time_formulation(1,1) logical = false % Flag to use real-time formulation
+        
+        source_relax_flag(1,1) logical = false % Flag to allow each vehicle flow to reduce its sources and sinks for cost source_relax_cost        
+        source_relax_cost(1,1) double {mustBeNonnegative,mustBeReal} % Cost for relaxing sources and sinks (only active when source_relax_flag is set)
+                       
+        verbose(1,1) logical = false % Flag for verbose output
+        
+        yalmip_settings(1,1) = sdpsettings() % Struct with YALMIP settings
+    end
+    
+    properties (SetAccess = private, GetAccess = public)
+        spec(1,1) EAMoDspec % Object of class EAMoDspec specifying the problem
+                
+        % For real-time formulation
+        
+        route_travel_time_matrix(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger}  % route_travel_time_matrix(i,j) is the number of time-steps needed to go from i to j
+        route_charge_to_traverse_matrix(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger} % route_charge_to_traverse_matrix(i,j) is the number of charge units needed to go from i to j
+        route_travel_distance_matrix_m(:,:)  double {mustBeNonnegative,mustBeReal} % route_travel_distance_matrix_m(i,j) is the distance in meters to go from i to j
+        route_path_cell(:,:) cell % route_path_cell{i,j} is the route from i to j expressed as a vector of connected nodes that need to be traversed
+        
+        road_residual_capacity_matrix(:,:,:) double {mustBeReal} % road_residual_capacity_matrix(i,j,t) is the residual capacity of the i-j link (in vehicles per unit time) at time t, after subtracting the flow from pre-routed vehicles     
+    end
+    
+    properties (Dependent)
+        n_state_vector % Number of elements in the problem's state vector
+        n_passenger_flow_in_optimization % Number of passenger flows. Is equal to spec.n_passenger_flow in the normal case and zero in the real-time formulation
+    end
+    
+    methods                            
         % State vector indexing functions
         function res = FindRoadLinkPtckij(obj,t,c,k,i,j)
             % FindRoadLinkPtckij Indexer for customer flow in road edges in the extended network
@@ -197,38 +228,8 @@ classdef EAMoDproblem < handle
         end       
 
     end
-    
-    properties (Dependent)
-        n_state_vector % Number of elements in the problem's state vector
-        n_passenger_flow_in_optimization % Number of passenger flows. Is equal to spec.n_passenger_flow in the normal case and zero in the real-time formulation
-    end
-    
-    properties       
-        use_real_time_formulation(1,1) logical = false % Flag to use real-time formulation
-        
-        source_relax_flag(1,1) logical = false % Flag to allow each vehicle flow to reduce its sources and sinks for cost source_relax_cost        
-        source_relax_cost(1,1) double {mustBeNonnegative,mustBeReal} % Cost for relaxing sources and sinks (only active when source_relax_flag is set)
-                       
-        verbose(1,1) logical = false % Flag for verbose output
-        
-        yalmip_settings(1,1) = sdpsettings() % Struct with YALMIP settings
-    end
-    
-    properties (SetAccess = private, GetAccess = public)
-        spec(1,1) EAMoDspec % Object of class EAMoDspec specifying the problem
-                
-        % For real-time formulation
-        
-        route_travel_time_matrix(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger}  % route_travel_time_matrix(i,j) is the number of time-steps needed to go from i to j
-        route_charge_to_traverse_matrix(:,:)  double {mustBeNonnegative,mustBeReal,mustBeInteger} % route_charge_to_traverse_matrix(i,j) is the number of charge units needed to go from i to j
-        route_travel_distance_matrix_m(:,:)  double {mustBeNonnegative,mustBeReal} % route_travel_distance_matrix_m(i,j) is the distance in meters to go from i to j
-        route_path_cell(:,:) cell % route_path_cell{i,j} is the route from i to j expressed as a vector of connected nodes that need to be traversed
-        
-        road_residual_capacity_matrix(:,:,:) double {mustBeReal} % road_residual_capacity_matrix(i,j,t) is the residual capacity of the i-j link (in vehicles per unit time) at time t, after subtracting the flow from pre-routed vehicles     
-    end
-    
+       
     properties (Access = private)
-        % TODO: rename to optimization_variables
         optimization_variables(1,1) % Struct with optimization variables        
     end
     
