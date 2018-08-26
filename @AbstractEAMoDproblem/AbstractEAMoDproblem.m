@@ -1,5 +1,5 @@
-classdef EAMoDproblem < handle
-    % EAMoDproblem Represents an electric AMoD problem using a network flow model
+classdef (Abstract) AbstractEAMoDproblem < handle
+    % AbstractEAMoDproblem Represents an electric AMoD problem using a network flow model
     %   The model of the electric AMoD system used here is described in the
     %   paper below. Note that this implementation does not include the power network.
     %
