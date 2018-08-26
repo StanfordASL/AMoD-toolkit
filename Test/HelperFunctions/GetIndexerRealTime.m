@@ -1,5 +1,5 @@
 function indexer = GetIndexerRealTime(Thor,RoadNetwork,PowerNetwork,InitialConditions,RebWeight,Passengers,Flags)
-% GetIndexer Creates an indexer to relate constraints in the AMoD-power implementation to their rows in the matrices of the linear program
+% GetIndexerRealTime Creates an indexer to relate constraints in the AMoD-power real-time implementation to their rows in the matrices of the linear program
 
 TVPowerBalancedFlowFinder_realtime;
 

@@ -1,6 +1,9 @@
-% Creates a dummy power network with an unbounded generator at every node with power priced according to power_costs
 function PowerNetworkR = CreateDummyPowerNetwork(Thor,numChargers,v2g_efficiency,power_costs)
-% power_costs(t,l) is the power cost in USD/(baseMVA*time_step) of charger l at timestep t
+% CreateDummyPowerNetwork Creates a dummy power network with an unbounded generator at every node with power priced according to power_costs
+%   PowerNetworkR = CreateDummyPowerNetwork(Thor,numChargers,v2g_efficiency,power_costs)
+%   Thor is the number of time-steps, numChargers is the number of chargers,
+%   v2g_efficiency is the efficency of v2g and
+%   power_costs(t,l) is the power cost in USD/(baseMVA*time_step) of charger l at timestep t   
 
 PowerGraphR = cell(1,numChargers);
 PowerLineCapR = PowerGraphR;

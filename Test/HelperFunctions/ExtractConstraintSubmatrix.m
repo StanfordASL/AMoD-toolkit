@@ -1,5 +1,6 @@
 function [A_sub,B_sub] = ExtractConstraintSubmatrix(A,B,row_range,col_range)
 % ExtractConstraintSubmatrix extracts the rows and columns that correspond to a constraint in a linear program
+
 n_col = size(A,2);
 
 A_sub = A(row_range,col_range);

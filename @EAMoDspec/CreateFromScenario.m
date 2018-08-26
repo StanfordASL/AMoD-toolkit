@@ -8,38 +8,37 @@ Flags = scenario.Flags;
 
 obj = EAMoDspec();
 
-obj.Thor = scenario.Thor;
+obj.n_time_step = scenario.Thor;
 
-obj.C = RoadNetwork.C;
+obj.n_charge_step = RoadNetwork.C;
 
-obj.RoadGraph = RoadNetwork.RoadGraph;
+obj.road_adjacency_list = RoadNetwork.RoadGraph;
 
-obj.Sources = Passengers.Sources;
-obj.Sinks = Passengers.Sinks;
-obj.Flows = Passengers.Flows;
-obj.StartTimes = Passengers.StartTimes;
+obj.passenger_source_list_cell = Passengers.Sources;
+obj.passenger_sink_list = Passengers.Sinks;
+obj.passenger_flow_list_cell = Passengers.Flows;
+obj.passenger_start_time_list_cell = Passengers.StartTimes;
 
-obj.RoadCap = RoadNetwork.RoadCap;
-obj.TravelTimes = RoadNetwork.TravelTimes;
-obj.TravelDistance = RoadNetwork.TravelDistance;
+obj.road_capacity_matrix = RoadNetwork.RoadCap;
+obj.road_travel_time_matrix = RoadNetwork.TravelTimes;
+obj.road_travel_distance_matrix_m = RoadNetwork.TravelDistance;
+obj.road_charge_to_traverse_matrix = RoadNetwork.ChargeToTraverse;
 
-obj.ChargersList = RoadNetwork.ChargersList;
-obj.ChargerTime = RoadNetwork.ChargerTime;
-
-obj.ChargeToTraverse = RoadNetwork.ChargeToTraverse;
-obj.ChargerSpeed = RoadNetwork.ChargerSpeed;
-obj.ChargerCap = RoadNetwork.ChargerCap;
+obj.charger_list = RoadNetwork.ChargersList;
+obj.charger_time = RoadNetwork.ChargerTime;
+obj.charger_speed = RoadNetwork.ChargerSpeed;
+obj.charger_capacity = RoadNetwork.ChargerCap;
 
 % Initial conditions
-obj.FullVehicleInitialPos = InitialConditions.FullVehicleInitialPos;
-obj.EmptyVehicleInitialPos = InitialConditions.EmptyVehicleInitialPos;
+obj.initial_state_full_vehicles = InitialConditions.FullVehicleInitialPos;
+obj.initial_state_empty_vehicles = InitialConditions.EmptyVehicleInitialPos;
 
 % Final conditions
-obj.MinEndCharge = RoadNetwork.MinEndCharge;
+obj.final_min_charge = RoadNetwork.MinEndCharge;
 
 % Economic settings
-obj.ValueOfTime = RoadNetwork.ValueOfTime;
-obj.VehicleCostPerM = RoadNetwork.VehicleCostPerKm/1000;
+obj.value_of_time_usd_per_time_step = RoadNetwork.ValueOfTime;
+obj.vehicle_cost_usd_per_m = RoadNetwork.VehicleCostPerKm/1000;
 
 % Relaxation
 if Flags.congrelaxflag
@@ -50,10 +49,10 @@ end
 obj.v2g_efficiency = scenario.PowerNetwork.v2g_efficiency;
 
 if isfield(scenario.RoadNetwork,'BatteryDepreciationPerUnitCharge')
-    obj.BatteryDepreciationPerUnitCharge = scenario.RoadNetwork.BatteryDepreciationPerUnitCharge;
+    obj.battery_depreciation_usd_per_charge_step = scenario.RoadNetwork.BatteryDepreciationPerUnitCharge;
 end
  
 obj.time_step_s = scenario.time_step_s;
-obj.charge_unit_j = scenario.charge_unit_j;
+obj.charge_step_j = scenario.charge_unit_j;
     
 end
