@@ -19,6 +19,8 @@ function setupOnce(test_case)
 addpath('..')
 addpath('HelperFunctions');
 
+% It is important that you use the path ending in a and not in aom. The one 
+% ending in aom does not include MOSEK's linprog overload which we need.
 mosek_path = '/home/ealvaro/ProgramFiles/mosek/8/toolbox/r2014a';
 % mosek_path = 'C:/Program Files/Mosek/8/toolbox/r2014a';
 addpath(genpath(mosek_path));
