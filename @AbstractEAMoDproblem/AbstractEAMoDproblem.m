@@ -3,10 +3,10 @@ classdef (Abstract) AbstractEAMoDproblem < handle
     %   The model of the electric AMoD system used here is described in the
     %   paper below. Note that this implementation does not include the power network.
     %
-    %   F. Rossi, R. Iglesias, n_passenger_flow. Alizadeh, and n_passenger_flow. Pavone, “On the interaction
-    %   between Autonomous Mobility-on-Demand systems and the power network:
-    %   models and coordination algorithms,” in Robotics: Science and Systems,
-    %   Pittsburgh, Pennsylvania, 2018
+    %   F. Rossi, R. Iglesias, M. Alizadeh, and M. Pavone, “On the interaction 
+    %   between Autonomous Mobility-on-Demand systems and the power network: 
+    %   models and coordination algorithms,” in Robotics: Science and 
+    %   Systems, Pittsburgh, Pennsylvania, 2018. 
     %
     %   See also EAMoDspec
     
@@ -39,7 +39,7 @@ classdef (Abstract) AbstractEAMoDproblem < handle
         final_vehicle_distribution = GetFinalVehicleDistribution(obj,varargin)
         [DepTimeHist, ArrivalTimeHist] = GetTravelTimesHistograms(obj,varargin);
         [ChargingVehicleHist,DischargingVehicleHist,PaxVehicleHist,RebVehicleHist,IdleVehicleHist,AllVehicleHist] = GetVehicleStateHistograms(obj,varargin)
-        [objective_value,solver_time,diagnostics] = Solve(obj)
+        [objective_value,solver_time_s,diagnostics] = Solve(obj)
                 
         % Plotting methods
         figure_handle = PlotRoadGraph(obj)

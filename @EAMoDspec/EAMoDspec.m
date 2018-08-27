@@ -86,7 +86,6 @@ classdef EAMoDspec
         charger_time(:,1) double {mustBeNonnegative,mustBeReal} % charger_time(l) is the time required to charge charger_speed(l) units of charge at charging station l
         charger_capacity(:,1) double {mustBeNonnegative,mustBeReal} % charger_capacity(l) is the number of vehicles that can charge concurrently in charging station l
         
-        % TODO: rename to electricity price
         charger_electricity_price_usd_per_j(:,:) double {mustBeReal} % charger_electricity_price_usd_per_j(l,t) is the price paid at time-step t for 1 Joule of energy consumed in charger l
         
         % Trip demand
@@ -160,7 +159,7 @@ classdef EAMoDspec
         end
     end
     
-    properties %(Access = {?EAMoDproblem})
+    properties (Access = {?AbstractEAMoDproblem})
         % The following properties depend on others. We do not use dependent
         % properties so that we can cache them.
         

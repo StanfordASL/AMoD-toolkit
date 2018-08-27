@@ -19,6 +19,8 @@ function setupOnce(test_case)
 addpath('..')
 addpath('HelperFunctions');
 
+% It is important that you use the path ending in a and not in aom. The one 
+% ending in aom does not include MOSEK's linprog overload which we need.
 mosek_path = '/home/ealvaro/ProgramFiles/mosek/8/toolbox/r2014a';
 % mosek_path = 'C:/Program Files/Mosek/8/toolbox/r2014a';
 addpath(genpath(mosek_path));
@@ -206,7 +208,7 @@ function OptimizationResultsMatch(test_case,eamod_problem,fval_ref)
 % TVPowerBalancedFlow_withpower_sinkbundle.
 eamod_problem.yalmip_settings = sdpsettings('solver','linprog');
 
-[objective_value,solver_time,diagnostics] = eamod_problem.Solve();
+[objective_value,solver_time_s,diagnostics] = eamod_problem.Solve();
 
 % Our real-time objective value includes cost of pre-routed customer carrying 
 % vehicles, AMoD-power implementation does not. Hence, we subtract it
