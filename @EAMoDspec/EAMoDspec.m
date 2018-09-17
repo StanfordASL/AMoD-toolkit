@@ -7,7 +7,7 @@ classdef EAMoDspec
         end
         
         [time_range,label] = GetTimeRange(obj)
-        RemoveTripsEndingTooLate(obj)
+        obj = RemoveTripsEndingTooLate(obj)
         ValidateSpec(obj)
         
         % Get methods for dependent properties

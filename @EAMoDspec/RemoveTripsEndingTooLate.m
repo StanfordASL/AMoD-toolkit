@@ -1,4 +1,4 @@
-function RemoveTripsEndingTooLate(obj)
+function obj = RemoveTripsEndingTooLate(obj)
 % RemoveTripsEndingTooLate Removes trips ending after n_time_step which cannot be serviced
 
 % Instantiate EAMoDproblemRT to compute routes
