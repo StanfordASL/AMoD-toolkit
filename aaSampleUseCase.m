@@ -4,7 +4,7 @@ clear variables;
 
 %% Prepare specification
 % Load demo EAMoDspec
-data = load('EAMoDspecDemo.mat');
+data = load('EAMoDspecDemo_25n_8t_30c.mat');
 spec = data.spec;
 
 % Add random charger electricity prices in [35,45] USD per MWh
@@ -20,6 +20,8 @@ eamod_problem = EAMoDproblem(spec);
 
 % Solve optimization problem
 [objective_value,solver_time_s] = eamod_problem.Solve();
+
+return
 
 % Evaluate the different cost components in the optimal solution
 [amod_cost_usd,pax_cost_usd,reb_cost_usd] = eamod_problem.EvaluateAMoDcost();
