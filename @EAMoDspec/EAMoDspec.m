@@ -6,9 +6,9 @@ classdef EAMoDspec
             % EAMoDspec Constructs an empty object.  All fields without default values must be manually filled to fully specify the problem.
         end
         
-        ValidateSpec(obj)
-        
         [time_range,label] = GetTimeRange(obj)
+        RemoveTripsEndingTooLate(obj)
+        ValidateSpec(obj)
         
         % Get methods for dependent properties
         function n_time_step = get.n_time_step(obj)
