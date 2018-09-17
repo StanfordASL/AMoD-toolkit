@@ -21,8 +21,6 @@ eamod_problem = EAMoDproblem(spec);
 % Solve optimization problem
 [objective_value,solver_time_s] = eamod_problem.Solve();
 
-return
-
 % Evaluate the different cost components in the optimal solution
 [amod_cost_usd,pax_cost_usd,reb_cost_usd] = eamod_problem.EvaluateAMoDcost();
 electricity_cost_usd = eamod_problem.EvaluateElectricityCost();

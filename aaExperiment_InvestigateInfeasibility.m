@@ -1,21 +1,15 @@
 scenario = LoadScenario('dfw_25cl_4h_30mstride_demo');
 
 spec = EAMoDspec.CreateFromScenario(scenario);
+spec = spec.RemoveTripsEndingTooLate();
 
-spec = RemoveTripsEndingTooLate(spec);
-
-
-passenger_flow_list_cell = spec.passenger_flow_list_cell;
-initial_state_empty_vehicles = spec.initial_state_empty_vehicles;
-road_capacity_matrix = spec.road_capacity_matrix;
-
-spec.road_capacity_matrix(road_capacity_matrix > 0) = 2*road_capacity_matrix;
-%spec.passenger_flow_list_cell = cellfun(@(x) 0.01*x,passenger_flow_list_cell,'UniformOutput',false);
+spec.road_capacity_matrix = 12.5*3/4*spec.road_capacity_matrix;
 
 initial_charge = 25;
+initial_state_empty_vehicles = spec.initial_state_empty_vehicles;
 spec.initial_state_empty_vehicles(:,initial_charge) = sum(initial_state_empty_vehicles,2);
-% Keep in mind that it is exclusive
-spec.final_min_charge = 5;
+% % Keep in mind that it is exclusive
+% spec.final_min_charge = 5;
 
 eamod_problem_rt = EAMoDproblemRT(spec);
 eamod_problem_rt.Solve();
