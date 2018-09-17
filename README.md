@@ -1,6 +1,6 @@
 # AMoD-toolkit
 
-A reference implementation of the time-varying, charge-aware network flow model for electric AMoD systems described in Rossi et al. 2018. The code implements both the traditional and real-time formulations. However, it does not include the power network.
+A reference MATLAB implementation of the time-varying, charge-aware network flow model for electric AMoD systems described in Rossi et al. 2018. The code implements both the traditional and real-time formulations. However, it does not include the power network.
 
 This code is based on the original implementation in [AMoD-power](https://github.com/StanfordASL/AMoD-power) with a number of changes:
 
