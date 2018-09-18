@@ -41,6 +41,16 @@ addpath('~/Repos/AMoD-toolkit')
 
 Once the installation is done, run [`aaSampleUseCase`](aaSampleUseCase.m). This code goes through the process of setting up and solving an electric AMoD problem. It also compares the traditional and real-time formulations (see below).
 
+The sample code plots the activities of the vehicles across time. This is shown for the traditional formulation in the following image: 
+![Fleet activity (traditional formulation)](state_plot.svg)
+
+Whereas, for the real-time formulation it is as follows:
+![Fleet activity (real-time formulation)](state_plot_rt.svg)
+
+The activities are similar in both cases but there are some small differences. In general, the real-time formulation offers shorter computation times at the cost of some suboptimality
+
+
+
 ## About the code
 There are three main classes: [`EAMoDspec`](@EAMoDspec/EAMoDspec.m), [`EAMoDproblem`](@EAMoDproblem/EAMoDproblem.m) and [`EAMoDproblemRT`](@EAMoDproblemRT/EAMoDproblemRT.m).
 
