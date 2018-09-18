@@ -13,8 +13,8 @@ spec = data.spec;
 % This displays a warning saying that "Residual road capacity is negative." In the real-time
 % formulation, the passenger-carrying vehicles follow fixed routes independent of congestion.
 % This warning tells us that there are some road links where the flow from pre-routed passenger-
-% carrying exceeds the link's capacity. In these cases, the code sets the link's residual
-% capacity to zero so that rebalancing vehicles avoid the links which are already congested.
+% carrying vehicles exceeds the link's capacity. In these cases, the code sets the link's residual
+% capacity to zero so that rebalancing vehicles avoid these links which are already congested.
 eamod_problem_rt = EAMoDproblemRT(spec);
 
 [objective_value_rt,solver_time_s_rt] = eamod_problem_rt.Solve();

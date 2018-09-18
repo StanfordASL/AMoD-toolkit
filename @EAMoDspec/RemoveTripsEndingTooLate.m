@@ -1,7 +1,7 @@
 function obj = RemoveTripsEndingTooLate(obj)
-% RemoveTripsEndingTooLate Removes trips ending after n_time_step which cannot be serviced
+% RemoveTripsEndingTooLate Removes trips ending after n_time_step which cannot be serviced and make the problem infeasible
 
-% Instantiate EAMoDproblemRT to compute routes
+% Instantiate EAMoDproblemRT to get routes
 eamod_problem_rt = EAMoDproblemRT(obj);
 
 end_time_list_cell = cell(obj.n_passenger_sink,1);
