@@ -79,7 +79,7 @@ The code is commented in such a way that MATLAB's `help` and `doc` commands work
 
 ## Running the tests
 
-The tests are located in the directory `Test/`
+The tests are located in the directory `Test/`. They can be run by setting this folder as MATLAB's current folder and executing `runtests`. Single tests can be run by executing `runtests('test_name')` (for example, `runtests('VehicleConservationTest')`) 
 
 ### Tests based on first principles
 [`VehicleConservationTest`](Test/VehicleConservationTest.m) verifies that the number of vehicles remains constant across time.
@@ -87,7 +87,7 @@ The tests are located in the directory `Test/`
 ### Regression tests
 [`CompareWithAMoDpowerTest`](Test/CompareWithAMoDpowerTest.m) verifies that this code is consistent with AMoD-power. In particular, it verifies that the matrices for the LP are equal and that the value of the objective function at optimality is within a small tolerance.
 
-To run this test, the folder with the AMoD-power repository must be in your MATLAB path. Furthermore, the same solver used in AMoD-power must be available for YALMIP (i.e., in the MATLAB path). At the time of writing, this is MOSEK's linprog overload.
+To run this test, the folder with the AMoD-power repository must be in your MATLAB path. Furthermore, the same solver used in AMoD-power must be available for YALMIP (i.e., in the MATLAB path). At the time of writing, this is MOSEK's linprog overload. Thus, you need to modify the paths in `setupOnce` accordingly before running the test.
 
 ## Contributing
 
