@@ -50,7 +50,7 @@ function CompareWithAMoDpowerHelper(test_case,scenario,use_real_time_formulation
 
 scenario = AddDummyPowerNetworkToScenario(scenario);
 
-spec = EAMoDspec.CreateFromScenario(scenario);
+spec = EAMoDspec.CreateFromScenarioFR(scenario);
 
 % Seed for repeatability
 rng('default');

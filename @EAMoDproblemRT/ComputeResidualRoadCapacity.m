@@ -39,16 +39,21 @@ end
 
 ExpandedRoadCap = repmat(full(obj.spec.road_capacity_matrix),1,1,obj.spec.n_time_step);
 
-road_residual_capacity_matrix = ExpandedRoadCap - road_utilization_matrix;
+road_residual_capacity_pre_matrix = ExpandedRoadCap - road_utilization_matrix;
 
-% Issue a warning if residual_road_cap_relative is negative
-residual_road_cap_relative = road_residual_capacity_matrix./ExpandedRoadCap;
+% If any link is congested (negative road_residual_capacity_pre_matrix), set
+% residual capacity to zero so that there is no rebalancing there
+road_residual_capacity_matrix = max(road_residual_capacity_pre_matrix,0);
+
+% Issue a warning if road_residual_capacity_pre_matrix is negative
+residual_road_cap_relative = road_residual_capacity_pre_matrix./ExpandedRoadCap;
 
 if any(residual_road_cap_relative(:) < 0)
     [min_residual_road_cap_relative,index] = min(residual_road_cap_relative(:));
-    [i,j,t] = ind2sub(size(road_residual_capacity_matrix),index);
+    [i,j,t] = ind2sub(size(road_residual_capacity_pre_matrix),index);
 
-    warning('Residual road capacity is negative. Real-time formulation will not be feasible. Maximal excedent: %.2f %% in edge %i-%i at time-step %i.',-min_residual_road_cap_relative*100,i,j,t)   
+    warning('Residual road capacity is negative. Blocking congested links so that rebalancing vehicles avoid them. Maximal excedent: %.2f %% in edge %i-%i at time-step %i.',-min_residual_road_cap_relative*100,i,j,t)   
 end     
+
 
 end
