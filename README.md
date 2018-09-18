@@ -1,6 +1,6 @@
 # AMoD-toolkit
 
-A reference MATLAB implementation of the time-varying, charge-aware network flow model for electric AMoD systems described in Rossi et al. 2018. The code implements both the traditional and real-time formulations. However, it does not include the power network.
+A reference *MATLAB* implementation of the time-varying, charge-aware network flow model for electric AMoD systems described in Rossi et al. 2018. The code implements both the traditional and real-time formulations. However, it does not include the power network.
 
 This code is based on the original implementation in [AMoD-power](https://github.com/StanfordASL/AMoD-power) with a number of changes:
 
@@ -59,6 +59,8 @@ There are three main classes: [`EAMoDspec`](@EAMoDspec/EAMoDspec.m), [`EAMoDprob
 
 For more details, look at the comments in `EAMoDspec` and `EAMoDspecDemo.mat`
 
+Note that `EAMoDspec` specifies *what* problem to solve but not *how* to solve it. Hence,  relaxations and the configuration of the solver are specified in `AbstractEAMoDproblem`.
+
 ###  EAMoDproblem
 `EAMoDproblem` implements the electric AMoD problem in the traditional formulation. It takes an `EAMoDspec` in the constructor which is copied into `EAMoDproblem.spec` and cannot be modified anymore. However, you can modify the `EAMoDspec` and then instantiate another `EAMoDproblem`.
 
@@ -67,6 +69,10 @@ For more details, look at the comments in `EAMoDspec` and `EAMoDspecDemo.mat`
 
 ###  AbstractEAMoDproblem
 `AbstractEAMoDproblem` is the abstract base class of both `EAMoDproblem` and `EAMoDproblemRT`. It contains common functionality.
+
+**Note on feasibility**
+For the optimization problem to be feasible, the number of vehicles in the fleet must suffice to fulfill the customer trip requests. If this is not the case, it is often useful to relax the problem. This can be done by setting  `source_relax_flag` to true and `source_relax_cost` to a positive value (typically 10e6 to 10e8 works well). This allows the optimization to drop some trip requests for a cost. 
+
 
 ## Documentation
 The code is commented in such a way that MATLAB's `help` and `doc` commands work for all files.
