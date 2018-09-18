@@ -115,7 +115,7 @@ classdef EAMoDspec
         
         time_step_s(1,1) double {mustBeNonnegative,mustBeReal} = 0 % Duration in seconds of a time step
         charge_step_j(1,1) double {mustBeNonnegative,mustBeReal} % Energy of a charge unit in joule, 1 kWh = 3.6e6 J
-        v2g_efficiency(1,1) double {mustBeNonnegative,mustBeReal,mustBeLessThanOrEqual(v2g_efficiency,1)} = 1 % Efficiency of sending power back to the grid (vehicle2grid)
+        v2g_efficiency(1,1) double {mustBeNonnegative,mustBeReal,mustBeLessThanOrEqual(v2g_efficiency,1)} = 1 % Efficiency of sending power back to the grid (vehicle 2 grid)
         
         disable_v2g(1,1) logical = false % Flag to disable v2g.
         
@@ -127,10 +127,12 @@ classdef EAMoDspec
         % properties so that we can cache them.
         
         % Dependent on road_adjacency_list
+        
         road_adjacency_matrix(:,:) logical % road_adjacency_matrix(i,j) == 1 if there is a road going from node i to node j
         n_road_edge(1,1) double % Number of road edges in road_adjacency_list
         
         % Dependent on passenger_source_list_cell
+        
         n_passenger_source(1,1) double % Total number of sources
     end
     
@@ -165,11 +167,13 @@ classdef EAMoDspec
         % properties so that we can cache them.
         
         % Dependent on road_adjacency_list
+        
         road_reverse_adjacency_list(:,1) cell % Nodes in road_reverse_adjacency_list{i} are such that road_adjacency_list{road_reverse_adjacency_list{i}} contains i
         road_node_outdegree(:,1) double % road_node_outdegree(i) is the number of edges starting in road node i
         edge_number_matrix(:,:) double % edge_number_matrix(i,j) is the number of edge i-j, where edges are numbered as they appear in road_adjacency_list. It is nan if i-j is not an edge.
         
         % Dependent on passenger_source_list_cell
+        
         n_sources_to_sink(:,1) double % n_sources_to_sink(i) is the number of passenger_source_list_cell towards passenger_sink_list(i)
         n_sources_to_sink_cumsum(:,1) double % Cumulative sum of n_sources_to_sink        
     end

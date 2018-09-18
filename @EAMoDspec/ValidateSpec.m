@@ -1,5 +1,5 @@
 function ValidateSpec(obj)
-% ValidateSpec Asserts that the properties of the EAMoDspec object are consistent with eachother
+% ValidateSpec Asserts that the properties of the EAMoDspec object are consistent with each other
 
 % Properties that depend on road_adjacency_list
 obj.ValidateConsistencyWithAdjancencyMatrix(obj.road_capacity_matrix,'road_capacity_matrix');
