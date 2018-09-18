@@ -60,7 +60,7 @@ classdef EAMoDspec
     end
     
     methods (Static)
-        obj = CreateFromScenarioFR(scenario);
+        obj = CreateFromScenarioFR(scenario)
         obj = CreateFromScenarioAE(scenario)
     end
         
