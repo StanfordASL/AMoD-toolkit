@@ -1,5 +1,5 @@
-function obj = CreateFromScenario(scenario)
-% CreateFromScenario Instantiates EAMoDspec based on a legacy scenario
+function obj = CreateFromScenarioFR(scenario)
+% CreateFromScenarioFR Instantiates EAMoDspec based on a legacy scenario (FR version)
 
 RoadNetwork = scenario.RoadNetwork;
 InitialConditions = scenario.InitialConditions;

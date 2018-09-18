@@ -23,7 +23,7 @@ end
 function TestVehicleConservation(test_case)
 
 scenario_feas = LoadScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_feas');
-spec_feas = EAMoDspec.CreateFromScenario(scenario_feas); 
+spec_feas = EAMoDspec.CreateFromScenarioFR(scenario_feas); 
 
 eamod_problem_feas = EAMoDproblem(spec_feas); 
 eamod_problem_feas_rt = EAMoDproblemRT(spec_feas); 
@@ -32,7 +32,7 @@ HelperVerifyVehicleConservation(test_case,eamod_problem_feas)
 HelperVerifyVehicleConservation(test_case,eamod_problem_feas_rt)
 
 scenario_infeas = LoadScenario('dfw_roadgraph_kmeans_tv_federico_5cl_windsun_12h_v3_infeas');
-spec_infeas = EAMoDspec.CreateFromScenario(scenario_infeas); 
+spec_infeas = EAMoDspec.CreateFromScenarioFR(scenario_infeas); 
 
 % NOTE: we do not test vehicle conservation for source-relaxed real-time formulation. 
 % It does not conserve vehicles in the sense of this test.

@@ -1,6 +1,6 @@
 scenario = LoadScenario('dfw_25cl_4h_30mstride_demo');
 
-spec = EAMoDspec.CreateFromScenario(scenario);
+spec = EAMoDspec.CreateFromScenarioFR(scenario);
 spec = spec.RemoveTripsEndingTooLate();
 
 spec.road_capacity_matrix = 12.5*3/4*spec.road_capacity_matrix;
