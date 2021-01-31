@@ -2,21 +2,14 @@ function [lb_StateVector,ub_StateVector] = CreateStateVectorBounds(obj)
 % CreateStateVectorBounds Creates upper and lower bounds for the state vector in the LP
 %   [lb_StateVector,ub_StateVector] = CreateStateVectorBounds(obj)
 
-lb_StateVector = zeros(obj.n_state_vector,1); %Passenger and rebalancing flows, passenger sources and sinks
-ub_StateVector = Inf*ones(obj.n_state_vector,1); %Why not? We enforce capacity separately
+lb_StateVector = zeros(obj.n_state_vector,1); % Passenger and rebalancing flows, passenger sources and sinks
+ub_StateVector = Inf*ones(obj.n_state_vector,1);
 
-% We have to be careful with discharging constraints: in particular, we
-% should pin discharging links that do not appear in the equalities to
-% zero.
-% ChargeLink(t,c,..) starts at time t and goes up. So we exclude it if
-% either t+charger_time>n_time_step or c+charger_speed>n_charge_step.
-% DischargeLink(t,c,...) starts at time t and goes down. So we exclude it
-% if either t+charger_time>n_time_step or c-charger_speed<1.
 for l = 1:obj.spec.n_charger
     for c = 1:obj.spec.n_charge_step
         for t = 1:obj.spec.n_time_step
             if t + obj.spec.charger_time(l) > obj.spec.n_time_step
-                %add link to i,c+1.
+                % add link to i,c+1.
                 % Loop does not run for obj.n_passenger_flow_in_optimization = 0
                 for k = 1:obj.n_passenger_flow_in_optimization
                     ub_StateVector(obj.FindChargeLinkPtckl(t,c,k,l)) = 0;
