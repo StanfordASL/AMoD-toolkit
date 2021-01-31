@@ -11,7 +11,7 @@ i_row = 1;
 i_entry = 1;
 
 for t = 1:obj.spec.n_time_step
-    for l = 1:obj.spec.n_charger %Go through chargers in the road network
+    for l = 1:obj.spec.n_charger % Go through chargers in the road network
         charger_power_w = obj.spec.charger_speed(l)/obj.spec.charger_time(l)*obj.spec.charge_step_j/obj.spec.time_step_s;
         for c = 1:obj.spec.n_charge_step
             if c + obj.spec.charger_speed(l) <= obj.spec.n_charge_step
