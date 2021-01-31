@@ -247,7 +247,7 @@ classdef (Abstract) AbstractEAMoDproblem < handle
     properties (Access = private)        
         % Cached offsets for indexing functions. See SetOffsetsForIndexingFunctions
         
-        offset_FindChargeLinkHelpertckij_t(:,1) double % offset_FindChargeLinkHelpertckij_t(t ) is the offset for FindChargeLinkHelpertckij at t
+        offset_FindChargeLinkHelpertckij_t(:,1) double % offset_FindChargeLinkHelpertckij_t(t) is the offset for FindChargeLinkHelpertckij at t
         offset_FindDischargeLinkHelpertckl_t(:,1) double % offset_FindDischargeLinkHelpertckl_t(t) is the offset for FindDischargeLinkHelpertckl at t
     
         offset_FindPaxSourceChargecks(1,1) double % Offset for FindPaxSourceChargecks
