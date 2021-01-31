@@ -36,10 +36,9 @@ end
 function [Route] = FreeRouteAstar(start,goal,road_adjacency_list,RoadCost,heuristic_est)
 n_road_node=length(road_adjacency_list);
 if nargin<=4
-    heuristic_est = zeros(n_road_node); %revert to Dijkstra
+    heuristic_est = zeros(n_road_node); % Revert to Dijkstra
 end
 
-%forked from the AMoD-congestion implementation
 
 ClosedSet = [];
 OpenSet = [start];
@@ -66,12 +65,12 @@ while ~isempty(OpenSet)
         
         return
     end
-    OpenSet = OpenSet(OpenSet~=currNode);       %Remove current node
-    ClosedSet = [ClosedSet, currNode];          %Add to closed set
+    OpenSet = OpenSet(OpenSet~=currNode);       % Remove current node
+    ClosedSet = [ClosedSet, currNode];          % Add to closed set
     for neigh = road_adjacency_list{currNode}
-        if ~sum(ClosedSet == neigh)             %If neighbor is not in closed set
+        if ~sum(ClosedSet == neigh)             % If neighbor is not in closed set
             tentative_g = g_score(currNode) + RoadCost(currNode,neigh);
-            if (~sum(neigh == OpenSet))         %If the neighbor is not already in OpenSet, add it
+            if (~sum(neigh == OpenSet))         % If the neighbor is not already in OpenSet, add it
                 OpenSet = [OpenSet, neigh];
             elseif tentative_g>=g_score(neigh)
                 continue

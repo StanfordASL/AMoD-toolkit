@@ -1,5 +1,5 @@
 classdef EAMoDproblem < AbstractEAMoDproblem 
-% EAMoDproblem Extends AbstractEAMoDproblem to implement the electric AMoD problem  in the traditional formulation.
+% EAMoDproblem Extends AbstractEAMoDproblem to implement the electric AMoD problem in the traditional formulation.
         
     methods
         function obj = EAMoDproblem(spec)

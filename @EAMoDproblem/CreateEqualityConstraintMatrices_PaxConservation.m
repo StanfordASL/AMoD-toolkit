@@ -22,7 +22,7 @@ for t = 1:obj.spec.n_time_step
         for k = 1:obj.spec.n_passenger_flow
             for i = 1:obj.spec.n_road_node
                 if ~isempty(obj.spec.road_adjacency_list{i})
-                    for j = obj.spec.road_adjacency_list{i} %Out-flows
+                    for j = obj.spec.road_adjacency_list{i} % Out-flows
                         if ((obj.spec.road_charge_to_traverse_matrix(i,j) < c) & (t + full(obj.spec.road_travel_time_matrix(i,j)) <= obj.spec.n_time_step))
                             Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindRoadLinkPtckij(t,c,k,i,j), 1];
                             Aeqentry=Aeqentry+1;
@@ -30,7 +30,7 @@ for t = 1:obj.spec.n_time_step
                     end
                 end
                 if ~isempty(obj.spec.road_reverse_adjacency_list{i})
-                    for j = obj.spec.road_reverse_adjacency_list{i} %In-flows
+                    for j = obj.spec.road_reverse_adjacency_list{i} % In-flows
                         if (obj.spec.road_charge_to_traverse_matrix(j,i) + c <= obj.spec.n_charge_step & t - full(obj.spec.road_travel_time_matrix(j,i)) > 0)
                             Aeqsparse(Aeqentry,:) = [Aeqrow, obj.FindRoadLinkPtckij(t - full(obj.spec.road_travel_time_matrix(j,i)),obj.spec.road_charge_to_traverse_matrix(j,i) + c,k,j,i),-1];
                             Aeqentry = Aeqentry+1;
@@ -38,26 +38,26 @@ for t = 1:obj.spec.n_time_step
                     end
                 end
                 for l = 1:length(obj.spec.charger_list)
-                    if (obj.spec.charger_list(l) == i) %is a charger
+                    if (obj.spec.charger_list(l) == i) % is a charger
                         if c + obj.spec.charger_speed(l) <= obj.spec.n_charge_step
-                            %add link to i,c+1.
+                            % add link to i,c+1.
                             if (t + obj.spec.charger_time(l) <= obj.spec.n_time_step)
                                 Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindChargeLinkPtckl(t,c,k,l),1];
-                                Aeqentry = Aeqentry + 1; %Charge up to c+1, goes out
+                                Aeqentry = Aeqentry + 1; % Charge up to c+1, goes out
                             end
                             if (t - obj.spec.charger_time(l) > 0)
                                 Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindDischargeLinkPtckl(t - obj.spec.charger_time(l),c + obj.spec.charger_speed(l),k,l),-1];
-                                Aeqentry = Aeqentry + 1; %Charge down from c+1, goes in
+                                Aeqentry = Aeqentry + 1; % Charge down from c+1, goes in
                             end
                         end
                         if (c - obj.spec.charger_speed(l)) >= 1
                             if (t - obj.spec.charger_time(l) > 0)
                                 Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindChargeLinkPtckl(t - obj.spec.charger_time(l),c - obj.spec.charger_speed(l),k,l),-1];
-                                Aeqentry=Aeqentry+1; %Charge up from c-1, goes in
+                                Aeqentry=Aeqentry+1; % Charge up from c-1, goes in
                             end
                             if (t + obj.spec.charger_time(l) <= obj.spec.n_time_step)
                                 Aeqsparse(Aeqentry,:) = [Aeqrow,obj.FindDischargeLinkPtckl(t,c,k,l),1];
-                                Aeqentry = Aeqentry + 1; %Charge down to c-1, goes out
+                                Aeqentry = Aeqentry + 1; % Charge down to c-1, goes out
                             end
                         end
                     end
@@ -75,7 +75,7 @@ for t = 1:obj.spec.n_time_step
                     
                 end
                 
-                %Initial conditions are handled by the rebalancers
+                % Initial conditions are handled by the rebalancers
                 if t == 1
                     Beq(Aeqrow) = obj.spec.initial_state_full_vehicles(k,i,c);
                 else
